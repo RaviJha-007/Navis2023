@@ -2266,7 +2266,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/MICT_section_confirmity')]",
+			"name": "[concat(parameters('workspaceName'), '/MICT_confirmities')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -2274,7 +2274,14 @@
 					{
 						"name": "section_confirmity_MICT",
 						"type": "ExecuteDataFlow",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "stack_confirmity_MICT",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -2300,6 +2307,36 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "stack_confirmity_MICT",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "stack_confirmity_MICT",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"StackConfirmity": {},
+									"StackConformity": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
@@ -2308,7 +2345,9 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/dataflows/section_confirmity_MICT')]"
+				"[concat(variables('workspaceId'), '/dataflows/section_confirmity_MICT')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('workspaceId'), '/dataflows/stack_confirmity_MICT')]"
 			]
 		},
 		{
@@ -8617,7 +8656,7 @@
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "MICT_stack_confirmity",
+							"referenceName": "MICT_confirmities",
 							"type": "PipelineReference"
 						},
 						"parameters": {}
@@ -8635,7 +8674,7 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/MICT_stack_confirmity')]"
+				"[concat(variables('workspaceId'), '/pipelines/MICT_confirmities')]"
 			]
 		},
 		{
@@ -28308,7 +28347,7 @@
 						"     validateSchema: false,",
 						"     inferDriftedColumnTypes: true,",
 						"     ignoreNoFilesFound: true,",
-						"     moveFiles: ['/bronze/sectionconformity/load','bronze/sectionconformity/archive'],",
+						"     moveFiles: ['/bronze/sectionconformity/load','bronze/stackconformity/archive'],",
 						"     rowUrlColumn: 'FileDate',",
 						"     format: 'delimited',",
 						"     fileSystem: 'mict',",
@@ -29064,7 +29103,7 @@
 						"     validateSchema: false,",
 						"     inferDriftedColumnTypes: true,",
 						"     ignoreNoFilesFound: true,",
-						"     moveFiles: ['/bronze/stackconformity/load','bronze/stackconformity/archive'],",
+						"     moveFiles: ['/bronze/stackconformity/load','bronze/sectionconformity/load'],",
 						"     rowUrlColumn: 'FileDate',",
 						"     format: 'delimited',",
 						"     fileSystem: 'mict',",
