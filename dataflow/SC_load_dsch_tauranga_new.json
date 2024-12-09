@@ -217,7 +217,7 @@
 				"     skipDuplicateMapOutputs: true) ~> select2",
 				"derivedColumn2 split(not(isNull(ScDschUnladenTime)),",
 				"     not(isNull(ScDschTime)),",
-				"     disjoint: false) ~> split3@(ScDschUnladenTime, ScDschTime)",
+				"     disjoint: true) ~> split3@(ScDschUnladenTime, ScDschTime)",
 				"split3@ScDschUnladenTime select(mapColumn(",
 				"          unitIdName,",
 				"          moveKind,",
