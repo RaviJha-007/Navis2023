@@ -22972,8 +22972,8 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select1",
-						"derivedColumn1 split(not(isNull(ScLoadUnladenTime)),",
-						"     not(isNull(ScLoadTime)),",
+						"derivedColumn1 split(not(isNull(ScLoadUnladenTime)) && ScLoadUnladenTime > 0,",
+						"     not(isNull(ScLoadTime)) && ScLoadTime > 0,",
 						"     disjoint: true) ~> split2@(ScLoadUnladenTime, ScLoadTime)",
 						"split2@ScLoadTime select(mapColumn(",
 						"          unitIdName,",
@@ -22988,8 +22988,8 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select2",
-						"derivedColumn2 split(not(isNull(ScDschUnladenTime)),",
-						"     not(isNull(ScDschTime)),",
+						"derivedColumn2 split(not(isNull(ScDschUnladenTime)) && ScDschUnladenTime > 0,",
+						"     not(isNull(ScDschTime)) && ScDschTime > 0,",
 						"     disjoint: true) ~> split3@(ScDschUnladenTime, ScDschTime)",
 						"split3@ScDschUnladenTime select(mapColumn(",
 						"          unitIdName,",
@@ -32693,6 +32693,26 @@
 			"properties": {
 				"content": {
 					"query": "SELECT count(*)\n FROM [dbo].[sc_dsch_time]\n where Week = 48",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "tauranga",
+						"poolName": "Built-in"
+					},
+					"resultLimit": -1
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 15')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "SELECT [ecEventGkey]\n,[cheKind]\n,[cheName]\n,[Month]\n,[Week]\n,[lastEstMoveTime]\n,[Year]\n,[moveKind]\n,[unitIdName]\n,[cheID]\n,[EcEventTime]\n,[type]\n,[subType]\n,[typeDescription]\n FROM [dbo].[ecevents]\n Where Week = 46 and Year = 2024 and unitIdName = 'CGMU5140040'\n order by [EcEventTime] asc",
 					"metadata": {
 						"language": "sql"
 					},
