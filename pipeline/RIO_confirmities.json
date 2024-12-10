@@ -7,7 +7,7 @@
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "stack_confirmity_RIO1",
+						"activity": "stack_conformity_RIO",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -34,7 +34,7 @@
 				}
 			},
 			{
-				"name": "stack_confirmity_RIO1",
+				"name": "stack_conformity_RIO",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -47,7 +47,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "stack_confirmity_RIO",
+						"referenceName": "stack_conformity_RIO",
 						"type": "DataFlowReference"
 					},
 					"compute": {
