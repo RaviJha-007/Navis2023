@@ -70,6 +70,10 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
+		"sc_trigger_rio_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
+		},
 		"tauranga_times_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
@@ -2651,6 +2655,91 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/RTG EcEvents')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/RIO_confirmities')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "section_confirmity_RIO",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "stack_conformity_RIO",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "section_confirmity_RIO",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"SectionConfirmity": {},
+									"SectionConformity": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "stack_conformity_RIO",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "stack_conformity_RIO",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"StackConfirmity": {},
+									"StackConformity": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/section_confirmity_RIO')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('workspaceId'), '/dataflows/stack_conformity_RIO')]"
 			]
 		},
 		{
@@ -8696,6 +8785,37 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/pipelines/MNHPI_confirmities')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sc_trigger_rio')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "RIO_confirmities",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/rio/blobs/bronze/stackconformity/load/",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('sc_trigger_rio_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/RIO_confirmities')]"
 			]
 		},
 		{
@@ -22972,8 +23092,8 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select1",
-						"derivedColumn1 split(not(isNull(ScLoadUnladenTime)) && ScLoadUnladenTime > 0,",
-						"     not(isNull(ScLoadTime)) && ScLoadTime > 0,",
+						"derivedColumn1 split(not(isNull(ScLoadUnladenTime)) && ScLoadUnladenTime >=0.0,",
+						"     not(isNull(ScLoadTime)) && ScLoadTime >= 0.0,",
 						"     disjoint: true) ~> split2@(ScLoadUnladenTime, ScLoadTime)",
 						"split2@ScLoadTime select(mapColumn(",
 						"          unitIdName,",
@@ -22988,8 +23108,8 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select2",
-						"derivedColumn2 split(not(isNull(ScDschUnladenTime)) && ScDschUnladenTime > 0,",
-						"     not(isNull(ScDschTime)) && ScDschTime > 0,",
+						"derivedColumn2 split(not(isNull(ScDschUnladenTime)) && ScDschUnladenTime >= 0.0,",
+						"     not(isNull(ScDschTime)) && ScDschTime >= 0.0,",
 						"     disjoint: true) ~> split3@(ScDschUnladenTime, ScDschTime)",
 						"split3@ScDschUnladenTime select(mapColumn(",
 						"          unitIdName,",
@@ -28566,6 +28686,156 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/section_confirmity_RIO')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService2",
+								"type": "LinkedServiceReference"
+							},
+							"name": "SectionConfirmity"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService2",
+								"type": "LinkedServiceReference"
+							},
+							"name": "SectionConformity"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "window1"
+						},
+						{
+							"name": "aggregate1"
+						},
+						{
+							"name": "join1"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "sort1"
+						},
+						{
+							"name": "filter1"
+						},
+						{
+							"name": "alterRow1"
+						},
+						{
+							"name": "select2"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          {Equipment ID} as string,",
+						"          {Stacking Factor} as string,",
+						"          CHE as string,",
+						"          {Blk Typ} as string,",
+						"          Type as string,",
+						"          {Current Position} as string,",
+						"          {Yard Row} as string,",
+						"          Cat as string,",
+						"          Sts as string,",
+						"          {Section Factor} as string",
+						"     ),",
+						"     useSchema: false,",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: true,",
+						"     moveFiles: ['/bronze/sectionconformity/load','bronze/stackconformity/archive'],",
+						"     rowUrlColumn: 'FileDate',",
+						"     format: 'delimited',",
+						"     fileSystem: 'rio',",
+						"     folderPath: 'bronze/sectionconformity/load',",
+						"     columnDelimiter: '\\t',",
+						"     escapeChar: '\\\\',",
+						"     quoteChar: '',",
+						"     columnNamesAsHeader: true,",
+						"     skipLines: -2) ~> SectionConfirmity",
+						"SectionConfirmity derive(Date = toDate(substring(FileDate, -12, 8), 'yyyyMMdd'),",
+						"          Week = iif(dayOfWeek(toDate(substring(FileDate, -12, 8), 'yyyyMMdd')) == 1,  weekOfYear(toDate(substring(FileDate, -12, 8), 'yyyyMMdd')) + 1, weekOfYear(toDate(substring(FileDate, -12, 8), 'yyyyMMdd'))),",
+						"          stacking_array := split({Stacking Factor}, '/')) ~> derivedColumn1",
+						"derivedColumn1 window(over(Date,",
+						"          {Yard Row}),",
+						"     asc({Section Factor}, true),",
+						"     sectionrank = rank()) ~> window1",
+						"window1 aggregate(groupBy(Date,",
+						"          {Yard Row}),",
+						"     Section_conformity = iif(max(sectionrank) > 1, 'Mix', 'Pure')) ~> aggregate1",
+						"window1, aggregate1 join(derivedColumn1@Date == aggregate1@Date",
+						"     && SectionConfirmity@{Yard Row} == aggregate1@{Yard Row},",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1",
+						"filter1 select(mapColumn(",
+						"          {Container No.} = {Equipment ID},",
+						"          {Stacking Factor},",
+						"          CHE,",
+						"          {Blk Typ},",
+						"          Type,",
+						"          {Current position} = {Current Position},",
+						"          {Yard Row} = SectionConfirmity@{Yard Row},",
+						"          Cat,",
+						"          Sts,",
+						"          {Section Factor},",
+						"          Date = derivedColumn1@Date,",
+						"          Week,",
+						"          Section_conformity",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1 sort(asc(Date, true),",
+						"     asc({Container No.}, true)) ~> sort1",
+						"join1 filter(not(isDate({Equipment ID})) && not(isNull({Equipment ID})) && {Equipment ID} != '') ~> filter1",
+						"select2 alterRow(insertIf(true())) ~> alterRow1",
+						"sort1 select(mapColumn(",
+						"          each(match(true()),",
+						"               regexReplace($$,' ','_') = $$)",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select2",
+						"alterRow1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'rio',",
+						"     folderPath: 'gold/section_conformity',",
+						"     mergeSchema: true,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     upsertable: false,",
+						"     umask: 0777,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SectionConformity"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService2')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/stack_confirmity_AGCT')]",
 			"type": "Microsoft.Synapse/workspaces/dataflows",
 			"apiVersion": "2019-06-01-preview",
@@ -29232,7 +29502,7 @@
 						"          {Equipment ID} as string,",
 						"          {Stacking Factor} as string,",
 						"          CHE as string,",
-						"          {Blk Typ} as boolean,",
+						"          {Blk Typ} as string,",
 						"          Type as string,",
 						"          {Current Position} as string,",
 						"          {Yard Row} as string,",
@@ -29461,6 +29731,158 @@
 						"     fileSystem: 'teagtl',",
 						"     folderPath: 'gold/stack_confirmity',",
 						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     upsertable: false,",
+						"     umask: 0777,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> StackConformity"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/stack_conformity_RIO')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService2",
+								"type": "LinkedServiceReference"
+							},
+							"name": "StackConfirmity"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService2",
+								"type": "LinkedServiceReference"
+							},
+							"name": "StackConformity"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "window1"
+						},
+						{
+							"name": "aggregate1"
+						},
+						{
+							"name": "join1"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "sort1"
+						},
+						{
+							"name": "filter1"
+						},
+						{
+							"name": "alterRow1"
+						},
+						{
+							"name": "select2"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          {Equipment ID} as string,",
+						"          {Stacking Factor} as string,",
+						"          CHE as string,",
+						"          {Blk Typ} as string,",
+						"          Type as string,",
+						"          {Current Position} as string,",
+						"          {Yard Row} as string,",
+						"          Cat as string,",
+						"          Sts as string,",
+						"          {Section Factor} as string",
+						"     ),",
+						"     useSchema: false,",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: true,",
+						"     moveFiles: ['/bronze/stackconformity/load','bronze/sectionconformity/load'],",
+						"     rowUrlColumn: 'FileDate',",
+						"     format: 'delimited',",
+						"     fileSystem: 'rio',",
+						"     folderPath: 'bronze/stackconformity/load',",
+						"     columnDelimiter: '\\t',",
+						"     escapeChar: '\\\\',",
+						"     quoteChar: '',",
+						"     columnNamesAsHeader: true,",
+						"     skipLines: -2) ~> StackConfirmity",
+						"StackConfirmity derive(Pos_WO_Tier = iif(isInteger(right({Current Position}, 1)), left({Current Position}, length({Current Position}) - 1), {Current Position}),",
+						"          Date = toDate(substring(FileDate, -12, 8), 'yyyyMMdd'),",
+						"          Week = iif(dayOfWeek(toDate(substring(FileDate, -12, 8), 'yyyyMMdd')) == 1,  weekOfYear(toDate(substring(FileDate, -12, 8), 'yyyyMMdd')) + 1, weekOfYear(toDate(substring(FileDate, -12, 8), 'yyyyMMdd'))),",
+						"          stacking_array := split({Stacking Factor}, '/')) ~> derivedColumn1",
+						"derivedColumn1 window(over(Date,",
+						"          Pos_WO_Tier),",
+						"     asc({Stacking Factor}, true),",
+						"     stackrank = rank()) ~> window1",
+						"window1 aggregate(groupBy(Date,",
+						"          Pos_WO_Tier),",
+						"     Stack_confirmty = iif(max(stackrank) > 1, 'Mix', 'Pure')) ~> aggregate1",
+						"window1, aggregate1 join(derivedColumn1@Date == aggregate1@Date",
+						"     && derivedColumn1@Pos_WO_Tier == aggregate1@Pos_WO_Tier,",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1",
+						"filter1 select(mapColumn(",
+						"          {Container No.} = {Equipment ID},",
+						"          {Stacking Factor},",
+						"          CHE,",
+						"          {Blk Typ},",
+						"          Type,",
+						"          {Current position} = {Current Position},",
+						"          {Yard Row},",
+						"          Cat,",
+						"          Sts,",
+						"          {Section Factor},",
+						"          Pos_WO_Tier = derivedColumn1@Pos_WO_Tier,",
+						"          Date = derivedColumn1@Date,",
+						"          Week,",
+						"          Stack_confirmty",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1 sort(asc(Date, true),",
+						"     asc({Container No.}, true)) ~> sort1",
+						"join1 filter(not(isDate({Equipment ID})) && not(isNull({Equipment ID})) && {Equipment ID} != '') ~> filter1",
+						"select2 alterRow(insertIf(true())) ~> alterRow1",
+						"sort1 select(mapColumn(",
+						"          each(match(true()),",
+						"               regexReplace($$,' ','_') = $$)",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select2",
+						"alterRow1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'rio',",
+						"     folderPath: 'gold/stack_confirmity',",
+						"     mergeSchema: true,",
 						"     autoCompact: false,",
 						"     optimizedWrite: false,",
 						"     vacuum: 0,",
@@ -32772,12 +33194,12 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "create or alter view itv_workhours\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/itv_workhours',\n        data_source = 'mnhpi',\n        FORMAT = 'DELTA'\n    ) AS [itv_workhours];\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'teagtl')  \n\n    CREATE EXTERNAL DATA SOURCE [teagtl]  \n\n    WITH ( \n\n        LOCATION   = 'https://navispowerbidatastorage2.dfs.core.windows.net/teagtl',  \n\n    ) \n\nGo \n\nDrop view stack_confirmity\n\ncreate or alter view stack_confirmity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/stack_confirmity',\n        data_source = 'teagtl',\n        FORMAT = 'DELTA'\n    ) AS [stack_confirmity];",
+					"query": "create or alter view itv_workhours\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/itv_workhours',\n        data_source = 'mnhpi',\n        FORMAT = 'DELTA'\n    ) AS [itv_workhours];\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'teagtl')  \n\n    CREATE EXTERNAL DATA SOURCE [teagtl]  \n\n    WITH ( \n\n        LOCATION   = 'https://navispowerbidatastorage2.dfs.core.windows.net/teagtl',  \n\n    ) \n\nGo \n\nDrop view stack_confirmity\n\ncreate or alter view stack_confirmity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/stack_confirmity',\n        data_source = 'rio',\n        FORMAT = 'DELTA'\n    ) AS [stack_confirmity];\n\ncreate or alter view section_conformity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/section_conformity',\n        data_source = 'rio',\n        FORMAT = 'DELTA'\n    ) AS [section_conformity];",
 					"metadata": {
 						"language": "sql"
 					},
 					"currentConnection": {
-						"databaseName": "teagtl",
+						"databaseName": "rio",
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
