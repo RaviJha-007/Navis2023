@@ -103,6 +103,18 @@
 				},
 				{
 					"name": "filter2"
+				},
+				{
+					"name": "filter3"
+				},
+				{
+					"name": "filter4"
+				},
+				{
+					"name": "filter5"
+				},
+				{
+					"name": "filter6"
 				}
 			],
 			"scriptLines": [
@@ -186,7 +198,7 @@
 				"          Month = month(:Timestamp),",
 				"          Week = weekOfYear(:Timestamp),",
 				"          Timestamp := toTimestamp(byName('DSPT_Time'))) ~> MapDrifted1",
-				"split2@ScLoadUnladenTime select(mapColumn(",
+				"filter6 select(mapColumn(",
 				"          unitIdName,",
 				"          moveKind,",
 				"          ScLoadUnladenTime,",
@@ -199,10 +211,10 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"derivedColumn1 split(not(isNull(ScLoadUnladenTime)) && ScLoadUnladenTime >=0.0,",
-				"     not(isNull(ScLoadTime)) && ScLoadTime >= 0.0,",
+				"derivedColumn1 split(not(isNull(ScLoadUnladenTime)),",
+				"     not(isNull(ScLoadTime)),",
 				"     disjoint: true) ~> split2@(ScLoadUnladenTime, ScLoadTime)",
-				"split2@ScLoadTime select(mapColumn(",
+				"filter5 select(mapColumn(",
 				"          unitIdName,",
 				"          moveKind,",
 				"          Timestamp,",
@@ -215,10 +227,10 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
-				"derivedColumn2 split(not(isNull(ScDschUnladenTime)) && ScDschUnladenTime >= 0.0,",
-				"     not(isNull(ScDschTime)) && ScDschTime >= 0.0,",
+				"derivedColumn2 split(not(isNull(ScDschUnladenTime)),",
+				"     not(isNull(ScDschTime)),",
 				"     disjoint: true) ~> split3@(ScDschUnladenTime, ScDschTime)",
-				"split3@ScDschUnladenTime select(mapColumn(",
+				"filter4 select(mapColumn(",
 				"          unitIdName,",
 				"          moveKind,",
 				"          Timestamp,",
@@ -231,7 +243,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
-				"split3@ScDschTime select(mapColumn(",
+				"filter3 select(mapColumn(",
 				"          unitIdName,",
 				"          moveKind,",
 				"          Timestamp,",
@@ -258,6 +270,10 @@
 				"     asc(EcEventTime, true),",
 				"     GroupNumber = sum(TimeGroupFlag)) ~> window2",
 				"MapDrifted1 filter(not(isNull(Timestamp))) ~> filter2",
+				"split3@ScDschTime filter(ScDschTime >= 0.0) ~> filter3",
+				"split3@ScDschUnladenTime filter(ScDschUnladenTime >= 0.0) ~> filter4",
+				"split2@ScLoadTime filter(ScLoadTime >= 0.0) ~> filter5",
+				"split2@ScLoadUnladenTime filter(ScLoadUnladenTime >=0.0) ~> filter6",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
