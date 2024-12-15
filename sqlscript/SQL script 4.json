@@ -2,12 +2,12 @@
 	"name": "SQL script 4",
 	"properties": {
 		"content": {
-			"query": "create or alter view itv_workhours\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/itv_workhours',\n        data_source = 'mnhpi',\n        FORMAT = 'DELTA'\n    ) AS [itv_workhours];\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'teagtl')  \n\n    CREATE EXTERNAL DATA SOURCE [teagtl]  \n\n    WITH ( \n\n        LOCATION   = 'https://navispowerbidatastorage2.dfs.core.windows.net/teagtl',  \n\n    ) \n\nGo \n\nDrop view stack_confirmity\n\ncreate or alter view stack_confirmity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/stack_confirmity',\n        data_source = 'rio',\n        FORMAT = 'DELTA'\n    ) AS [stack_confirmity];\n\ncreate or alter view section_conformity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/section_conformity',\n        data_source = 'rio',\n        FORMAT = 'DELTA'\n    ) AS [section_conformity];",
+			"query": "create or alter view itv_workhours\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/itv_workhours',\n        data_source = 'mnhpi',\n        FORMAT = 'DELTA'\n    ) AS [itv_workhours];\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'cit_ivory_coast')  \n\n    CREATE EXTERNAL DATA SOURCE [cit_ivory_coast]  \n\n    WITH ( \n\n        LOCATION   = 'https://navispowerbidatastorage2.dfs.core.windows.net/cit-ivory-coast',  \n\n    ) \n\nGo \n\nDrop view stack_confirmity\n\ncreate or alter view stack_confirmity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/stack_confirmity',\n        data_source = 'cit_ivory_coast',\n        FORMAT = 'DELTA'\n    ) AS [stack_confirmity];\n\ncreate or alter view section_conformity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/section_conformity',\n        data_source = 'cit_ivory_coast',\n        FORMAT = 'DELTA'\n    ) AS [section_conformity];",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "rio",
+				"databaseName": "cit_ivory_coast",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000
