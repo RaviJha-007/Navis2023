@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 19",
+	"properties": {
+		"content": {
+			"query": "SELECT TOP (100) [unitIdName]\n,[GroupNumber]\n,[moveKind]\n,[UnladenDistance]\n,[LadenDistance]\n,[Timestamp]\n,[Date]\n,[Year]\n,[Month]\n,[Week]\n FROM [dbo].[sc_laden_unladen]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "tauranga",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
