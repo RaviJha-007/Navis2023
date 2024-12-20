@@ -109,9 +109,6 @@
 					"name": "window2"
 				},
 				{
-					"name": "filter2"
-				},
-				{
 					"name": "filter3"
 				},
 				{
@@ -132,6 +129,9 @@
 				},
 				{
 					"name": "alterRow5"
+				},
+				{
+					"name": "filter7"
 				}
 			],
 			"scriptLines": [
@@ -198,7 +198,7 @@
 				"          ScLoadUnladenTimeRange = iif(:sc_load_unladen_time >= 0.0 && :sc_load_unladen_time <= 10.0, \"0 to 10 min\",iif(:sc_load_unladen_time > 10.0 && :sc_load_unladen_time <= 15.0, \"10 to 15 min\",iif(:sc_load_unladen_time > 15.0 && :sc_load_unladen_time <= 20.0, \"15 to 20 min\",iif(:sc_load_unladen_time > 20.0 && :sc_load_unladen_time <= 25.0, \"20 to 25 min\",iif(:sc_load_unladen_time > 25.0 && :sc_load_unladen_time <= 30.0, \"25 to 30 min\",iif(:sc_load_unladen_time > 30.0 && :sc_load_unladen_time <= 40.0, \"30 to 40 min\",iif(:sc_load_unladen_time > 40.0 && :sc_load_unladen_time <= 50.0, \"40 to 50 min\",iif(:sc_load_unladen_time > 50.0 ,\"50 & above\", \"\")))))))),",
 				"          sc_load_time := round((DROP_Time - DSPT_Time)/60000,2),",
 				"          sc_load_unladen_time := round((EARW_Time - DSPT_Time)/60000,2)) ~> derivedColumn1",
-				"filter2 split(moveKind  == \"LOAD\",",
+				"MapDrifted1 split(moveKind  == \"LOAD\",",
 				"     moveKind  == \"DSCH\",",
 				"     disjoint: false) ~> split1@(LoadMoves, DschMoves)",
 				"split1@DschMoves derive(ScDschTime = :sc_dsch_time,",
@@ -208,17 +208,19 @@
 				"          sc_dsch_time := round((DROP_Time - DSPT_Time)/60000,2),",
 				"          sc_dsch_unladen_time := round((EASH_Time - DSPT_Time)/60000,2)) ~> derivedColumn2",
 				"MapDrifted2 derive(Timestamp = :Timestamp,",
-				"          Date = toDate(toString(:Timestamp)),",
-				"          Year = year(:Timestamp),",
-				"          Month = month(:Timestamp),",
-				"          Week = weekOfYear(:Timestamp),",
-				"          Timestamp := toTimestamp(byName('DSPT_Time'))) ~> MapDrifted1",
+				"          Date = toDate(toString(:TimeStamp)),",
+				"          Year = year(:TimeStamp),",
+				"          Month = month(:TimeStamp),",
+				"          Week = weekOfYear(:TimeStamp),",
+				"          TimeStamp = :TimeStamp,",
+				"          Timestamp := iifNull(iifNull(toTimestamp(byName('_DSPT_Time')), toTimestamp(byName('_DROP_Time')), toTimestamp(byName('_EARW_Time'))), toTimestamp(byName('_EASH_Time'))) ,",
+				"          TimeStamp := iifNull(iif(moveKind == 'DSCH', iifNull(toTimestamp(byName('_LTRW_Time')), toTimestamp(byName('_LARW_Time'))), iif(moveKind == 'LOAD', iifNull(toTimestamp(byName('_LTSH_Time')), toTimestamp(byName('_LASH_Time'))), toTimestamp(null()))), :Timestamp)) ~> MapDrifted1",
 				"filter6 select(mapColumn(",
 				"          unitIdName,",
 				"          moveKind,",
 				"          ScLoadUnladenTime,",
 				"          ScLoadUnladenTimeRange,",
-				"          Timestamp,",
+				"          Timestamp = split2@ScLoadUnladenTime@TimeStamp,",
 				"          Date,",
 				"          Year,",
 				"          Month,",
@@ -232,7 +234,7 @@
 				"filter5 select(mapColumn(",
 				"          unitIdName,",
 				"          moveKind,",
-				"          Timestamp,",
+				"          Timestamp = split2@ScLoadTime@TimeStamp,",
 				"          Date,",
 				"          Year,",
 				"          Month,",
@@ -248,7 +250,7 @@
 				"filter4 select(mapColumn(",
 				"          unitIdName,",
 				"          moveKind,",
-				"          Timestamp,",
+				"          Timestamp = split3@ScDschUnladenTime@TimeStamp,",
 				"          Date,",
 				"          Year,",
 				"          Month,",
@@ -261,7 +263,7 @@
 				"filter3 select(mapColumn(",
 				"          unitIdName,",
 				"          moveKind,",
-				"          Timestamp,",
+				"          Timestamp = split3@ScDschTime@TimeStamp,",
 				"          Date,",
 				"          Year,",
 				"          Month,",
@@ -284,7 +286,6 @@
 				"derivedColumn3 window(over(unitIdName),",
 				"     asc(EcEventTime, true),",
 				"     GroupNumber = sum(TimeGroupFlag)) ~> window2",
-				"MapDrifted1 filter(not(isNull(Timestamp))) ~> filter2",
 				"split3@ScDschTime filter(ScDschTime >= 0.0) ~> filter3",
 				"split3@ScDschUnladenTime filter(ScDschUnladenTime >= 0.0) ~> filter4",
 				"split2@ScLoadTime filter(ScLoadTime >= 0.0) ~> filter5",
@@ -293,18 +294,15 @@
 				"          DSPT_Time = toTimestamp(byName('_DSPT_Time')),",
 				"          EARW_Time = toTimestamp(byName('_EARW_Time')),",
 				"          EASH_Time = toTimestamp(byName('_EASH_Time')),",
-				"          DschUnladenDistance = iifNull(toShort(byName('unladenLTRW_Time')), toShort(byName('unladenLARW_Time'))),",
-				"          DschLadenDistance = iifNull(toShort(byName('ladenLTRW_Time')), toShort(byName('ladenLARW_Time'))),",
-				"          LoadUnladenDistance = iifNull(toShort(byName('unladenLTSH_Time')), toShort(byName('unladenLASH_Time'))),",
-				"          LoadLadenDistance = iifNull(toShort(byName('ladenLTSH_Time')), toShort(byName('ladenLASH_Time')))) ~> MapDrifted2",
-				"filter2 select(mapColumn(",
+				"          UnladenDistance = iif(moveKind == 'DSCH', iifNull(toShort(byName('unladenLTRW_Time')), toShort(byName('unladenLARW_Time'))), iif(moveKind == 'LOAD', iifNull(toShort(byName('unladenLTSH_Time')), toShort(byName('unladenLASH_Time'))), toShort(999))) ,",
+				"          LadenDistance = iif(moveKind == 'DSCH', iifNull(toShort(byName('ladenLTRW_Time')), toShort(byName('ladenLARW_Time'))), iif(moveKind == 'LOAD', iifNull(toShort(byName('ladenLTSH_Time')), toShort(byName('ladenLASH_Time'))), toShort(999))) ) ~> MapDrifted2",
+				"MapDrifted1 select(mapColumn(",
 				"          unitIdName,",
+				"          GroupNumber,",
 				"          moveKind,",
-				"          DschUnladenDistance,",
-				"          DschLadenDistance,",
-				"          LoadUnladenDistance,",
-				"          LoadLadenDistance,",
-				"          Timestamp,",
+				"          UnladenDistance,",
+				"          LadenDistance,",
+				"          Timestamp = MapDrifted1@TimeStamp,",
 				"          Date,",
 				"          Year,",
 				"          Month,",
@@ -312,7 +310,8 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
-				"select5 alterRow(upsertIf(true())) ~> alterRow5",
+				"filter7 alterRow(upsertIf(true())) ~> alterRow5",
+				"select5 filter(not(isNull(UnladenDistance) && isNull(LadenDistance))) ~> filter7",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -407,7 +406,13 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink5"
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('key',",
+				"          1,",
+				"          Year,",
+				"          Month,",
+				"          Week",
+				"     )) ~> sink5"
 			]
 		}
 	}
