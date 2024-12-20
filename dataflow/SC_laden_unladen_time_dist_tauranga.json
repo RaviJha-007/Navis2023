@@ -1,5 +1,5 @@
 {
-	"name": "SC_load_dsch_tauranga_new_copy1",
+	"name": "SC_laden_unladen_time_dist_tauranga",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
