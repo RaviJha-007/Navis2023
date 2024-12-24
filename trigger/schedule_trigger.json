@@ -36,12 +36,6 @@
 			},
 			{
 				"pipelineReference": {
-					"referenceName": "mict",
-					"type": "PipelineReference"
-				}
-			},
-			{
-				"pipelineReference": {
 					"referenceName": "tauranga_ecevents",
 					"type": "PipelineReference"
 				}
