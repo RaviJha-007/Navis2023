@@ -58,7 +58,7 @@
 				}
 			},
 			{
-				"name": "SC_load_dsch_tauranga_new",
+				"name": "SC_laden_unladen_time_dist_tauranga",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
@@ -78,7 +78,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "SC_load_dsch_tauranga_new",
+						"referenceName": "SC_laden_unladen_time_dist_tauranga",
 						"type": "DataFlowReference"
 					},
 					"compute": {
