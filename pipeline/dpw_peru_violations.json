@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "violations_rio",
+				"name": "violations_DPW_peru",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "violations_rio",
+						"referenceName": "violations_DPW_peru",
 						"type": "DataFlowReference"
 					},
 					"compute": {
