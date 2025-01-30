@@ -2,12 +2,12 @@
 	"name": "SQL script 1",
 	"properties": {
 		"content": {
-			"query": "create or alter view rehandle\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/rehandle',\n        data_source = 'mict',\n        FORMAT = 'DELTA'\n    ) AS [rehandle];\n\ncreate or alter view tt_productivity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/tt_productivity',\n        data_source = 'mict',\n        FORMAT = 'DELTA'\n    ) AS [tt_productivity];\n\ncreate or alter view yard_che_productivity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/yard_che_productivity',\n        data_source = 'mict',\n        FORMAT = 'DELTA'\n    ) AS [yard_che_productivity];\n ",
+			"query": "create or alter view rehandle\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/rehandle',\n        data_source = 'mict',\n        FORMAT = 'DELTA'\n    ) AS [rehandle];\n\ncreate or alter view tt_productivity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/tt_productivity',\n        data_source = 'vizingham',\n        FORMAT = 'DELTA'\n    ) AS [tt_productivity];\n\ncreate or Alter view dual_cycling\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/dual_cycling',\n        data_source = 'vizingham',\n        FORMAT = 'DELTA'\n    ) AS [dual_cycling];\n\ncreate or alter view yard_che_productivity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/yard_che_productivity',\n        data_source = 'mict',\n        FORMAT = 'DELTA'\n    ) AS [yard_che_productivity];\n ",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "mict",
+				"databaseName": "vizingham",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000
