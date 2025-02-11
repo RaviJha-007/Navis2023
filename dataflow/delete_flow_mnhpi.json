@@ -371,6 +371,7 @@
 				"alterRow4 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
+				"     fileSystem: 'mnhpi',",
 				"     folderPath: 'gold/rehandle',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
