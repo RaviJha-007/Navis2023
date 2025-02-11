@@ -419,7 +419,7 @@
 				"     insertable: false,",
 				"     updateable: false,",
 				"     upsertable: false,",
-				"     keys:['mve_gkey'],",
+				"     keys:['mve_gkey','t_put','Year','Month','Week'],",
 				"     umask: 0777,",
 				"     preCommands: [],",
 				"     postCommands: [],",
