@@ -9,7 +9,35 @@
 						"referenceName": "linkedService1",
 						"type": "LinkedServiceReference"
 					},
-					"name": "source1"
+					"name": "violation"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "moves"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "decking"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "rehandle"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "ttprod"
 				}
 			],
 			"sinks": [
@@ -19,6 +47,34 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "sink1"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink2"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink3"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink4"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink5"
 				}
 			],
 			"transformations": [
@@ -27,6 +83,30 @@
 				},
 				{
 					"name": "alterRow1"
+				},
+				{
+					"name": "filter2"
+				},
+				{
+					"name": "alterRow2"
+				},
+				{
+					"name": "filter3"
+				},
+				{
+					"name": "alterRow3"
+				},
+				{
+					"name": "filter4"
+				},
+				{
+					"name": "alterRow4"
+				},
+				{
+					"name": "filter5"
+				},
+				{
+					"name": "alterRow5"
 				}
 			],
 			"scriptLines": [
@@ -57,9 +137,91 @@
 				"     ignoreNoFilesFound: true,",
 				"     format: 'delta',",
 				"     fileSystem: 'mnhpi',",
-				"     folderPath: 'gold/violation') ~> source1",
-				"source1 filter(Shift_Date >= toDate('27-11-2024', 'dd-mm-yyyy')) ~> filter1",
+				"     folderPath: 'gold/violation') ~> violation",
+				"source(output(",
+				"          mve_gkey as integer,",
+				"          Unit_Nbr as string,",
+				"          Event_Type_Id as string,",
+				"          Move_Kind as string,",
+				"          From_Location as string,",
+				"          To_Position_Name as string,",
+				"          Put_CHE_Operator_Id as string,",
+				"          Put_CHE_Id as short,",
+				"          MH_T_Put_DateTime as timestamp,",
+				"          Freight_Kind_Id as string,",
+				"          Category_Id as string,",
+				"          ufv_gkey as integer,",
+				"          Year_Month as integer,",
+				"          Year_Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     fileSystem: 'mnhpi',",
+				"     folderPath: 'gold/move') ~> moves",
+				"source(output(",
+				"          gkey as integer,",
+				"          unit_id as string,",
+				"          DH_TimeStamp as timestamp,",
+				"          Decking_Type as string,",
+				"          to_pos_name as string,",
+				"          Year_Month as integer,",
+				"          Year_Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'mnhpi',",
+				"     folderPath: 'gold/decking') ~> decking",
+				"source(output(",
+				"          mve_gkey as integer,",
+				"          Unit_Nbr as string,",
+				"          Event_Type_Id as string,",
+				"          Move_Kind as string,",
+				"          t_put as timestamp,",
+				"          Category_Id as string,",
+				"          Freight_Kind_Id as string,",
+				"          Date as date,",
+				"          Year_Week as integer,",
+				"          Year as integer,",
+				"          Month as integer,",
+				"          Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'mnhpi',",
+				"     folderPath: 'gold/rehandle') ~> rehandle",
+				"source(output(",
+				"          Carry_CHE_Id as long,",
+				"          CarryCompleteDate as date,",
+				"          First_Lift as timestamp,",
+				"          Last_Lift as timestamp,",
+				"          Move_Count as long,",
+				"          WorkTime as long,",
+				"          Year as integer,",
+				"          Month as integer,",
+				"          Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'mnhpi',",
+				"     folderPath: 'gold/tt_productivity') ~> ttprod",
+				"violation filter(Shift_Date >= toDate('27-11-2024', 'dd-mm-yyyy')) ~> filter1",
 				"filter1 alterRow(deleteIf(true())) ~> alterRow1",
+				"moves filter(toDate(MH_T_Put_DateTime) >= toDate('27-11-2024', 'dd-mm-yyyy')) ~> filter2",
+				"filter2 alterRow(deleteIf(true())) ~> alterRow2",
+				"decking filter(toDate(DH_TimeStamp) >= toDate('27-11-2024', 'dd-mm-yyyy')) ~> filter3",
+				"filter3 alterRow(deleteIf(true())) ~> alterRow3",
+				"rehandle filter(Date >= toDate('20-10-2024', 'dd-mm-yyyy')) ~> filter4",
+				"filter4 alterRow(deleteIf(true())) ~> alterRow4",
+				"ttprod filter(CarryCompleteDate >= toDate('20-10-2024', 'dd-mm-yyyy')) ~> filter5",
+				"filter5 alterRow(deleteIf(true())) ~> alterRow5",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -78,7 +240,82 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true) ~> sink1",
+				"alterRow2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'mnhpi',",
+				"     folderPath: 'gold/move',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     keys:['MH_T_Put_DateTime'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink2",
+				"alterRow3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'mnhpi',",
+				"     folderPath: 'gold/decking',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     keys:['DH_TimeStamp'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink3",
+				"alterRow4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     folderPath: 'gold/rehandle',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     keys:['Date'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink4",
+				"alterRow5 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'mnhpi',",
+				"     folderPath: 'gold/tt_productivity',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     keys:['CarryCompleteDate'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink5"
 			]
 		}
 	}
