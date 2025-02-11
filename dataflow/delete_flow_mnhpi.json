@@ -1,0 +1,85 @@
+{
+	"name": "delete_flow_mnhpi",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          D_H_Decking_Type as string,",
+				"          MH_ToPosName_Short_5Char as string,",
+				"          DH_ToPosName_Short_5Char as string,",
+				"          MH_Unit_Nbr as string,",
+				"          MH_Move_Kind as string,",
+				"          Category_Id as string,",
+				"          MH_T_Put_DateTime as timestamp,",
+				"          MH_Put_CHE_Operator_Id as string,",
+				"          mve_gkey as integer,",
+				"          MH_Put_CHE_Id as short,",
+				"          Freight_Kind_Id as string,",
+				"          MaxDHTime as timestamp,",
+				"          Location_Match_or_Not as string,",
+				"          Shift_Id as string,",
+				"          Shift_Date as date,",
+				"          Week_of_Year as integer,",
+				"          {XPS_ECUser.name} as string,",
+				"          Block_To_Block_Violation as boolean,",
+				"          Same_Block_Violation as boolean,",
+				"          Stack_Violation as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     fileSystem: 'mnhpi',",
+				"     folderPath: 'gold/violation') ~> source1",
+				"source1 filter(Shift_Date >= toDate('27-11-2024', 'dd-mm-yyyy')) ~> filter1",
+				"filter1 alterRow(deleteIf(true())) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'mnhpi',",
+				"     folderPath: 'gold/violation',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     keys:['Shift_Date'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
