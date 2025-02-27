@@ -23,7 +23,8 @@
 			],
 			"transformations": [
 				{
-					"name": "DerivedColumn1"
+					"name": "DerivedColumn1",
+					"description": "Creating/updating the columns 'gkey, uyv_gkey, unit_id, time_stamp, decking_type, node_id, yard, from_pos_loctype, from_pos_locid, from_pos_loc_gkey, from_pos_slot, from_pos_name, from_pos_bin, from_pos_tier, to_pos_loctype, to_pos_locid, to_pos_loc_gkey, to_pos_slot, to_pos_name, to_pos_bin, to_pos_tier, total_score, execution_time, details, phase, TIME_STAMP, Year, Month, Week' "
 				},
 				{
 					"name": "AlterRow1"
