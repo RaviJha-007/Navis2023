@@ -1,0 +1,137 @@
+{
+	"name": "failtodeck_mict",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "DeckingHistory"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "decking"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select2"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "AlterRow2"
+				},
+				{
+					"name": "select6"
+				},
+				{
+					"name": "aggregate2"
+				},
+				{
+					"name": "filter5"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Gkey as integer,",
+				"          uyv_gkey as integer,",
+				"          unit_id as string,",
+				"          time_stamp as timestamp,",
+				"          decking_type as string,",
+				"          node_id as string,",
+				"          Yard as string,",
+				"          from_pos_loctype as string,",
+				"          from_pos_locid as string,",
+				"          from_pos_loc_gkey as integer,",
+				"          from_pos_slot as string,",
+				"          from_pos_name as string,",
+				"          from_pos_bin as integer,",
+				"          from_pos_tier as short,",
+				"          to_pos_loctype as string,",
+				"          to_pos_locid as string,",
+				"          to_pos_loc_gkey as integer,",
+				"          to_pos_slot as string,",
+				"          to_pos_name as string,",
+				"          to_pos_bin as short,",
+				"          to_pos_tier as string,",
+				"          total_score as short,",
+				"          execution_time as short,",
+				"          Details as string,",
+				"          Phase as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     moveFiles: ['/bronze/deckinghistory/load','bronze/deckinghistory/archive'],",
+				"     format: 'delimited',",
+				"     fileSystem: 'mict',",
+				"     folderPath: 'bronze/deckinghistory/load',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> DeckingHistory",
+				"DeckingHistory select(mapColumn(",
+				"          gkey = Gkey,",
+				"          uyv_gkey,",
+				"          unit_id,",
+				"          time_stamp,",
+				"          decking_type,",
+				"          node_id,",
+				"          Yard,",
+				"          from_pos_loctype,",
+				"          from_pos_locid,",
+				"          from_pos_slot,",
+				"          from_pos_name,",
+				"          to_pos_loctype,",
+				"          to_pos_locid,",
+				"          to_pos_slot,",
+				"          to_pos_name",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"filter5 derive(Year_Month = (year(time_stamp) * 100) + month(time_stamp),",
+				"          Year_Week = (year(time_stamp) * 100) + weekOfYear(time_stamp)) ~> derivedColumn2",
+				"select6 alterRow(upsertIf(true())) ~> AlterRow2",
+				"derivedColumn2 select(mapColumn(",
+				"          each(match(true()),",
+				"               regexReplace($$,' ','_') = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select6",
+				"select2 aggregate(groupBy(gkey),",
+				"     each(match(name!='gkey'), $$ = first($$))) ~> aggregate2",
+				"aggregate2 filter(not(isNull(gkey)) && to_pos_locid == \"DCT\") ~> filter5",
+				"AlterRow2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'mict',",
+				"     folderPath: 'gold/decking',",
+				"     mergeSchema: false,",
+				"     autoCompact: true,",
+				"     optimizedWrite: true,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['gkey'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> decking"
+			]
+		}
+	}
+}
