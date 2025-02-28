@@ -116,7 +116,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'mict',",
-				"     folderPath: 'gold/decking',",
+				"     folderPath: 'gold/failtodeck',",
 				"     mergeSchema: false,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
