@@ -71,7 +71,7 @@
 				"     moveFiles: ['/bronze/stackconformity/load','bronze/sectionconformity/load'],",
 				"     rowUrlColumn: 'FileDate',",
 				"     format: 'delimited',",
-				"     fileSystem: 'mict',",
+				"     fileSystem: 'cgsa',",
 				"     folderPath: 'bronze/stackconformity/load',",
 				"     columnDelimiter: '\\t',",
 				"     escapeChar: '\\\\',",
