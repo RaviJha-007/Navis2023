@@ -124,7 +124,7 @@
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
-				"     fileSystem: 'mict',",
+				"     fileSystem: 'cgsa',",
 				"     folderPath: 'gold/section_conformity',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
