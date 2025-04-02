@@ -68,27 +68,6 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "sink3"
-				},
-				{
-					"linkedService": {
-						"referenceName": "linkedService1",
-						"type": "LinkedServiceReference"
-					},
-					"name": "sink4"
-				},
-				{
-					"linkedService": {
-						"referenceName": "linkedService1",
-						"type": "LinkedServiceReference"
-					},
-					"name": "sink5"
-				},
-				{
-					"linkedService": {
-						"referenceName": "linkedService1",
-						"type": "LinkedServiceReference"
-					},
-					"name": "sink6"
 				}
 			],
 			"transformations": [
@@ -109,24 +88,6 @@
 				},
 				{
 					"name": "alterRow3"
-				},
-				{
-					"name": "filter4"
-				},
-				{
-					"name": "alterRow4"
-				},
-				{
-					"name": "filter5"
-				},
-				{
-					"name": "alterRow5"
-				},
-				{
-					"name": "filter6"
-				},
-				{
-					"name": "alterRow6"
 				}
 			],
 			"scriptLines": [
@@ -299,18 +260,12 @@
 				"     format: 'delta',",
 				"     fileSystem: 'mnhpi',",
 				"     folderPath: 'silver/moves') ~> movesrc",
-				"violation filter(toDate(MH_T_Put_DateTime) <= toDate('21-10-2024', 'dd-mm-yyyy') && not(isNull(MH_T_Put_DateTime))) ~> filter1",
-				"filter1 alterRow(insertIf(true())) ~> alterRow1",
-				"moves filter(toDate(MH_T_Put_DateTime) <= toDate('21-10-2024', 'dd-mm-yyyy') && not(isNull(MH_T_Put_DateTime))) ~> filter2",
-				"filter2 alterRow(insertIf(true())) ~> alterRow2",
-				"decking filter(toDate(DH_TimeStamp) <= toDate('21-10-2024', 'dd-mm-yyyy') && not(isNull(DH_TimeStamp))) ~> filter3",
-				"filter3 alterRow(insertIf(true())) ~> alterRow3",
-				"rehandle filter(Date >= toDate('20-10-2024', 'dd-mm-yyyy')) ~> filter4",
-				"filter4 alterRow(deleteIf(true())) ~> alterRow4",
-				"ttprod filter(CarryCompleteDate >= toDate('20-10-2024', 'dd-mm-yyyy')) ~> filter5",
-				"filter5 alterRow(deleteIf(true())) ~> alterRow5",
-				"movesrc filter(toDate(t_put) >= toDate('20-10-2024', 'dd-mm-yyyy')) ~> filter6",
-				"filter6 alterRow(deleteIf(true())) ~> alterRow6",
+				"violation filter(toDate(MH_T_Put_DateTime) > toDate('04-08-2024', 'dd-mm-yyyy') && not(isNull(MH_T_Put_DateTime))) ~> filter1",
+				"filter1 alterRow(deleteIf(true())) ~> alterRow1",
+				"moves filter(toDate(MH_T_Put_DateTime) > toDate('04-08-2024', 'dd-mm-yyyy') && not(isNull(MH_T_Put_DateTime))) ~> filter2",
+				"filter2 alterRow(deleteIf(true())) ~> alterRow2",
+				"decking filter(toDate(DH_TimeStamp) > toDate('04-08-2024', 'dd-mm-yyyy') && not(isNull(DH_TimeStamp))) ~> filter3",
+				"filter3 alterRow(deleteIf(true())) ~> alterRow3",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -370,64 +325,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink3",
-				"alterRow4 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'delta',",
-				"     fileSystem: 'mnhpi',",
-				"     folderPath: 'gold/rehandle',",
-				"     mergeSchema: false,",
-				"     autoCompact: false,",
-				"     optimizedWrite: false,",
-				"     vacuum: 0,",
-				"     deletable: true,",
-				"     insertable: false,",
-				"     updateable: false,",
-				"     upsertable: false,",
-				"     keys:['mve_gkey'],",
-				"     umask: 0777,",
-				"     preCommands: [],",
-				"     postCommands: [],",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink4",
-				"alterRow5 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'delta',",
-				"     fileSystem: 'mnhpi',",
-				"     folderPath: 'gold/tt_productivity',",
-				"     mergeSchema: false,",
-				"     autoCompact: false,",
-				"     optimizedWrite: false,",
-				"     vacuum: 0,",
-				"     deletable: true,",
-				"     insertable: false,",
-				"     updateable: false,",
-				"     upsertable: false,",
-				"     keys:['CarryCompleteDate','Carry_CHE_Id','First_Lift','Last_Lift','Year','Month','Week'],",
-				"     umask: 0777,",
-				"     preCommands: [],",
-				"     postCommands: [],",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink5",
-				"alterRow6 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'delta',",
-				"     fileSystem: 'mnhpi',",
-				"     folderPath: 'silver/moves',",
-				"     mergeSchema: false,",
-				"     autoCompact: false,",
-				"     optimizedWrite: false,",
-				"     vacuum: 0,",
-				"     deletable: true,",
-				"     insertable: false,",
-				"     updateable: false,",
-				"     upsertable: false,",
-				"     keys:['mve_gkey','t_put','Year','Month','Week'],",
-				"     umask: 0777,",
-				"     preCommands: [],",
-				"     postCommands: [],",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink6"
+				"     skipDuplicateMapOutputs: true) ~> sink3"
 			]
 		}
 	}
