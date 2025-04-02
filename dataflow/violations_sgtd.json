@@ -150,6 +150,15 @@
 				},
 				{
 					"name": "derivedColumn6"
+				},
+				{
+					"name": "removableFilter3"
+				},
+				{
+					"name": "Removablefilter2"
+				},
+				{
+					"name": "Removablefilter1"
 				}
 			],
 			"scriptLines": [
@@ -522,11 +531,11 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
-				"select5 alterRow(upsertIf(true()),",
+				"Removablefilter2 alterRow(upsertIf(true()),",
 				"     updateIf(true())) ~> alterRow1",
-				"select6 alterRow(upsertIf(true()),",
+				"removableFilter3 alterRow(upsertIf(true()),",
 				"     updateIf(true())) ~> AlterRow2",
-				"select7 alterRow(upsertIf(true()),",
+				"Removablefilter1 alterRow(upsertIf(true()),",
 				"     updateIf(true())) ~> alterRow3",
 				"derivedColumn2 select(mapColumn(",
 				"          each(match(true()),",
@@ -549,6 +558,9 @@
 				"join6 derive(Block_To_Block_Violation = iif(substring({MH ToPosName Short 5Char}, 1, 3) != substring({DH ToPosName Short 5Char}, 1, 3), true(), false()),",
 				"          Same_Block_Violation = iif(substring({MH ToPosName Short 5Char}, 1, 5) != substring({DH ToPosName Short 5Char}, 1, 5), true(), false()),",
 				"          Stack_Violation = iif(substring({MH ToPosName Short 5Char}, 1, 6) != substring({DH ToPosName Short 5Char}, 1, 6), true(), false())) ~> derivedColumn6",
+				"select6 filter(Year_Week > 202510) ~> removableFilter3",
+				"select5 filter(Week_of_Year> 202510) ~> Removablefilter2",
+				"select7 filter(Year_Week> 202510) ~> Removablefilter1",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
