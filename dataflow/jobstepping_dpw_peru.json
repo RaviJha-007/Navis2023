@@ -130,7 +130,7 @@
 				"window1 derive(jobStep = iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TYCO' && eventTypeDescription_nxt=='AYCO', 1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TVDR' && eventTypeDescription_nxt=='AVDR',1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TYDR' && eventTypeDescription_nxt=='AYDR',1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TVCO' && eventTypeDescription_nxt=='AVCO',1,0))))) ~> derivedColumn1",
 				"select1 alterRow(upsertIf(true())) ~> AlterRow1",
 				"derivedColumn1, xpseceuser join(OPERATOR_ID == USER_ID,",
-				"     joinType:'inner',",
+				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
