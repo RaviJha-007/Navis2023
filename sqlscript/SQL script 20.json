@@ -2,7 +2,7 @@
 	"name": "SQL script 20",
 	"properties": {
 		"content": {
-			"query": "Select DISTINCT OperatorID from [dbo].[jobstep]\n Where OperatorID is not null\n and OperatorName is NULL",
+			"query": "Select DISTINCT OperatorID from [dbo].[jobstep]\n Where OperatorID is not null\n and OperatorName is NULL\n\n select Top(10) EcEventTime from dbo.ecevents ORDER by EcEventTime DESC",
 			"metadata": {
 				"language": "sql"
 			},
