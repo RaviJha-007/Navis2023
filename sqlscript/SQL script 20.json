@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 20",
+	"properties": {
+		"content": {
+			"query": "Select DISTINCT OperatorID from [dbo].[jobstep]\n Where OperatorID is not null\n and OperatorName is NULL",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dpw-peru",
+				"poolName": "Built-in"
+			},
+			"resultLimit": -1
+		},
+		"type": "SqlQuery"
+	}
+}
