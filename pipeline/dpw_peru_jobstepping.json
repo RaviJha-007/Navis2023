@@ -7,7 +7,7 @@
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "EcEvents_dpw_peru",
+						"activity": "EcEvents_dpw_peru_new",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -34,7 +34,7 @@
 				}
 			},
 			{
-				"name": "EcEvents_dpw_peru",
+				"name": "EcEvents_dpw_peru_new",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -47,7 +47,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "EcEvents_dpw_peru",
+						"referenceName": "EcEvents_dpw_peru_new",
 						"type": "DataFlowReference"
 					},
 					"compute": {
