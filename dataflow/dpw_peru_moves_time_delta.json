@@ -174,7 +174,7 @@
 				"split1@discharge sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
-				"     fileSystem: 'dpwperu',",
+				"     fileSystem: 'dpw-peru',",
 				"     folderPath: 'gold/dsch_time_delta',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
