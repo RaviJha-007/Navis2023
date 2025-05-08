@@ -1,5 +1,5 @@
 {
-	"name": "dpw_peru_jobstepping",
+	"name": "dpw_peru_ecevents",
 	"properties": {
 		"activities": [
 			{
@@ -48,6 +48,37 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "EcEvents_dpw_peru_new",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "ladenUnladen_dpw_peru",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "EcEvents_dpw_peru_new",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "ladenUnladen_dpw_peru",
 						"type": "DataFlowReference"
 					},
 					"compute": {
