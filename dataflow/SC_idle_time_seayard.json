@@ -18,34 +18,6 @@
 						"referenceName": "linkedService2",
 						"type": "LinkedServiceReference"
 					},
-					"name": "sink1"
-				},
-				{
-					"linkedService": {
-						"referenceName": "linkedService2",
-						"type": "LinkedServiceReference"
-					},
-					"name": "sink2"
-				},
-				{
-					"linkedService": {
-						"referenceName": "linkedService2",
-						"type": "LinkedServiceReference"
-					},
-					"name": "sink3"
-				},
-				{
-					"linkedService": {
-						"referenceName": "linkedService2",
-						"type": "LinkedServiceReference"
-					},
-					"name": "sink4"
-				},
-				{
-					"linkedService": {
-						"referenceName": "linkedService2",
-						"type": "LinkedServiceReference"
-					},
 					"name": "sink5"
 				}
 			],
@@ -54,50 +26,7 @@
 					"name": "filter1"
 				},
 				{
-					"name": "alterRow1"
-				},
-				{
 					"name": "pivot1"
-				},
-				{
-					"name": "derivedColumn1"
-				},
-				{
-					"name": "split1"
-				},
-				{
-					"name": "derivedColumn2"
-				},
-				{
-					"name": "MapDrifted1",
-					"description": "Creates an explicit mapping for each drifted column"
-				},
-				{
-					"name": "select1"
-				},
-				{
-					"name": "split2"
-				},
-				{
-					"name": "select2"
-				},
-				{
-					"name": "split3"
-				},
-				{
-					"name": "select3"
-				},
-				{
-					"name": "select4"
-				},
-				{
-					"name": "alterRow2"
-				},
-				{
-					"name": "alterRow3"
-				},
-				{
-					"name": "alterRow4"
 				},
 				{
 					"name": "window1"
@@ -107,18 +36,6 @@
 				},
 				{
 					"name": "window2"
-				},
-				{
-					"name": "filter3"
-				},
-				{
-					"name": "filter4"
-				},
-				{
-					"name": "filter5"
-				},
-				{
-					"name": "filter6"
 				},
 				{
 					"name": "MapDrifted2",
@@ -183,8 +100,7 @@
 				"     format: 'delta',",
 				"     fileSystem: 'seayard',",
 				"     folderPath: 'silver/ecevents') ~> ecevents",
-				"ecevents filter(cheKind == 'SC' && (moveKind == 'DSCH' || moveKind == 'LOAD') && (typeDescription=='EARW' || typeDescription=='EASH' || typeDescription=='DSPT' || typeDescription=='DROP' || typeDescription=='EAGD' || typeDescription=='ETGD' || typeDescription=='ETRW' || typeDescription=='ETSH' || typeDescription=='ETRL')) ~> filter1",
-				"select1 alterRow(upsertIf(true())) ~> alterRow1",
+				"ecevents filter(cheKind == 'SC') ~> filter1",
 				"window2 pivot(groupBy(unitIdName,",
 				"          GroupNumber,",
 				"          moveKind),",
@@ -194,98 +110,20 @@
 				"          laden = first(travelDistance),",
 				"     columnNaming: '$N$V_Time',",
 				"     lateral: false) ~> pivot1",
-				"split1@LoadMoves derive(ScLoadTime = :sc_load_time,",
-				"          ScLoadUnladenTime = :sc_load_unladen_time,",
-				"          ScLoadTimeRange = iif(:sc_load_time >= 0.0 && :sc_load_time <= 10.0, \"0 to 10 min\",iif(:sc_load_time > 10.0 && :sc_load_time <= 15.0, \"10 to 15 min\",iif(:sc_load_time > 15.0 && :sc_load_time <= 20.0, \"15 to 20 min\",iif(:sc_load_time > 20.0 && :sc_load_time <= 25.0, \"20 to 25 min\",iif(:sc_load_time > 25.0 && :sc_load_time <= 30.0, \"25 to 30 min\",iif(:sc_load_time > 30.0 && :sc_load_time <= 40.0, \"30 to 40 min\",iif(:sc_load_time > 40.0 && :sc_load_time <= 50.0, \"40 to 50 min\",iif(:sc_load_time > 50.0 ,\"50 & above\", \"\")))))))),",
-				"          ScLoadUnladenTimeRange = iif(:sc_load_unladen_time >= 0.0 && :sc_load_unladen_time <= 10.0, \"0 to 10 min\",iif(:sc_load_unladen_time > 10.0 && :sc_load_unladen_time <= 15.0, \"10 to 15 min\",iif(:sc_load_unladen_time > 15.0 && :sc_load_unladen_time <= 20.0, \"15 to 20 min\",iif(:sc_load_unladen_time > 20.0 && :sc_load_unladen_time <= 25.0, \"20 to 25 min\",iif(:sc_load_unladen_time > 25.0 && :sc_load_unladen_time <= 30.0, \"25 to 30 min\",iif(:sc_load_unladen_time > 30.0 && :sc_load_unladen_time <= 40.0, \"30 to 40 min\",iif(:sc_load_unladen_time > 40.0 && :sc_load_unladen_time <= 50.0, \"40 to 50 min\",iif(:sc_load_unladen_time > 50.0 ,\"50 & above\", \"\")))))))),",
-				"          sc_load_time := round((DROP_Time - DSPT_Time)/60000,2),",
-				"          sc_load_unladen_time := round((EARW_Time - DSPT_Time)/60000,2)) ~> derivedColumn1",
-				"MapDrifted1 split(moveKind  == \"LOAD\",",
-				"     moveKind  == \"DSCH\",",
-				"     disjoint: false) ~> split1@(LoadMoves, DschMoves)",
-				"split1@DschMoves derive(ScDschTime = :sc_dsch_time,",
-				"          ScDschUnladenTime = :sc_dsch_unladen_time,",
-				"          ScDschTimeRange = iif(:sc_dsch_time >= 0.0 && :sc_dsch_time <= 10.0, \"0 to 10 min\",iif(:sc_dsch_time > 10.0 && :sc_dsch_time <= 15.0, \"10 to 15 min\",iif(:sc_dsch_time > 15.0 && :sc_dsch_time <= 20.0, \"15 to 20 min\",iif(:sc_dsch_time > 20.0 && :sc_dsch_time <= 25.0, \"20 to 25 min\",iif(:sc_dsch_time > 25.0 && :sc_dsch_time <= 30.0, \"25 to 30 min\",iif(:sc_dsch_time > 30.0 && :sc_dsch_time <= 40.0, \"30 to 40 min\",iif(:sc_dsch_time > 40.0 && :sc_dsch_time <= 50.0, \"40 to 50 min\",iif(:sc_dsch_time > 50.0 ,\"50 & above\", \"\")))))))),",
-				"          ScDschUnladenTimeRange = iif(:sc_dsch_unladen_time>= 0.0 && :sc_dsch_unladen_time<= 10.0, \"0 to 10 min\",iif(:sc_dsch_unladen_time> 10.0 && :sc_dsch_unladen_time<= 15.0, \"10 to 15 min\",iif(:sc_dsch_unladen_time> 15.0 && :sc_dsch_unladen_time<= 20.0, \"15 to 20 min\",iif(:sc_dsch_unladen_time> 20.0 && :sc_dsch_unladen_time<= 25.0, \"20 to 25 min\",iif(:sc_dsch_unladen_time> 25.0 && :sc_dsch_unladen_time<= 30.0, \"25 to 30 min\",iif(:sc_dsch_unladen_time> 30.0 && :sc_dsch_unladen_time<= 40.0, \"30 to 40 min\",iif(:sc_dsch_unladen_time> 40.0 && :sc_dsch_unladen_time<= 50.0, \"40 to 50 min\",iif(:sc_dsch_unladen_time > 50.0 ,\"50 & above\", \"\")))))))),",
-				"          sc_dsch_time := round((DROP_Time - DSPT_Time)/60000,2),",
-				"          sc_dsch_unladen_time := round((EASH_Time - DSPT_Time)/60000,2)) ~> derivedColumn2",
-				"MapDrifted2 derive(Timestamp = :Timestamp,",
-				"          Date = toDate(toString(:TimeStamp)),",
-				"          Year = year(:TimeStamp),",
-				"          Month = month(:TimeStamp),",
-				"          Week = weekOfYear(:TimeStamp),",
-				"          TimeStamp = :TimeStamp,",
-				"          Timestamp := iifNull(iifNull(toTimestamp(byName('_DSPT_Time')), toTimestamp(byName('_DROP_Time')), toTimestamp(byName('_EARW_Time'))), toTimestamp(byName('_EASH_Time'))),",
-				"          TimeStamp := iifNull(iif(moveKind == 'DSCH', iifNull(toTimestamp(byName('_LTRW_Time')), toTimestamp(byName('_LARW_Time'))), iif(moveKind == 'LOAD', iifNull(toTimestamp(byName('_LTSH_Time')), toTimestamp(byName('_LASH_Time'))), toTimestamp(null()))), :Timestamp)) ~> MapDrifted1",
-				"filter6 select(mapColumn(",
-				"          unitIdName,",
-				"          moveKind,",
-				"          ScLoadUnladenTime,",
-				"          ScLoadUnladenTimeRange,",
-				"          Timestamp = TimeStamp,",
-				"          Date,",
-				"          Year,",
-				"          Month,",
-				"          Week",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
-				"derivedColumn1 split(not(isNull(ScLoadUnladenTime)),",
-				"     not(isNull(ScLoadTime)),",
-				"     disjoint: true) ~> split2@(ScLoadUnladenTime, ScLoadTime)",
-				"filter5 select(mapColumn(",
-				"          unitIdName,",
-				"          moveKind,",
-				"          Timestamp = TimeStamp,",
-				"          Date,",
-				"          Year,",
-				"          Month,",
-				"          Week,",
-				"          ScLoadTime,",
-				"          ScLoadTimeRange",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2",
-				"derivedColumn2 split(not(isNull(ScDschUnladenTime)),",
-				"     not(isNull(ScDschTime)),",
-				"     disjoint: true) ~> split3@(ScDschUnladenTime, ScDschTime)",
-				"filter4 select(mapColumn(",
-				"          unitIdName,",
-				"          moveKind,",
-				"          Timestamp = TimeStamp,",
-				"          Date,",
-				"          Year,",
-				"          Month,",
-				"          Week,",
-				"          ScDschUnladenTime,",
-				"          ScDschUnladenTimeRange",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select3",
-				"filter3 select(mapColumn(",
-				"          unitIdName,",
-				"          moveKind,",
-				"          Timestamp = TimeStamp,",
-				"          Date,",
-				"          Year,",
-				"          Month,",
-				"          Week,",
-				"          ScDschTime,",
-				"          ScDschTimeRange",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select4",
-				"select2 alterRow(upsertIf(true())) ~> alterRow2",
-				"select3 alterRow(upsertIf(true())) ~> alterRow3",
-				"select4 alterRow(upsertIf(true())) ~> alterRow4",
 				"derivedColumn4 window(over(cheID,",
 				"          EcEventDate),",
 				"     asc(cheID, true),",
-				"     asc(ERROR_FUNCTION(''), true),",
+				"     asc(EcEventTime, true),",
+				"     rangeSpecified: true,",
+				"     startRowOffset: 1L,",
 				"     EcEventTime_PREV = lag(EcEventTime, 1, null()),",
 				"          EcEventTime_NEXT = lead(EcEventTime, 1, null()),",
 				"          typeDescription_PREV = lag(typeDescription, 1, null()),",
-				"          typeDescription_NEXT = lead(typeDescription, 1, null())) ~> window1",
+				"          typeDescription_NEXT = lead(typeDescription, 1, null()),",
+				"          cheID_PREV = lag(cheID, 1, null()),",
+				"          cheID_NEXT = lead(cheID, 1, null()),",
+				"          EcEventDate_PREV = lag(EcEventDate, 1, null()),",
+				"          EcEventDate_NEXT = lead(EcEventDate, 1, null())) ~> window1",
 				"window1 derive(TimeDeltaMins = :time_delta_mins,",
 				"          TimeGroupFlag = iif(isNull(EcEventTime_PREV) || :time_delta_mins > toLong(24*60), 1, 0),",
 				"          drop_time = ERROR_FUNCTION(''),",
@@ -293,17 +131,13 @@
 				"derivedColumn3 window(over(unitIdName),",
 				"     asc(derivedColumn4@EcEventTime, true),",
 				"     GroupNumber = sum(TimeGroupFlag)) ~> window2",
-				"split3@ScDschTime filter(ScDschTime >= 0.0) ~> filter3",
-				"split3@ScDschUnladenTime filter(ScDschUnladenTime >= 0.0) ~> filter4",
-				"split2@ScLoadTime filter(ScLoadTime >= 0.0) ~> filter5",
-				"split2@ScLoadUnladenTime filter(ScLoadUnladenTime >=0.0) ~> filter6",
 				"pivot1 derive(DROP_Time = toTimestamp(byName('_DROP_Time')),",
 				"          DSPT_Time = toTimestamp(byName('_DSPT_Time')),",
 				"          EARW_Time = toTimestamp(byName('_EARW_Time')),",
 				"          EASH_Time = toTimestamp(byName('_EASH_Time')),",
 				"          UnladenDistance = iif(moveKind == 'DSCH', iifNull(toShort(byName('unladenLTRW_Time')), toShort(byName('unladenLARW_Time'))), iif(moveKind == 'LOAD', iifNull(toShort(byName('unladenLTSH_Time')), toShort(byName('unladenLASH_Time'))), toShort(999))),",
 				"          LadenDistance = iif(moveKind == 'DSCH', iifNull(toShort(byName('ladenLTRW_Time')), toShort(byName('ladenLARW_Time'))), iif(moveKind == 'LOAD', iifNull(toShort(byName('ladenLTSH_Time')), toShort(byName('ladenLASH_Time'))), toShort(999)))) ~> MapDrifted2",
-				"MapDrifted1 select(mapColumn(",
+				"MapDrifted2 select(mapColumn(",
 				"          unitIdName,",
 				"          GroupNumber,",
 				"          moveKind,",
@@ -321,82 +155,6 @@
 				"select5 filter(not(isNull(UnladenDistance) && isNull(LadenDistance))) ~> filter7",
 				"filter1 derive(EcEventDate = toDate(toString(EcEventTime,'yyyy-MM-dd'),'yyyy-MM-dd'),",
 				"          EcEventTimepart = toString(EcEventTime,'HH:mm:ss')) ~> derivedColumn4",
-				"alterRow1 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'delta',",
-				"     fileSystem: 'tauranga',",
-				"     folderPath: 'gold/sc_load_unladen_time',",
-				"     mergeSchema: false,",
-				"     autoCompact: false,",
-				"     optimizedWrite: false,",
-				"     vacuum: 0,",
-				"     deletable: false,",
-				"     insertable: false,",
-				"     updateable: false,",
-				"     upsertable: true,",
-				"     keys:['unitIdName','moveKind','Timestamp'],",
-				"     umask: 0022,",
-				"     preCommands: [],",
-				"     postCommands: [],",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1",
-				"alterRow2 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'delta',",
-				"     fileSystem: 'tauranga',",
-				"     folderPath: 'gold/sc_load_time',",
-				"     mergeSchema: false,",
-				"     autoCompact: false,",
-				"     optimizedWrite: false,",
-				"     vacuum: 0,",
-				"     deletable: false,",
-				"     insertable: false,",
-				"     updateable: false,",
-				"     upsertable: true,",
-				"     keys:['unitIdName','moveKind','Timestamp'],",
-				"     umask: 0022,",
-				"     preCommands: [],",
-				"     postCommands: [],",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink2",
-				"alterRow3 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'delta',",
-				"     fileSystem: 'tauranga',",
-				"     folderPath: 'gold/sc_dsch_unladen_time',",
-				"     mergeSchema: false,",
-				"     autoCompact: false,",
-				"     optimizedWrite: false,",
-				"     vacuum: 0,",
-				"     deletable: false,",
-				"     insertable: false,",
-				"     updateable: false,",
-				"     upsertable: true,",
-				"     keys:['unitIdName','moveKind','Timestamp'],",
-				"     umask: 0022,",
-				"     preCommands: [],",
-				"     postCommands: [],",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink3",
-				"alterRow4 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'delta',",
-				"     fileSystem: 'tauranga',",
-				"     folderPath: 'gold/sc_dsch_time',",
-				"     mergeSchema: false,",
-				"     autoCompact: false,",
-				"     optimizedWrite: false,",
-				"     vacuum: 0,",
-				"     deletable: false,",
-				"     insertable: false,",
-				"     updateable: false,",
-				"     upsertable: true,",
-				"     keys:['unitIdName','moveKind','Timestamp'],",
-				"     umask: 0022,",
-				"     preCommands: [],",
-				"     postCommands: [],",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink4",
 				"alterRow5 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
