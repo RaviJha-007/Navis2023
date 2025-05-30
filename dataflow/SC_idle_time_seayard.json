@@ -126,7 +126,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
 				"select5 alterRow(upsertIf(true())) ~> alterRow5",
-				"filter1 derive(EcEventDate = toDate(toString(EcEventTime,'dd-MM-yyyy'))) ~> derivedColumn4",
+				"filter1 derive(EcEventDate = toDate(toString(EcEventTime,'yyyy-MM-dd'))) ~> derivedColumn4",
 				"window1 sort(asc(EcEventDate, true),",
 				"     asc(cheID, true),",
 				"     asc(EcEventTime, true)) ~> sort1",
