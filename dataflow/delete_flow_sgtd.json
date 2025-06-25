@@ -1,0 +1,207 @@
+{
+	"name": "delete_flow_sgtd",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "violation"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "moves"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "decking"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink2"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink3"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "filter2"
+				},
+				{
+					"name": "alterRow2"
+				},
+				{
+					"name": "filter3"
+				},
+				{
+					"name": "alterRow3"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          D_H_Decking_Type as string,",
+				"          MH_ToPosName_Short_5Char as string,",
+				"          DH_ToPosName_Short_5Char as string,",
+				"          MH_Unit_Nbr as string,",
+				"          MH_Move_Kind as string,",
+				"          Category_Id as string,",
+				"          MH_T_Put_DateTime as timestamp,",
+				"          MH_Put_CHE_Operator_Id as string,",
+				"          mve_gkey as integer,",
+				"          MH_Put_CHE_Id as short,",
+				"          Freight_Kind_Id as string,",
+				"          MaxDHTime as timestamp,",
+				"          Location_Match_or_Not as string,",
+				"          Shift_Id as string,",
+				"          Shift_Date as date,",
+				"          Week_of_Year as integer,",
+				"          {XPS_ECUser.name} as string,",
+				"          Block_To_Block_Violation as boolean,",
+				"          Same_Block_Violation as boolean,",
+				"          Stack_Violation as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'gold/violation') ~> violation",
+				"source(output(",
+				"          mve_gkey as integer,",
+				"          Unit_Nbr as string,",
+				"          Event_Type_Id as string,",
+				"          Move_Kind as string,",
+				"          From_Location as string,",
+				"          To_Position_Name as string,",
+				"          Put_CHE_Operator_Id as string,",
+				"          Put_CHE_Id as short,",
+				"          MH_T_Put_DateTime as timestamp,",
+				"          Freight_Kind_Id as string,",
+				"          Category_Id as string,",
+				"          ufv_gkey as integer,",
+				"          Year_Month as integer,",
+				"          Year_Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'gold/move') ~> moves",
+				"source(output(",
+				"          gkey as integer,",
+				"          unit_id as string,",
+				"          DH_TimeStamp as timestamp,",
+				"          Decking_Type as string,",
+				"          to_pos_name as string,",
+				"          Year_Month as integer,",
+				"          Year_Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'gold/decking') ~> decking",
+				"violation filter(Shift_Date < toDate(\"24-03-2025\",\"dd-MM-yyyy\")) ~> filter1",
+				"filter1 alterRow(upsertIf(true())) ~> alterRow1",
+				"moves filter(toDate(MH_T_Put_DateTime) < toDate(\"24-03-2025\",\"dd-MM-yyyy\")) ~> filter2",
+				"filter2 alterRow(upsertIf(true())) ~> alterRow2",
+				"decking filter(toDate(DH_TimeStamp) < toDate(\"24-03-2025\",\"dd-MM-yyyy\")) ~> filter3",
+				"filter3 alterRow(upsertIf(true())) ~> alterRow3",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'gold/violations',",
+				"     overwrite: true,",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: true,",
+				"     updateable: true,",
+				"     upsertable: true,",
+				"     keys:['mve_gkey','MH_T_Put_DateTime','Shift_Date','Week_of_Year'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1",
+				"alterRow2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'gold/moves',",
+				"     overwrite: true,",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: true,",
+				"     updateable: true,",
+				"     upsertable: true,",
+				"     keys:['mve_gkey'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink2",
+				"alterRow3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'gold/deckings',",
+				"     overwrite: true,",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: true,",
+				"     updateable: true,",
+				"     upsertable: true,",
+				"     keys:['gkey'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink3"
+			]
+		}
+	}
+}
