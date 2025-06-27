@@ -49,6 +49,15 @@
 				},
 				{
 					"name": "select1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "filter2"
 				}
 			],
 			"scriptLines": [
@@ -101,7 +110,7 @@
 				"          GKEY as string,",
 				"          USER_ID as string,",
 				"          NAME as string,",
-				"          YARD as integer",
+				"          YARD as string",
 				"     ),",
 				"     useSchema: false,",
 				"     allowSchemaDrift: true,",
@@ -130,7 +139,7 @@
 				"window1 derive(jobStep = iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TYCO' && eventTypeDescription_nxt=='AYCO', 1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TVDR' && eventTypeDescription_nxt=='AVDR',1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TYDR' && eventTypeDescription_nxt=='AYDR',1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TVCO' && eventTypeDescription_nxt=='AVCO',1,0))))) ~> derivedColumn1",
 				"select1 alterRow(upsertIf(true()),",
 				"     insertIf(true())) ~> AlterRow1",
-				"derivedColumn1, xpseceuser join(OPERATOR_ID == USER_ID,",
+				"derivedColumn1, filter2 join(OPERATOR_ID == USER_ID,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -166,6 +175,11 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
+				"derivedColumn2 aggregate(groupBy(USER_ID),",
+				"     NAME = first(NAME)) ~> aggregate1",
+				"xpseceuser derive(USER_ID = regexReplace(USER_ID, `[^a-zA-Z0-9]`, ''),",
+				"          NAME = regexReplace(NAME, `[^a-zA-Z0-9]`, ' ')) ~> derivedColumn2",
+				"aggregate1 filter(not(isNull(USER_ID))) ~> filter2",
 				"AlterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
