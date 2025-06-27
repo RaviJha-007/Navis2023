@@ -8425,8 +8425,7 @@
 				"[concat(variables('workspaceId'), '/dataflows/renomination_sgtd')]",
 				"[concat(variables('workspaceId'), '/dataflows/Dual Cycling_sgtd_yard')]",
 				"[concat(variables('workspaceId'), '/dataflows/TT_Productivity_sgtd')]",
-				"[concat(variables('workspaceId'), '/dataflows/sgtd_moves_time_delta_new')]",
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+				"[concat(variables('workspaceId'), '/dataflows/sgtd_moves_time_delta_new')]"
 			]
 		},
 		{
@@ -10550,6 +10549,362 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Trigger 1')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "vizingham_stack_confirmity",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/vizingham/blobs/bronze/stackconformity/load/",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('Trigger 1_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/vizingham_stack_confirmity')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sc_trigger')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "TEAGTL_stack_confirmity",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/teagtl/blobs/bronze/stackconformity/load/",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('sc_trigger_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/TEAGTL_stack_confirmity')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sc_trigger_agct')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "AGCT_stack_confirmity",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/agct/blobs/bronze/stackconformity/load/",
+					"blobPathEndsWith": ".csv",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('sc_trigger_agct_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/AGCT_stack_confirmity')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sc_trigger_cmsa')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "CMSA_stack_confirmity",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/cmsa/blobs/bronze/stackconformity/load/",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('sc_trigger_cmsa_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/CMSA_stack_confirmity')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sc_trigger_dpw_peru')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "DPW_peru_stack_confirmity",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/dpw-peru/blobs/bronze/stackconformity/load/",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('sc_trigger_dpw_peru_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/DPW_peru_stack_confirmity')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sc_trigger_mict')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "MICT_confirmities",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/mict/blobs/bronze/stackconformity/load/",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('sc_trigger_mict_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/MICT_confirmities')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sc_trigger_mnhpi')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "MNHPI_confirmities",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/mnhpi/blobs/bronze/stackconformity/load/",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('sc_trigger_mnhpi_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/MNHPI_confirmities')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sc_trigger_rio')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "RIO_confirmities",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/rio/blobs/bronze/stackconformity/load/",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('sc_trigger_rio_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/RIO_confirmities')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sc_trigger_sgtd')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "SGTD_stack_confirmity",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/sgtd/blobs/bronze/stackconformity/load/",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('sc_trigger_sgtd_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/SGTD_stack_confirmity')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/schedule_trigger')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "mict",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "mnhpi_moves",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2024-09-04T04:45:00",
+						"timeZone": "India Standard Time",
+						"schedule": {
+							"minutes": [
+								59
+							],
+							"hours": [
+								23
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/mict')]",
+				"[concat(variables('workspaceId'), '/pipelines/mnhpi_moves')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/tauranga_times')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "tauranga_ecevents",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/tauranga/blobs/bronze/ecevents/load/",
+					"blobPathEndsWith": ".csv",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('tauranga_times_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/tauranga_ecevents')]"
 			]
 		},
 		{
@@ -30883,6 +31238,218 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/delete_flow_sgtd')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "violation"
+						},
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "moves"
+						},
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "decking"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink1"
+						},
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink2"
+						},
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink3"
+						}
+					],
+					"transformations": [
+						{
+							"name": "filter1"
+						},
+						{
+							"name": "alterRow1"
+						},
+						{
+							"name": "filter2"
+						},
+						{
+							"name": "alterRow2"
+						},
+						{
+							"name": "filter3"
+						},
+						{
+							"name": "alterRow3"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          D_H_Decking_Type as string,",
+						"          MH_ToPosName_Short_5Char as string,",
+						"          DH_ToPosName_Short_5Char as string,",
+						"          MH_Unit_Nbr as string,",
+						"          MH_Move_Kind as string,",
+						"          Category_Id as string,",
+						"          MH_T_Put_DateTime as timestamp,",
+						"          MH_Put_CHE_Operator_Id as string,",
+						"          mve_gkey as integer,",
+						"          MH_Put_CHE_Id as short,",
+						"          Freight_Kind_Id as string,",
+						"          MaxDHTime as timestamp,",
+						"          Location_Match_or_Not as string,",
+						"          Shift_Id as string,",
+						"          Shift_Date as date,",
+						"          Week_of_Year as integer,",
+						"          {XPS_ECUser.name} as string,",
+						"          Block_To_Block_Violation as boolean,",
+						"          Same_Block_Violation as boolean,",
+						"          Stack_Violation as boolean",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: true,",
+						"     format: 'delta',",
+						"     fileSystem: 'sgtd',",
+						"     folderPath: 'gold/violation') ~> violation",
+						"source(output(",
+						"          mve_gkey as integer,",
+						"          Unit_Nbr as string,",
+						"          Event_Type_Id as string,",
+						"          Move_Kind as string,",
+						"          From_Location as string,",
+						"          To_Position_Name as string,",
+						"          Put_CHE_Operator_Id as string,",
+						"          Put_CHE_Id as short,",
+						"          MH_T_Put_DateTime as timestamp,",
+						"          Freight_Kind_Id as string,",
+						"          Category_Id as string,",
+						"          ufv_gkey as integer,",
+						"          Year_Month as integer,",
+						"          Year_Week as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: true,",
+						"     format: 'delta',",
+						"     fileSystem: 'sgtd',",
+						"     folderPath: 'gold/move') ~> moves",
+						"source(output(",
+						"          gkey as integer,",
+						"          unit_id as string,",
+						"          DH_TimeStamp as timestamp,",
+						"          Decking_Type as string,",
+						"          to_pos_name as string,",
+						"          Year_Month as integer,",
+						"          Year_Week as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: true,",
+						"     format: 'delta',",
+						"     fileSystem: 'sgtd',",
+						"     folderPath: 'gold/decking') ~> decking",
+						"violation filter(Shift_Date < toDate(\"24-03-2025\",\"dd-MM-yyyy\")) ~> filter1",
+						"filter1 alterRow(upsertIf(true())) ~> alterRow1",
+						"moves filter(toDate(MH_T_Put_DateTime) < toDate(\"24-03-2025\",\"dd-MM-yyyy\")) ~> filter2",
+						"filter2 alterRow(upsertIf(true())) ~> alterRow2",
+						"decking filter(toDate(DH_TimeStamp) < toDate(\"24-03-2025\",\"dd-MM-yyyy\")) ~> filter3",
+						"filter3 alterRow(upsertIf(true())) ~> alterRow3",
+						"alterRow1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'sgtd',",
+						"     folderPath: 'gold/violations',",
+						"     overwrite: true,",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: true,",
+						"     insertable: true,",
+						"     updateable: true,",
+						"     upsertable: true,",
+						"     keys:['mve_gkey','MH_T_Put_DateTime','Shift_Date','Week_of_Year'],",
+						"     umask: 0777,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink1",
+						"alterRow2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'sgtd',",
+						"     folderPath: 'gold/moves',",
+						"     overwrite: true,",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: true,",
+						"     insertable: true,",
+						"     updateable: true,",
+						"     upsertable: true,",
+						"     keys:['mve_gkey'],",
+						"     umask: 0777,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink2",
+						"alterRow3 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'sgtd',",
+						"     folderPath: 'gold/deckings',",
+						"     overwrite: true,",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: true,",
+						"     insertable: true,",
+						"     updateable: true,",
+						"     upsertable: true,",
+						"     keys:['gkey'],",
+						"     umask: 0777,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink3"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/dpw_peru_moves_time_delta')]",
 			"type": "Microsoft.Synapse/workspaces/dataflows",
 			"apiVersion": "2019-06-01-preview",
@@ -31615,6 +32182,15 @@
 						},
 						{
 							"name": "select1"
+						},
+						{
+							"name": "aggregate1"
+						},
+						{
+							"name": "derivedColumn2"
+						},
+						{
+							"name": "filter2"
 						}
 					],
 					"scriptLines": [
@@ -31667,7 +32243,7 @@
 						"          GKEY as string,",
 						"          USER_ID as string,",
 						"          NAME as string,",
-						"          YARD as integer",
+						"          YARD as string",
 						"     ),",
 						"     useSchema: false,",
 						"     allowSchemaDrift: true,",
@@ -31696,7 +32272,7 @@
 						"window1 derive(jobStep = iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TYCO' && eventTypeDescription_nxt=='AYCO', 1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TVDR' && eventTypeDescription_nxt=='AVDR',1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TYDR' && eventTypeDescription_nxt=='AYDR',1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TVCO' && eventTypeDescription_nxt=='AVCO',1,0))))) ~> derivedColumn1",
 						"select1 alterRow(upsertIf(true()),",
 						"     insertIf(true())) ~> AlterRow1",
-						"derivedColumn1, xpseceuser join(OPERATOR_ID == USER_ID,",
+						"derivedColumn1, filter2 join(OPERATOR_ID == USER_ID,",
 						"     joinType:'left',",
 						"     matchType:'exact',",
 						"     ignoreSpaces: false,",
@@ -31732,6 +32308,11 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select1",
+						"derivedColumn2 aggregate(groupBy(USER_ID),",
+						"     NAME = first(NAME)) ~> aggregate1",
+						"xpseceuser derive(USER_ID = regexReplace(USER_ID, `[^a-zA-Z0-9]`, ''),",
+						"          NAME = regexReplace(NAME, `[^a-zA-Z0-9]`, ' ')) ~> derivedColumn2",
+						"aggregate1 filter(not(isNull(USER_ID))) ~> filter2",
 						"AlterRow1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'delta',",
@@ -31741,9 +32322,9 @@
 						"     autoCompact: true,",
 						"     optimizedWrite: true,",
 						"     vacuum: 0,",
-						"     deletable: false,",
+						"     deletable: true,",
 						"     insertable: false,",
-						"     updateable: false,",
+						"     updateable: true,",
 						"     upsertable: true,",
 						"     keys:['ecEventGkey'],",
 						"     umask: 0777,",
@@ -34605,6 +35186,207 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/linkedService2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sgtd_moves_time_delta_new')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sgtd"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink1"
+						},
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink2"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "filter1"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "alterRow1"
+						},
+						{
+							"name": "filter2"
+						},
+						{
+							"name": "split1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          mve_gkey as integer,",
+						"          Unit_Nbr as string,",
+						"          Facility_Id as string,",
+						"          Complex_Id as string,",
+						"          Yard_Id as string,",
+						"          Carrier_Visit_Key as integer,",
+						"          Event_Type_Id as string,",
+						"          Move_Kind as string,",
+						"          From_Location as string,",
+						"          To_Location as string,",
+						"          From_Position_Name as string,",
+						"          To_Position_Name as string,",
+						"          Carry_CHE_Operator_Id as short,",
+						"          Fetch_CHE_Operator_Id as string,",
+						"          Put_CHE_Operator_Id as string,",
+						"          Fetch_CHE_Id as long,",
+						"          Fetch_CHE_Kind as string,",
+						"          Carry_CHE_Id as long,",
+						"          Carry_CHE_Kind as string,",
+						"          Put_CHE_Id as long,",
+						"          Put_CHE_Kind as string,",
+						"          QC_CHE_Id as long,",
+						"          QC_CHE_Kind as string,",
+						"          t_carry_complete as timestamp,",
+						"          t_put as timestamp,",
+						"          t_fetch as timestamp,",
+						"          t_dispatch as timestamp,",
+						"          t_discharge as timestamp,",
+						"          t_carry_dispatch as timestamp,",
+						"          t_carry_fetch_ready as timestamp,",
+						"          t_carry_put_ready as timestamp,",
+						"          dist_carry as integer,",
+						"          dist_start as short,",
+						"          Twin_Fetch as string,",
+						"          Twin_Carry as string,",
+						"          Twin_Put as string,",
+						"          Category_Id as string,",
+						"          Freight_Kind_Id as string,",
+						"          to_pos_gkey as integer,",
+						"          fm_pos_gkey as integer,",
+						"          Restow_Reason as string,",
+						"          Container_Line_Id as string,",
+						"          Container_Line_Role as string,",
+						"          pow as string,",
+						"          ufv_gkey as integer,",
+						"          Berth_Id as string,",
+						"          Goods_And_Ctr_Wt_Kg as double,",
+						"          active_ufv as integer,",
+						"          Requires_Power_Flag as string,",
+						"          OOG_Flag as string,",
+						"          Shipper_Id as string,",
+						"          Consignee_Id as string,",
+						"          Commodity_Id as string,",
+						"          ATA as timestamp,",
+						"          ATD as timestamp,",
+						"          Rehandles as string,",
+						"          Year as integer,",
+						"          Month as integer,",
+						"          Week as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: true,",
+						"     format: 'delta',",
+						"     fileSystem: 'sgtd',",
+						"     folderPath: 'silver/moves') ~> sgtd",
+						"filter1 derive(exec_delta_16 = iif(:exec_time > 16, true(), false()),",
+						"          t_execution_delta = :exec_time,",
+						"          exec_time := (t_carry_complete - t_fetch)/60000) ~> derivedColumn1",
+						"sgtd filter(Carry_CHE_Kind==\"ITV\") ~> filter1",
+						"derivedColumn1 select(mapColumn(",
+						"          mve_gkey,",
+						"          Unit_Nbr,",
+						"          Facility_Id,",
+						"          Yard_Id,",
+						"          Event_Type_Id,",
+						"          Move_Kind,",
+						"          From_Location,",
+						"          To_Location,",
+						"          From_Position_Name,",
+						"          To_Position_Name,",
+						"          Carry_CHE_Kind,",
+						"          t_carry_complete,",
+						"          t_put,",
+						"          t_fetch,",
+						"          Category_Id,",
+						"          Freight_Kind_Id,",
+						"          pow,",
+						"          Commodity_Id,",
+						"          Year,",
+						"          Month,",
+						"          Week,",
+						"          exec_delta_16,",
+						"          t_execution_delta",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"filter2 alterRow(upsertIf(true())) ~> alterRow1",
+						"select1 filter((t_execution_delta >= 0.0) || (t_execution_delta >= 0)) ~> filter2",
+						"alterRow1 split(Event_Type_Id == \"UNIT_LOAD\",",
+						"     Event_Type_Id == \"UNIT_DISCH\",",
+						"     disjoint: false) ~> split1@(load, discharge)",
+						"split1@load sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'sgtd',",
+						"     folderPath: 'gold/load_time_delta',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: false,",
+						"     updateable: false,",
+						"     upsertable: true,",
+						"     keys:['mve_gkey'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink1",
+						"split1@discharge sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'sgtd',",
+						"     folderPath: 'gold/dsch_time_delta',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: false,",
+						"     updateable: false,",
+						"     upsertable: true,",
+						"     keys:['mve_gkey'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink2"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]"
 			]
 		},
 		{
@@ -41540,563 +42322,6 @@
 			},
 			"dependsOn": [],
 			"location": "westus"
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Trigger 1')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "vizingham_stack_confirmity",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/vizingham/blobs/bronze/stackconformity/load/",
-					"blobPathEndsWith": ".txt",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('Trigger 1_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/vizingham_stack_confirmity')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/sc_trigger')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "TEAGTL_stack_confirmity",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/teagtl/blobs/bronze/stackconformity/load/",
-					"blobPathEndsWith": ".txt",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('sc_trigger_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/TEAGTL_stack_confirmity')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/sc_trigger_agct')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "AGCT_stack_confirmity",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/agct/blobs/bronze/stackconformity/load/",
-					"blobPathEndsWith": ".csv",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('sc_trigger_agct_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/AGCT_stack_confirmity')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/sc_trigger_cmsa')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "CMSA_stack_confirmity",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/cmsa/blobs/bronze/stackconformity/load/",
-					"blobPathEndsWith": ".txt",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('sc_trigger_cmsa_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/CMSA_stack_confirmity')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/sc_trigger_dpw_peru')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "DPW_peru_stack_confirmity",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/dpw-peru/blobs/bronze/stackconformity/load/",
-					"blobPathEndsWith": ".txt",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('sc_trigger_dpw_peru_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/DPW_peru_stack_confirmity')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/sc_trigger_mict')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "MICT_confirmities",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/mict/blobs/bronze/stackconformity/load/",
-					"blobPathEndsWith": ".txt",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('sc_trigger_mict_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/MICT_confirmities')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/sc_trigger_mnhpi')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "MNHPI_confirmities",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/mnhpi/blobs/bronze/stackconformity/load/",
-					"blobPathEndsWith": ".txt",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('sc_trigger_mnhpi_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/MNHPI_confirmities')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/sc_trigger_rio')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "RIO_confirmities",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/rio/blobs/bronze/stackconformity/load/",
-					"blobPathEndsWith": ".txt",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('sc_trigger_rio_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/RIO_confirmities')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/sc_trigger_sgtd')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "SGTD_stack_confirmity",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/sgtd/blobs/bronze/stackconformity/load/",
-					"blobPathEndsWith": ".txt",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('sc_trigger_sgtd_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/SGTD_stack_confirmity')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/schedule_trigger')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "mict",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					},
-					{
-						"pipelineReference": {
-							"referenceName": "mnhpi_moves",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2024-09-04T04:45:00",
-						"timeZone": "India Standard Time",
-						"schedule": {
-							"minutes": [
-								59
-							],
-							"hours": [
-								23
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/mict')]",
-				"[concat(variables('workspaceId'), '/pipelines/mnhpi_moves')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/tauranga_times')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "tauranga_ecevents",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/tauranga/blobs/bronze/ecevents/load/",
-					"blobPathEndsWith": ".csv",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('tauranga_times_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/tauranga_ecevents')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/sgtd_moves_time_delta_new')]",
-			"type": "Microsoft.Synapse/workspaces/dataflows",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"linkedService": {
-								"referenceName": "linkedService1",
-								"type": "LinkedServiceReference"
-							},
-							"name": "sgtd"
-						}
-					],
-					"sinks": [
-						{
-							"linkedService": {
-								"referenceName": "linkedService1",
-								"type": "LinkedServiceReference"
-							},
-							"name": "sink1"
-						},
-						{
-							"linkedService": {
-								"referenceName": "linkedService1",
-								"type": "LinkedServiceReference"
-							},
-							"name": "sink2"
-						}
-					],
-					"transformations": [
-						{
-							"name": "derivedColumn1"
-						},
-						{
-							"name": "filter1"
-						},
-						{
-							"name": "select1"
-						},
-						{
-							"name": "alterRow1"
-						},
-						{
-							"name": "filter2"
-						},
-						{
-							"name": "split1"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          mve_gkey as integer,",
-						"          Unit_Nbr as string,",
-						"          Facility_Id as string,",
-						"          Complex_Id as string,",
-						"          Yard_Id as string,",
-						"          Carrier_Visit_Key as integer,",
-						"          Event_Type_Id as string,",
-						"          Move_Kind as string,",
-						"          From_Location as string,",
-						"          To_Location as string,",
-						"          From_Position_Name as string,",
-						"          To_Position_Name as string,",
-						"          Carry_CHE_Operator_Id as short,",
-						"          Fetch_CHE_Operator_Id as string,",
-						"          Put_CHE_Operator_Id as string,",
-						"          Fetch_CHE_Id as long,",
-						"          Fetch_CHE_Kind as string,",
-						"          Carry_CHE_Id as long,",
-						"          Carry_CHE_Kind as string,",
-						"          Put_CHE_Id as long,",
-						"          Put_CHE_Kind as string,",
-						"          QC_CHE_Id as long,",
-						"          QC_CHE_Kind as string,",
-						"          t_carry_complete as timestamp,",
-						"          t_put as timestamp,",
-						"          t_fetch as timestamp,",
-						"          t_dispatch as timestamp,",
-						"          t_discharge as timestamp,",
-						"          t_carry_dispatch as timestamp,",
-						"          t_carry_fetch_ready as timestamp,",
-						"          t_carry_put_ready as timestamp,",
-						"          dist_carry as integer,",
-						"          dist_start as short,",
-						"          Twin_Fetch as string,",
-						"          Twin_Carry as string,",
-						"          Twin_Put as string,",
-						"          Category_Id as string,",
-						"          Freight_Kind_Id as string,",
-						"          to_pos_gkey as integer,",
-						"          fm_pos_gkey as integer,",
-						"          Restow_Reason as string,",
-						"          Container_Line_Id as string,",
-						"          Container_Line_Role as string,",
-						"          pow as string,",
-						"          ufv_gkey as integer,",
-						"          Berth_Id as string,",
-						"          Goods_And_Ctr_Wt_Kg as double,",
-						"          active_ufv as integer,",
-						"          Requires_Power_Flag as string,",
-						"          OOG_Flag as string,",
-						"          Shipper_Id as string,",
-						"          Consignee_Id as string,",
-						"          Commodity_Id as string,",
-						"          ATA as timestamp,",
-						"          ATD as timestamp,",
-						"          Rehandles as string,",
-						"          Year as integer,",
-						"          Month as integer,",
-						"          Week as integer",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: true,",
-						"     format: 'delta',",
-						"     fileSystem: 'sgtd',",
-						"     folderPath: 'silver/moves') ~> sgtd",
-						"filter1 derive(exec_delta_16 = iif(:exec_time > 16, true(), false()),",
-						"          t_execution_delta = :exec_time,",
-						"          exec_time := (t_carry_complete - t_fetch)/60000) ~> derivedColumn1",
-						"sgtd filter(Carry_CHE_Kind==\"ITV\") ~> filter1",
-						"derivedColumn1 select(mapColumn(",
-						"          mve_gkey,",
-						"          Unit_Nbr,",
-						"          Facility_Id,",
-						"          Yard_Id,",
-						"          Event_Type_Id,",
-						"          Move_Kind,",
-						"          From_Location,",
-						"          To_Location,",
-						"          From_Position_Name,",
-						"          To_Position_Name,",
-						"          Carry_CHE_Kind,",
-						"          t_carry_complete,",
-						"          t_put,",
-						"          t_fetch,",
-						"          Category_Id,",
-						"          Freight_Kind_Id,",
-						"          pow,",
-						"          Commodity_Id,",
-						"          Year,",
-						"          Month,",
-						"          Week,",
-						"          exec_delta_16,",
-						"          t_execution_delta",
-						"     ),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> select1",
-						"filter2 alterRow(upsertIf(true())) ~> alterRow1",
-						"select1 filter((t_execution_delta >= 0.0) || (t_execution_delta >= 0)) ~> filter2",
-						"alterRow1 split(Event_Type_Id == \"UNIT_LOAD\",",
-						"     Event_Type_Id == \"UNIT_DISCH\",",
-						"     disjoint: false) ~> split1@(load, discharge)",
-						"split1@load sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'delta',",
-						"     fileSystem: 'sgtd',",
-						"     folderPath: 'gold/load_time_delta',",
-						"     mergeSchema: false,",
-						"     autoCompact: false,",
-						"     optimizedWrite: false,",
-						"     vacuum: 0,",
-						"     deletable: false,",
-						"     insertable: false,",
-						"     updateable: false,",
-						"     upsertable: true,",
-						"     keys:['mve_gkey'],",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> sink1",
-						"split1@discharge sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'delta',",
-						"     fileSystem: 'sgtd',",
-						"     folderPath: 'gold/dsch_time_delta',",
-						"     mergeSchema: false,",
-						"     autoCompact: false,",
-						"     optimizedWrite: false,",
-						"     vacuum: 0,",
-						"     deletable: false,",
-						"     insertable: false,",
-						"     updateable: false,",
-						"     upsertable: true,",
-						"     keys:['mve_gkey'],",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> sink2"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]"
-			]
 		}
 	]
 }
