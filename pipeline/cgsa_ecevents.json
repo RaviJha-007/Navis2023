@@ -3,37 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "jobstepping_cgsa",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "EcEvents_CGSA",
-						"dependencyConditions": [
-							"Skipped"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "jobstepping_cgsa",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
 				"name": "EcEvents_CGSA",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
@@ -48,6 +17,37 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "EcEvents_CGSA",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "jobstepping_cgsa",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "EcEvents_CGSA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "jobstepping_cgsa",
 						"type": "DataFlowReference"
 					},
 					"compute": {
