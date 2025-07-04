@@ -15,13 +15,19 @@
 					"referenceName": "mnhpi_moves",
 					"type": "PipelineReference"
 				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "sgtd",
+					"type": "PipelineReference"
+				}
 			}
 		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
 				"frequency": "Day",
-				"interval": 1,
+				"interval": 2,
 				"startTime": "2024-09-04T04:45:00",
 				"timeZone": "India Standard Time",
 				"schedule": {
