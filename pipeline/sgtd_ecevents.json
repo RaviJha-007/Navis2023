@@ -1,9 +1,9 @@
 {
-	"name": "sgtd_rehandle",
+	"name": "sgtd_ecevents",
 	"properties": {
 		"activities": [
 			{
-				"name": "Rehandle_sgtd",
+				"name": "EcEvents_sgtd",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,38 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "Rehandle_sgtd",
+						"referenceName": "EcEvents_sgtd",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "jobstepping_sgtd",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "EcEvents_sgtd",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "jobstepping_sgtd",
 						"type": "DataFlowReference"
 					},
 					"compute": {
