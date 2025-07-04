@@ -1,0 +1,181 @@
+{
+	"name": "delete_flow_sgtd_ecevents",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "jobstepping"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "ecevents"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink2"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink3"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter2"
+				},
+				{
+					"name": "alterRow2"
+				},
+				{
+					"name": "filter3"
+				},
+				{
+					"name": "alterRow3"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ecEventGkey as long,",
+				"          yardGkey as integer,",
+				"          YardID as string,",
+				"          FcyID as string,",
+				"          cheKind as string,",
+				"          CHE_Name as string,",
+				"          eventType as short,",
+				"          eventSubType as short,",
+				"          eventTypeDescription as string,",
+				"          unit as string,",
+				"          pow as string,",
+				"          pool as string,",
+				"          workQueue as string,",
+				"          travelDistance as short,",
+				"          moveKind as string,",
+				"          isTwin as boolean,",
+				"          startDistance as short,",
+				"          EcEventTime as timestamp,",
+				"          cheID as long,",
+				"          Year as integer,",
+				"          Month as integer,",
+				"          Week as integer,",
+				"          eventTypeDescription_nxt as string,",
+				"          unit_nxt as string,",
+				"          cheID_nxt as long,",
+				"          EcEventTime_nxt as timestamp,",
+				"          jobStep as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'gold/jobstep') ~> jobstepping",
+				"source(output(",
+				"          ecEventGkey as long,",
+				"          yardGkey as integer,",
+				"          YardID as string,",
+				"          FcyID as string,",
+				"          cheKind as string,",
+				"          CHE_Name as string,",
+				"          eventType as short,",
+				"          eventSubType as short,",
+				"          eventTypeDescription as string,",
+				"          fromCheIdName as boolean,",
+				"          ToCheIdName as boolean,",
+				"          unit as string,",
+				"          pow as string,",
+				"          pool as string,",
+				"          workQueue as string,",
+				"          travelDistance as short,",
+				"          moveKind as string,",
+				"          isTwin as boolean,",
+				"          startDistance as short,",
+				"          workAssignment as long,",
+				"          unitRef as string,",
+				"          tran_ID as string,",
+				"          locType as string,",
+				"          locID as string,",
+				"          locSlot as string,",
+				"          opsPosID as string,",
+				"          unladenLoctype as string,",
+				"          unladenLocID as string,",
+				"          unladenLocSlot as string,",
+				"          ladenLoctype as string,",
+				"          ladenLocID as string,",
+				"          laden_LocSlot as string,",
+				"          lastEstMoveTime as string,",
+				"          EcEventTime as timestamp,",
+				"          cheID as long,",
+				"          Year as integer,",
+				"          Month as integer,",
+				"          Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'silver/ecevents') ~> ecevents",
+				"jobstepping filter(not(isNull(EcEventTime)) && toDate(EcEventTime) < toDate(\"11-06-2025\", \"dd-MM-yyyy\")) ~> filter2",
+				"filter2 alterRow(upsertIf(true())) ~> alterRow2",
+				"ecevents filter(not(isNull(EcEventTime)) && toDate(EcEventTime) < toDate(\"11-06-2025\", \"dd-MM-yyyy\")) ~> filter3",
+				"filter3 alterRow(upsertIf(true())) ~> alterRow3",
+				"alterRow2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'gold/jobstep',",
+				"     deltaTruncate: true,",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: true,",
+				"     updateable: true,",
+				"     upsertable: true,",
+				"     keys:['ecEventGkey'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink2",
+				"alterRow3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'silver/ecevents',",
+				"     deltaTruncate: true,",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: true,",
+				"     updateable: true,",
+				"     upsertable: true,",
+				"     keys:['ecEventGkey'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink3"
+			]
+		}
+	}
+}
