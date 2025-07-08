@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "8",
-				"spark.autotune.trackingId": "05c62b42-c41a-46e2-a6be-781252c5ab71"
+				"spark.autotune.trackingId": "4433cfd2-699b-4b7e-9f25-a5c16d6a0e00"
 			}
 		},
 		"metadata": {
@@ -60,17 +60,17 @@
 				"source": [
 					"# Read Delta-tracked data (from current _delta_log)\n",
 					"# delta_df = spark.read.format(\"delta\").load(\"abfss://sgtd@navispowerbidata2.dfs.core.windows.net/sgtd/silver/ecevents\")\n",
-					"delta_df = spark.read.format(\"delta\").load(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/silver/ecevents_new\")"
+					"delta_df = spark.read.format(\"delta\").load(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/silver/moves\")"
 				],
-				"execution_count": 24
+				"execution_count": 38
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"# Read all Parquet files manually (includes everything even if not in _delta_log)\n",
-					"raw_df = spark.read.parquet(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/silver/ecevents_new\")"
+					"raw_df = spark.read.parquet(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/silver/moves\")"
 				],
-				"execution_count": 25
+				"execution_count": 39
 			},
 			{
 				"cell_type": "code",
@@ -78,21 +78,83 @@
 					"# Compare row counts\n",
 					"print(\"Delta:\", delta_df.count(), \"Raw:\", raw_df.count())"
 				],
-				"execution_count": 26
+				"execution_count": 40
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					"raw_df = raw_df.na.drop(subset=[\"Year\", \"Month\", \"Week\"])"
+					"merged_df = raw_df.unionByName(delta_df).dropDuplicates([\"mve_gkey\"])\n",
+					"print(merged_df.count())"
 				],
-				"execution_count": 17
+				"execution_count": 44
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					"delta_df.write.format(\"delta\").mode(\"overwrite\").save(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/silver/ecevents_new\")"
+					"raw_df = raw_df.na.drop(subset=[\"Year\", \"Month\", \"Week\"])\n",
+					"print(raw_df.count())"
 				],
-				"execution_count": 23
+				"execution_count": 41
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"merged_df = merged_df.na.drop(subset=[\"Year\", \"Month\", \"Week\"])\n",
+					"print(merged_df.count())"
+				],
+				"execution_count": 48
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"merged_df = merged_df.dropDuplicates()\n",
+					"print(merged_df.count())"
+				],
+				"execution_count": 46
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"raw_df = raw_df.dropDuplicates(subset=[\"mve_gkey\"])\n",
+					"print(raw_df.count())"
+				],
+				"execution_count": 42
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"merged_df.columns"
+				],
+				"execution_count": 50
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"merged_df = merged_df.filter(\"t_put >= '2024-01-01 00:00:00'\")"
+				],
+				"execution_count": 51
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"print(merged_df.count())"
+				],
+				"execution_count": 52
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"spark.conf.set(\"spark.sql.parquet.int96RebaseModeInWrite\", \"CORRECTED\")\n",
+					"spark.conf.set(\"spark.sql.datetimeRebaseModeInWrite\", \"CORRECTED\")"
+				],
+				"execution_count": 54
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"merged_df.write.format(\"delta\").mode(\"overwrite\").save(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/silver/moves_new\")"
+				],
+				"execution_count": 55
 			},
 			{
 				"cell_type": "code",
@@ -100,6 +162,13 @@
 					"print(raw_df.count())"
 				],
 				"execution_count": 18
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"raw_df.write.format(\"delta\").mode(\"overwrite\").save(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/gold/jobstep_new\")"
+				],
+				"execution_count": 37
 			},
 			{
 				"cell_type": "code",
