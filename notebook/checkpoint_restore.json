@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "8",
-				"spark.autotune.trackingId": "4da1ca3a-a891-4fdd-9da2-5dfe1e9538f0"
+				"spark.autotune.trackingId": "05c62b42-c41a-46e2-a6be-781252c5ab71"
 			}
 		},
 		"metadata": {
@@ -60,17 +60,17 @@
 				"source": [
 					"# Read Delta-tracked data (from current _delta_log)\n",
 					"# delta_df = spark.read.format(\"delta\").load(\"abfss://sgtd@navispowerbidata2.dfs.core.windows.net/sgtd/silver/ecevents\")\n",
-					"delta_df = spark.read.format(\"delta\").load(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/silver/ecevents\")"
+					"delta_df = spark.read.format(\"delta\").load(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/silver/ecevents_new\")"
 				],
-				"execution_count": 6
+				"execution_count": 24
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"# Read all Parquet files manually (includes everything even if not in _delta_log)\n",
-					"raw_df = spark.read.parquet(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/silver/ecevents\")"
+					"raw_df = spark.read.parquet(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/silver/ecevents_new\")"
 				],
-				"execution_count": 7
+				"execution_count": 25
 			},
 			{
 				"cell_type": "code",
@@ -78,21 +78,28 @@
 					"# Compare row counts\n",
 					"print(\"Delta:\", delta_df.count(), \"Raw:\", raw_df.count())"
 				],
-				"execution_count": 8
+				"execution_count": 26
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					"raw_df = raw_df.dropDuplicates()"
+					"raw_df = raw_df.na.drop(subset=[\"Year\", \"Month\", \"Week\"])"
 				],
-				"execution_count": 9
+				"execution_count": 17
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					"raw_df.write.format(\"delta\").mode(\"overwrite\").save(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/silver/ecevents_restored\")"
+					"delta_df.write.format(\"delta\").mode(\"overwrite\").save(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/silver/ecevents_new\")"
 				],
-				"execution_count": 10
+				"execution_count": 23
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"print(raw_df.count())"
+				],
+				"execution_count": 18
 			},
 			{
 				"cell_type": "code",
