@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "10",
-				"spark.autotune.trackingId": "9fc526f8-8785-46d3-a2ab-df29f539bf1e"
+				"spark.autotune.trackingId": "762ed292-1e00-4aac-a231-06ecf5195649"
 			}
 		},
 		"metadata": {
@@ -52,17 +52,95 @@
 				"cell_type": "code",
 				"source": [
 					"from delta.tables import DeltaTable\n",
-					"from pyspark.sql.functions import *"
+					"from pyspark.sql.functions import *\n",
+					"from pyspark.sql.types import *\n",
+					"from pyspark.sql.window import Window"
 				],
-				"execution_count": 1
+				"execution_count": 69
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					"# Load CSV as a single string column to avoid schema shifting\n",
-					"raw_df = spark.read.text(\"abfss://sgtd@navispowerbidatastorage2.dfs.core.windows.net/bronze/deckinghistory/load\")"
+					"# === CONFIG ===\n",
+					"input_path = \"abfss://dpw-peru@navispowerbidatastorage2.dfs.core.windows.net/bronze/deckinghistory/raw\"\n",
+					"output_path = \"abfss://dpw-peru@navispowerbidatastorage2.dfs.core.windows.net/bronze/deckinghistory/load\"\n",
+					""
 				],
-				"execution_count": 2
+				"execution_count": 70
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#=== STEP 1: Read CSVs without header ===\n",
+					"raw_df = spark.read \\\n",
+					"    .option(\"header\", \"false\") \\\n",
+					"    .option(\"inferSchema\", \"false\") \\\n",
+					"    .option(\"quote\", '\"') \\\n",
+					"    .option(\"escape\", '\"') \\\n",
+					"    .csv(input_path) \\\n",
+					"    .withColumn(\"row_num\", row_number().over(Window.partitionBy(input_file_name()).orderBy(monotonically_increasing_id())))\n",
+					"\n",
+					"# === STEP 2: Remove first line from each file ===\n",
+					"raw_df = raw_df.filter(col(\"row_num\") > 1).drop(\"row_num\")\n",
+					"\n",
+					"# List of base columns\n",
+					"columns = [col(f\"_c{i}\") for i in range(24)]\n",
+					"\n",
+					"# === Rename columns directly without any concat ===\n",
+					"df = df_temp.select(\n",
+					"    col(\"_c0\").alias(\"GKEY\"),\n",
+					"    col(\"_c1\").alias(\"UYV_GKEY\"),\n",
+					"    col(\"_c2\").alias(\"UNIT_ID\"),\n",
+					"    col(\"_c3\").alias(\"TIMESTAMP\"),       # timestamp is whole now\n",
+					"    col(\"_c4\").alias(\"NODE_ID\"),\n",
+					"    col(\"_c5\").alias(\"DECKING_TYPE\"),\n",
+					"    col(\"_c6\").alias(\"YARD\"),\n",
+					"    col(\"_c7\").alias(\"FROM_POS_LOCTYPE\"),\n",
+					"    col(\"_c8\").alias(\"FROM_POS_LOCID\"),\n",
+					"    col(\"_c9\").alias(\"FROM_POS_LOC_GKEY\"),\n",
+					"    col(\"_c10\").alias(\"FROM_POS_SLOT\"),\n",
+					"    col(\"_c11\").alias(\"FROM_POS_NAME\"),\n",
+					"    col(\"_c12\").alias(\"FROM_POS_BIN\"),\n",
+					"    col(\"_c13\").alias(\"FROM_POS_TIER\"),\n",
+					"    col(\"_c14\").alias(\"TO_POS_LOCTYPE\"),\n",
+					"    col(\"_c15\").alias(\"TO_POS_LOCID\"),\n",
+					"    col(\"_c16\").alias(\"TO_POS_LOC_GKEY\"),\n",
+					"    col(\"_c17\").alias(\"TO_POS_SLOT\"),\n",
+					"    col(\"_c18\").alias(\"TO_POS_NAME\"),\n",
+					"    col(\"_c19\").alias(\"TO_POS_BIN\"),\n",
+					"    col(\"_c20\").alias(\"TO_POS_TIER\"),\n",
+					"    col(\"_c21\").alias(\"TOTAL_SCORE\"),\n",
+					"    col(\"_c22\").alias(\"EXECUTION_TIME\"),\n",
+					"    col(\"_c23\").alias(\"DETAILS\"),\n",
+					"    col(\"_c24\").alias(\"PHASE\")\n",
+					")\n",
+					"final_df = df.withColumn(\n",
+					"    \"TIMESTAMP\",\n",
+					"    regexp_replace(col(\"TIMESTAMP\"), \",\", \".\")\n",
+					")\n",
+					""
+				],
+				"execution_count": 71
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
+				"source": [
+					"display(final_df)"
+				],
+				"execution_count": 68
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"final_df.write \\\n",
+					"    .mode(\"overwrite\") \\\n",
+					"    .option(\"header\", True) \\\n",
+					"    .csv(output_path)"
+				],
+				"execution_count": 72
 			},
 			{
 				"cell_type": "code",
