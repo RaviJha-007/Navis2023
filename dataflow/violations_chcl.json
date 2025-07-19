@@ -90,9 +90,6 @@
 					"name": "derivedColumn4"
 				},
 				{
-					"name": "derivedColumn5"
-				},
-				{
 					"name": "select4"
 				},
 				{
@@ -366,8 +363,6 @@
 				"          {T Put Hour} = hour(MaxDHTime),",
 				"          {T Put Minute} = minute(MaxDHTime),",
 				"          {T Put Second} = second(MaxDHTime)) ~> derivedColumn4",
-				"derivedColumn4 derive({Shift Date} = iif({MH T_Put DateTime} - toTimestamp(toString(Shift_Date) + {Shift End}) > 0, addDays(Shift_Date, -1), Shift_Date),",
-				"          Week_of_Year = year(iif({MH T_Put DateTime} - toTimestamp(toString(Shift_Date) + {Shift End}) > 0, addDays(Shift_Date, -1), Shift_Date))*100 + weekOfYear(iif({MH T_Put DateTime} - toTimestamp(toString(Shift_Date) + {Shift End}) > 0, addDays(Shift_Date, -1), Shift_Date))) ~> derivedColumn5",
 				"derivedColumn6 select(mapColumn(",
 				"          {D H Decking Type},",
 				"          {MH ToPosName Short 5Char},",
@@ -382,17 +377,17 @@
 				"          {Freight Kind Id},",
 				"          MaxDHTime,",
 				"          {Location Match or Not},",
-				"          {Shift Id},",
-				"          {Shift Date},",
-				"          Week_of_Year,",
-				"          {XPS_ECUser.name} = NAME,",
+				"          operator_name = NAME,",
 				"          Block_To_Block_Violation,",
 				"          Same_Block_Violation,",
-				"          Stack_Violation",
+				"          Stack_Violation,",
+				"          Date = Shift_Date,",
+				"          Year_Month,",
+				"          Year_Week",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select4",
-				"derivedColumn5, XpsEcUser join({MH Put CHE Operator Id} == USER_ID,",
+				"derivedColumn4, XpsEcUser join(lower({MH Put CHE Operator Id}) == lower(USER_ID),",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
