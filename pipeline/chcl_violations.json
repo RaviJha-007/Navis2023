@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "violations_mict",
+				"name": "violations_chcl",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "violations_mict",
+						"referenceName": "violations_chcl",
 						"type": "DataFlowReference"
 					},
 					"compute": {
