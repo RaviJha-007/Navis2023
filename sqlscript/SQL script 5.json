@@ -7,7 +7,7 @@
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "sgtd",
+				"databaseName": "chcl",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000
