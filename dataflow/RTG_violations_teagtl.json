@@ -130,6 +130,9 @@
 				},
 				{
 					"name": "select8"
+				},
+				{
+					"name": "filter6"
 				}
 			],
 			"scriptLines": [
@@ -279,7 +282,7 @@
 				"     escapeChar: '\\\\',",
 				"     quoteChar: '\\\"',",
 				"     columnNamesAsHeader: true) ~> XpsEcUser",
-				"MoveHistory select(mapColumn(",
+				"filter6 select(mapColumn(",
 				"          mve_gkey,",
 				"          {Unit Nbr},",
 				"          {Event Type Id},",
@@ -452,11 +455,12 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select8",
+				"MoveHistory filter({Put CHE Kind} == \"RTG\") ~> filter6",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'teagtl',",
-				"     folderPath: 'gold/violation',",
+				"     folderPath: 'gold/rtg_violation',",
 				"     mergeSchema: false,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
