@@ -48,6 +48,9 @@
 				},
 				{
 					"name": "select2"
+				},
+				{
+					"name": "select3"
 				}
 			],
 			"scriptLines": [
@@ -79,7 +82,7 @@
 				"     quoteChar: '',",
 				"     columnNamesAsHeader: true,",
 				"     skipLines: -2) ~> StackConfirmity",
-				"StackConfirmity derive(Pos_WO_Tier = (iif(isInteger(right({Current Position}, 1)), left({Current Position}, length({Current Position}) - 2), {Current Position})),",
+				"select3 derive(Pos_WO_Tier = (iif(isInteger(right({Current Position}, 1)), left({Current Position}, length({Current Position}) - 2), {Current Position})),",
 				"          Date = toDate(substring(FileDate, -12, 8), 'yyyyMMdd'),",
 				"          Week = iif(dayOfWeek(toDate(substring(FileDate, -12, 8), 'yyyyMMdd')) == 1,  weekOfYear(toDate(substring(FileDate, -12, 8), 'yyyyMMdd')) + 1, weekOfYear(toDate(substring(FileDate, -12, 8), 'yyyyMMdd'))),",
 				"          stacking_array := split({Stacking Factor}, '/')) ~> derivedColumn1",
@@ -124,6 +127,21 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
+				"StackConfirmity select(mapColumn(",
+				"          {Container No.},",
+				"          {Stacking Factor},",
+				"          {Assigned CHE},",
+				"          {Blk Typ},",
+				"          Type,",
+				"          {Current Position},",
+				"          {Yard Row},",
+				"          Cat,",
+				"          Sts,",
+				"          {Section Factor},",
+				"          FileDate",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
