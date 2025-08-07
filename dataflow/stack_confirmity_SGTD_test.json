@@ -108,7 +108,7 @@
 				"     broadcast: 'auto')~> join1",
 				"filter1 select(mapColumn(",
 				"          {Container No.} = {Equipment ID},",
-				"          {Stacking Factor},",
+				"          {Stacking Factor} = stacking_factor_new,",
 				"          CHE = {Assigned CHE},",
 				"          {Blk Typ},",
 				"          Type = Class,",
