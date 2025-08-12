@@ -1,0 +1,205 @@
+{
+	"name": "jobstepping_cmsa_v2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source1"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "xpseceuser"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "AlterRow1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "filter2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ecEventGkey as long,",
+				"          yardGkey as boolean,",
+				"          YardID as string,",
+				"          FcyID as string,",
+				"          cheKind as string,",
+				"          CHE_Name as string,",
+				"          eventType as short,",
+				"          eventSubType as short,",
+				"          eventTypeDescription as string,",
+				"          fromCheIdName as boolean,",
+				"          ToCheIdName as boolean,",
+				"          unit as string,",
+				"          pow as string,",
+				"          pool as string,",
+				"          workQueue as string,",
+				"          travelDistance as short,",
+				"          moveKind as string,",
+				"          isTwin as boolean,",
+				"          startDistance as short,",
+				"          unitRef as string,",
+				"          tran_ID as string,",
+				"          locType as string,",
+				"          locID as string,",
+				"          locSlot as string,",
+				"          opsPosID as string,",
+				"          unladenLoctype as string,",
+				"          unladenLocID as string,",
+				"          unladenLocSlot as string,",
+				"          ladenLoctype as string,",
+				"          ladenLocID as string,",
+				"          laden_LocSlot as string,",
+				"          EcEventTime as timestamp,",
+				"          cheID as long,",
+				"          Year as integer,",
+				"          Month as integer,",
+				"          Week as integer,",
+				"          OPERATOR_ID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'cmsa',",
+				"     folderPath: 'silver/ecevents') ~> source1",
+				"source(output(",
+				"          gkey as short,",
+				"          user_id as string,",
+				"          name as string,",
+				"          yard as boolean",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'cmsa',",
+				"     folderPath: 'bronze/xpseceuser',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> xpseceuser",
+				"source1 filter(cheKind==\"ITV\" && (eventTypeDescription==\"AYDR\" || eventTypeDescription==\"TYDR\" || eventTypeDescription==\"AYCO\" || eventTypeDescription==\"TYCO\" || eventTypeDescription==\"AVDR\" || eventTypeDescription==\"TVDR\" || eventTypeDescription==\"AVCO\" || eventTypeDescription==\"TVCO\") && (moveKind==\"DSCH\"||moveKind==\"LOAD\")) ~> filter1",
+				"sort1 window(asc(cheID, true),",
+				"     asc(EcEventTime, true),",
+				"     asc(ecEventGkey, true),",
+				"     startRowOffset: 1L,",
+				"     endRowOffset: 1L,",
+				"     eventTypeDescription_nxt = lead(eventTypeDescription),",
+				"          unit_nxt = lead(unit),",
+				"          cheID_nxt = lead(cheID),",
+				"          EcEventTime_nxt = lead(EcEventTime)) ~> window1",
+				"filter1 sort(asc(cheID, true),",
+				"     asc(EcEventTime, true),",
+				"     asc(ecEventGkey, true)) ~> sort1",
+				"window1 derive(jobStep = iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TYCO' && eventTypeDescription_nxt=='AYCO', 1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TVDR' && eventTypeDescription_nxt=='AVDR',1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TYDR' && eventTypeDescription_nxt=='AYDR',1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TVCO' && eventTypeDescription_nxt=='AVCO',1,0))))) ~> derivedColumn1",
+				"select1 alterRow(upsertIf(true()),",
+				"     insertIf(true())) ~> AlterRow1",
+				"derivedColumn1, filter2 join(lower(OPERATOR_ID) == lower(USER_ID),",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 select(mapColumn(",
+				"          ecEventGkey,",
+				"          yardGkey,",
+				"          YardID,",
+				"          FcyID,",
+				"          cheKind,",
+				"          CHE_Name,",
+				"          eventType,",
+				"          eventSubType,",
+				"          eventTypeDescription,",
+				"          unit,",
+				"          pow,",
+				"          pool,",
+				"          travelDistance,",
+				"          moveKind,",
+				"          startDistance,",
+				"          EcEventTime,",
+				"          cheID,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          OperatorID = OPERATOR_ID,",
+				"          eventTypeDescription_nxt,",
+				"          unit_nxt,",
+				"          cheID_nxt,",
+				"          EcEventTime_nxt,",
+				"          OperatorName = NAME,",
+				"          jobStep",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"derivedColumn2 aggregate(groupBy(derivedColumn2@USER_ID),",
+				"     NAME = first(derivedColumn2@NAME)) ~> aggregate1",
+				"xpseceuser derive(USER_ID = regexReplace(user_id, `[^a-zA-Z0-9]`, ''),",
+				"          NAME = regexReplace(name, `[^a-zA-Z0-9]`, ' ')) ~> derivedColumn2",
+				"aggregate1 filter(not(isNull(USER_ID))) ~> filter2",
+				"AlterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'cmsa',",
+				"     folderPath: 'gold/jobstep',",
+				"     mergeSchema: true,",
+				"     autoCompact: true,",
+				"     optimizedWrite: true,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: false,",
+				"     updateable: true,",
+				"     upsertable: true,",
+				"     keys:['ecEventGkey'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
