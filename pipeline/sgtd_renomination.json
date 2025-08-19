@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "renomination",
+				"name": "renomination_sgtd",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
