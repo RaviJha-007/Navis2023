@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "d81ae173-a68d-42c0-96c4-d76679fef6e9"
+				"spark.autotune.trackingId": "4a81a548-9c44-4cf2-a677-65474cd612e2"
 			}
 		},
 		"metadata": {
@@ -53,9 +53,11 @@
 				"source": [
 					"from pyspark.sql import SparkSession\n",
 					"from pyspark.sql.functions import col, year, month, weekofyear, to_timestamp, row_number\n",
-					"from pyspark.sql.window import Window"
+					"from pyspark.sql.window import Window\n",
+					"\n",
+					"spark.conf.set(\"spark.sql.legacy.timeParserPolicy\", \"LEGACY\")"
 				],
-				"execution_count": 2
+				"execution_count": 44
 			},
 			{
 				"cell_type": "code",
@@ -72,7 +74,7 @@
 					"\n",
 					"\n",
 					"# Load CSVs (header = True/False depending on files)\n",
-					"df = (\n",
+					"df_all = (\n",
 					"    spark.read\n",
 					"    .option(\"header\", True)  # Will be False if no header in CSV\n",
 					"    .option(\"inferSchema\", True)\n",
@@ -92,9 +94,109 @@
 					"    \"Shipper Id\",\"Consignee Id\",\"Commodity Id\",\"ATA\",\"ATD\",\"Rehandles\"\n",
 					"]\n",
 					"\n",
-					"df = df.toDF(*new_headers)"
+					"df_all = df_all.toDF(*new_headers)"
 				],
-				"execution_count": 3
+				"execution_count": 45
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# Convert timestamp columns\n",
+					"timestamp_cols = [\n",
+					"    \"t_carry_complete\",\"t_put\",\"t_fetch\",\"t_dispatch\",\"t_discharge\",\n",
+					"    \"t_carry_dispatch\",\"t_carry_fetch_ready\",\"t_carry_put_ready\",\"ATA\",\"ATD\"\n",
+					"]\n",
+					"for col_name in timestamp_cols:\n",
+					"    df_all = df_all.withColumn(col_name, F.to_timestamp(col_name, \"yyyy-MM-dd HH:mm:ss\"))\n",
+					"\n",
+					"# Derive Year, Month, Week from t_put\n",
+					"df_all = (\n",
+					"    df_all.withColumn(\"Year\", F.year(\"t_put\"))\n",
+					"          .withColumn(\"Month\", F.month(\"t_put\"))\n",
+					"          .withColumn(\"Week\", F.weekofyear(\"t_put\"))\n",
+					")\n",
+					"\n",
+					"# Latest record per mve_gkey\n",
+					"window_spec = Window.partitionBy(\"mve_gkey\").orderBy(F.col(\"t_put\").desc())\n",
+					"df_latest = df_all.withColumn(\"rn\", F.row_number().over(window_spec)).filter(F.col(\"rn\") == 1).drop(\"rn\")\n",
+					"\n",
+					"# Replace spaces with underscores for Delta\n",
+					"for col_name in df_latest.columns:\n",
+					"    df_latest = df_latest.withColumnRenamed(col_name, col_name.replace(\" \", \"_\"))"
+				],
+				"execution_count": 46
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# from delta.tables import DeltaTable\n",
+					"\n",
+					"# # Path to your delta table\n",
+					"# output_path = \"abfss://cmsa@navispowerbidatastorage2.dfs.core.windows.net/silver/moves\"\n",
+					"\n",
+					"# # Load table\n",
+					"# delta_tbl = DeltaTable.forPath(spark, output_path)\n",
+					"\n",
+					"# # Current dataframe\n",
+					"# df = delta_tbl.toDF()\n",
+					"\n",
+					"# # Drop the unwanted columns if they exist\n",
+					"# cols_to_drop = {\"Hazardous_Flag\", \"Service_Id\"}\n",
+					"# df_clean = df.drop(*[c for c in cols_to_drop if c in df.columns])\n",
+					"\n",
+					"# # Overwrite table with cleaned schema\n",
+					"# df_clean.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(output_path)\n",
+					"\n",
+					"# print(\"✅ Dropped missing cols and rewrote Delta table with clean schema.\")\n",
+					"\n",
+					"# # Get target schema\n",
+					"# silver_delta = DeltaTable.forPath(spark, output_path)\n",
+					"# target_cols = [f.name for f in silver_delta.toDF().schema.fields]\n",
+					"# source_cols = df_latest.columns\n",
+					"# miss_col = []\n",
+					"# # Add missing cols with null\n",
+					"# for col in target_cols:\n",
+					"#     if col not in source_cols:\n",
+					"#         miss_col.append(col)\n",
+					"# print(miss_col)"
+				],
+				"execution_count": 52
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
+				"source": [
+					"display(df_latest)"
+				],
+				"execution_count": 22
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from delta.tables import DeltaTable\n",
+					"\n",
+					"if DeltaTable.isDeltaTable(spark, output_path):\n",
+					"    silver_delta = DeltaTable.forPath(spark, output_path)\n",
+					"    \n",
+					"    (\n",
+					"        silver_delta.alias(\"t\")\n",
+					"        .merge(\n",
+					"            df_latest.alias(\"s\"),\n",
+					"            \"t.mve_gkey = s.mve_gkey\"\n",
+					"        )\n",
+					"        .whenMatchedUpdateAll()\n",
+					"        .whenNotMatchedInsertAll()\n",
+					"        .execute()\n",
+					"    )\n",
+					"    print(\"Merged\")\n",
+					"else:\n",
+					"    print(\"Overwriting...\")\n",
+					"    # df_latest.write.format(\"delta\").mode(\"overwrite\").save(output_path)\n",
+					""
+				],
+				"execution_count": 55
 			},
 			{
 				"cell_type": "code",
