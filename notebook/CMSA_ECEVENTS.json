@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "c7d66596-9d1a-4b1c-a825-7fc6443f24b1"
+				"spark.autotune.trackingId": "fdced68f-0c16-41c0-a65d-dd94c4a54c1c"
 			}
 		},
 		"metadata": {
@@ -52,10 +52,11 @@
 				"cell_type": "code",
 				"source": [
 					"from pyspark.sql import SparkSession\n",
-					"from pyspark.sql.functions import col, year, month, weekofyear, to_timestamp, row_number\n",
-					"from pyspark.sql.window import Window"
+					"from pyspark.sql.functions import col, year, month, weekofyear, to_timestamp, row_number, lit\n",
+					"from pyspark.sql.window import Window\n",
+					"from delta.tables import DeltaTable"
 				],
-				"execution_count": null
+				"execution_count": 24
 			},
 			{
 				"cell_type": "code",
@@ -79,18 +80,43 @@
 					"archive_path = \"abfss://cmsa@navispowerbidatastorage2.dfs.core.windows.net/bronze/ecevents/archive/\"\n",
 					"\n",
 					"# Updated headers\n",
-					"headers = [\n",
-					"    \"ecEventGkey\",\"yardGkey\",\"YardID\",\"FcyID\",\"cheKind\",\"CHE_Name\",\"CHE_ID\",\"TimeStamp\",\n",
-					"    \"eventType\",\"eventSubType\",\"eventTypeDescription\",\"fromCheIdName\",\"ToCheIdName\",\"unit\",\n",
-					"    \"pow\",\"pool\",\"workQueue\",\"travelDistance\",\"moveKind\",\"isTwin\",\"startDistance\",\n",
-					"    \"workAssignment\",\"unitRef\",\"tran_ID\",\"locType\",\"locID\",\"locSlot\",\"opsPosID\",\n",
-					"    \"unladenLoctype\",\"unladenLocID\",\"unladenLocSlot\",\"ladenLoctype\",\"ladenLocID\",\n",
-					"    \"laden_LocSlot\",\"lastEstMoveTime\",\"operator_name\"\n",
-					"]\n",
+					"headers = [\"ecEventGkey\",\"yardGkey\",\"YardID\",\"FcyID\",\"cheKind\",\"CHE_Name\",\"CHE_ID\",\"TimeStamp\",\"eventType\",\"eventSubType\",\"eventTypeDescription\",\"fromCheIdName\",\"ToCheIdName\",\"unit\",\"pow\",\"pool\",\"workQueue\",\"travelDistance\",\"moveKind\",\"isTwin\",\"startDistance\",\"unitRef\",\"tran_ID\",\"locType\",\"locID\",\"locSlot\",\"opsPosID\",\"unladenLoctype\",\"unladenLocID\",\"unladenLocSlot\",\"ladenLoctype\",\"ladenLocID\",\"laden_LocSlot\",\"operator_name\"]\n",
 					"\n",
 					"# Read CSV without header\n",
-					"df = spark.read.option(\"header\", \"false\").option(\"delimiter\", \",\").csv(input_path)\n",
-					"\n",
+					"df = spark.read.option(\"header\", \"false\").option(\"delimiter\", \",\").csv(input_path)"
+				],
+				"execution_count": 25
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"len(headers)"
+				],
+				"execution_count": 26
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
+				"source": [
+					"len(df.columns)"
+				],
+				"execution_count": 27
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
+				"source": [
+					"display(df)"
+				],
+				"execution_count": 28
+			},
+			{
+				"cell_type": "code",
+				"source": [
 					"# Apply updated headers\n",
 					"df = df.toDF(*headers)\n",
 					"\n",
@@ -108,13 +134,20 @@
 					"# Window to get LAST row by EcEventTime\n",
 					"windowSpec = Window.partitionBy(\"ecEventGkey\").orderBy(col(\"EcEventTime\").desc())\n",
 					"\n",
-					"df_last = df.withColumn(\"rn\", row_number().over(windowSpec)) \\\n",
+					"df = df.withColumn(\"rn\", row_number().over(windowSpec)) \\\n",
 					"            .filter(col(\"rn\") == 1) \\\n",
 					"            .drop(\"rn\")\n",
 					"\n",
 					"# Write to Delta\n",
 					"# df_last.write.format(\"delta\").mode(\"overwrite\").save(output_path)\n",
 					"\n",
+					""
+				],
+				"execution_count": 29
+			},
+			{
+				"cell_type": "code",
+				"source": [
 					"\n",
 					"# Check if Delta table already exists at the path\n",
 					"if DeltaTable.isDeltaTable(spark, output_path):\n",
@@ -146,6 +179,13 @@
 					"#     dbutils.fs.mv(file_info.path, archive_path + file_name)\n",
 					"\n",
 					"print(\"✅ Transformation complete with updated headers, client_id added, and files archived.\")\n",
+					""
+				],
+				"execution_count": 30
+			},
+			{
+				"cell_type": "code",
+				"source": [
 					""
 				],
 				"execution_count": null
