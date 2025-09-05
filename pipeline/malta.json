@@ -3,9 +3,16 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "MoveSrc_malta",
+				"name": "ladenUnladen_malta",
 				"type": "ExecuteDataFlow",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "EcEvents_malta",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -16,7 +23,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "MoveSrc_malta",
+						"referenceName": "ladenUnladen_malta",
 						"type": "DataFlowReference"
 					},
 					"compute": {
