@@ -81,7 +81,7 @@
 				"     format: 'delta',",
 				"     fileSystem: 'dpw-lg',",
 				"     folderPath: 'silver/ecevents') ~> ecevents",
-				"ecevents filter(like(cheKind, \"%SC\")  && (moveKind == 'DSCH' || moveKind == 'LOAD') && (eventTypeDescription == 'TVCO' || eventTypeDescription == 'TYCO')) ~> filter1",
+				"ecevents filter(equals(cheKind, 'SC')  && (moveKind == 'DSCH' || moveKind == 'LOAD') && (eventTypeDescription  =='EARW' || eventTypeDescription  =='EASH')) ~> filter1",
 				"filter1 derive(Date = toDate(EcEventTime),",
 				"          Day_of_Week = dayOfWeek(EcEventTime)) ~> derivedColumn1",
 				"derivedColumn1 select(mapColumn(",
