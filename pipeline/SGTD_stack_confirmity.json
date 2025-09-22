@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "stack_confirmity_SGTD",
+				"name": "stack_confirmity_SGTD_new",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "stack_confirmity_SGTD",
+						"referenceName": "stack_confirmity_SGTD_new",
 						"type": "DataFlowReference"
 					},
 					"compute": {
