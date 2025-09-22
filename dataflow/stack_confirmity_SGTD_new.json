@@ -1,0 +1,132 @@
+{
+	"name": "stack_confirmity_SGTD_new",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "StackConfirmity"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "StackConformity"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "filter2"
+				},
+				{
+					"name": "derivedColumn2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {Equipment ID} as string,",
+				"          {Stacking Factor} as string,",
+				"          {Assigned CHE} as string,",
+				"          {Blk Typ} as string,",
+				"          Class as string,",
+				"          {Current Position} as string,",
+				"          {Yard Row} as string,",
+				"          Cat as string,",
+				"          Sts as string,",
+				"          {Section Factor} as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: true,",
+				"     moveFiles: ['/bronze/stackconformity/load','bronze/stackconformity/archive'],",
+				"     rowUrlColumn: 'FileDate',",
+				"     format: 'delimited',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'bronze/stackconformity/load',",
+				"     columnDelimiter: '\\t',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '',",
+				"     columnNamesAsHeader: true,",
+				"     skipLines: -2) ~> StackConfirmity",
+				"filter2 derive(Pos_WO_Tier = iif(isInteger(right({Current Position}, 1)), left({Current Position}, length({Current Position}) - 1), {Current Position}),",
+				"          Date = toDate(substring(FileDate, -12, 8), 'yyyyMMdd'),",
+				"          stacking_factor_new = iif(\r",
+				"    length(substringIndex({Stacking Factor}, '/', 1)) == 1 && \r",
+				"    (ascii(substringIndex({Stacking Factor}, '/', 1)) >= 65 && ascii(substringIndex({Stacking Factor}, '/', 1)) <= 90 || \r",
+				"     ascii(substringIndex({Stacking Factor}, '/', 1)) >= 97 && ascii(substringIndex({Stacking Factor}, '/', 1)) <= 122),\r",
+				"    substringIndex(substringIndex({Stacking Factor}, '/', 4), '/', -3),\r",
+				"    substringIndex({Stacking Factor}, '/', 3)\r",
+				"),",
+				"          stacking_array := split({Stacking Factor}, '/')) ~> derivedColumn1",
+				"derivedColumn1 window(over(Date,",
+				"          Pos_WO_Tier),",
+				"     asc(stacking_factor_new, true),",
+				"     stackrank = rank()) ~> window1",
+				"window1 aggregate(groupBy(Date,",
+				"          Pos_WO_Tier),",
+				"     Stack_confirmty = iif(max(stackrank) > 1, 'Mix', 'Pure')) ~> aggregate1",
+				"derivedColumn2 sort(asc(Date, true)) ~> sort1",
+				"select1 alterRow(insertIf(true())) ~> alterRow1",
+				"sort1 select(mapColumn(",
+				"          Date,",
+				"          Stack = Pos_WO_Tier,",
+				"          Stack_confirmty,",
+				"          Year,",
+				"          Month,",
+				"          Week",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"StackConfirmity filter((Cat == \"EXPORT\" || Cat == \"TRANSSHIP\") && (Sts == \"FCL\" || Sts == \"LCL\")) ~> filter2",
+				"aggregate1 derive(Year = year(Date),",
+				"          Month = month(Date),",
+				"          Week = iif(dayOfWeek(Date) == 1,  weekOfYear(Date) + 1, weekOfYear(Date))) ~> derivedColumn2",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'gold/stack_confirmity',",
+				"     mergeSchema: true,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> StackConformity"
+			]
+		}
+	}
+}
