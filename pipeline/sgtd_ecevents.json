@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "EcEvents_sgtd",
+				"name": "EcEvents_sgtd_v2",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "EcEvents_sgtd",
+						"referenceName": "EcEvents_sgtd_v2",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -27,11 +27,11 @@
 				}
 			},
 			{
-				"name": "jobstepping_sgtd",
+				"name": "jobstepping_sgtd_v2",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "EcEvents_sgtd",
+						"activity": "EcEvents_sgtd_v2",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -47,7 +47,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "jobstepping_sgtd",
+						"referenceName": "jobstepping_sgtd_v2",
 						"type": "DataFlowReference"
 					},
 					"compute": {
