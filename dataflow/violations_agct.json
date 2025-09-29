@@ -368,7 +368,7 @@
 				"          {T Put Second} = second(MaxDHTime)) ~> derivedColumn4",
 				"derivedColumn6 select(mapColumn(",
 				"          {MH Event Type Id},",
-				"          {From Location} = {D H Decking Type},",
+				"          {D H Decking Type},",
 				"          gkey = select3@gkey,",
 				"          Year_Month,",
 				"          Year_Week,",
