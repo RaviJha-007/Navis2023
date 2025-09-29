@@ -384,7 +384,7 @@
 				"          {Freight Kind Id},",
 				"          MaxDHTime,",
 				"          {Location Match or Not},",
-				"          {User Name} = user_id,",
+				"          {User Name} = name,",
 				"          Block_To_Block_Violation,",
 				"          Same_Block_Violation,",
 				"          Stack_Violation",
