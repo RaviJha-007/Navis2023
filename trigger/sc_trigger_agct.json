@@ -6,7 +6,7 @@
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "AGCT_stack_confirmity",
+					"referenceName": "AGCT_conformities",
 					"type": "PipelineReference"
 				}
 			}
