@@ -1,0 +1,145 @@
+{
+	"name": "ladenUnladen_MCT",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "ecevents"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ecEventGkey as long,",
+				"          yardGkey as integer,",
+				"          YardID as string,",
+				"          FcyID as string,",
+				"          cheKind as string,",
+				"          CHE_Name as string,",
+				"          CHE_ID as short,",
+				"          eventType as short,",
+				"          eventSubType as short,",
+				"          eventTypeDescription as string,",
+				"          fromCheIdName as boolean,",
+				"          ToCheIdName as boolean,",
+				"          unit as string,",
+				"          pow as string,",
+				"          pool as string,",
+				"          workQueue as string,",
+				"          travelDistance as short,",
+				"          moveKind as string,",
+				"          isTwin as boolean,",
+				"          startDistance as short,",
+				"          workAssignment as string,",
+				"          unitRef as string,",
+				"          tran_ID as string,",
+				"          locType as string,",
+				"          locID as string,",
+				"          locSlot as string,",
+				"          opsPosID as string,",
+				"          unladenLoctype as string,",
+				"          unladenLocID as string,",
+				"          unladenLocSlot as string,",
+				"          ladenLoctype as string,",
+				"          ladenLocID as string,",
+				"          laden_LocSlot as string,",
+				"          lastEstMoveTime as string,",
+				"          operator_name as string,",
+				"          EcEventTime as timestamp,",
+				"          Year as integer,",
+				"          Month as integer,",
+				"          Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     fileSystem: 'mct',",
+				"     folderPath: 'silver/ecevents') ~> ecevents",
+				"ecevents filter(cheKind == 'SC' && ((moveKind == 'DSCH' && eventTypeDescription == 'LTRW') || (moveKind == 'LOAD' && eventTypeDescription == 'LTSH'))) ~> filter1",
+				"filter1 derive(Date = toDate(EcEventTime),",
+				"          Day_of_Week = dayOfWeek(EcEventTime)) ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          ecEventGkey,",
+				"          yardGkey,",
+				"          FcyID,",
+				"          CHE_Name,",
+				"          YardID,",
+				"          CHE_ID,",
+				"          cheKind,",
+				"          eventType,",
+				"          eventSubType,",
+				"          eventTypeDescription,",
+				"          fromCheIdName,",
+				"          ToCheIdName,",
+				"          unit,",
+				"          pow,",
+				"          pool,",
+				"          workQueue,",
+				"          startDistance,",
+				"          travelDistance,",
+				"          moveKind,",
+				"          isTwin,",
+				"          workAssignment,",
+				"          locSlot,",
+				"          operator_name,",
+				"          EcEventTime,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          Date,",
+				"          Day_of_Week",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 alterRow(upsertIf(true())) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'mct',",
+				"     folderPath: 'gold/laden_unladen',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['ecEventGkey'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
