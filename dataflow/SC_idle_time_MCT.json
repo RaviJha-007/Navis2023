@@ -1,0 +1,169 @@
+{
+	"name": "SC_idle_time_MCT",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "ecevents"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink5"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "select5"
+				},
+				{
+					"name": "alterRow5"
+				},
+				{
+					"name": "derivedColumn4"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "aggregate1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ecEventGkey as long,",
+				"          yardGkey as long,",
+				"          YardID as string,",
+				"          FcyID as string,",
+				"          cheKind as string,",
+				"          cheName as string,",
+				"          cheID as long,",
+				"          EcEventTime as timestamp,",
+				"          type as short,",
+				"          subType as short,",
+				"          typeDescription as string,",
+				"          fromCheIdName as string,",
+				"          ToCheIdName as string,",
+				"          unitIdName as string,",
+				"          powName as string,",
+				"          poolName as string,",
+				"          workQueue as string,",
+				"          travelDistance as short,",
+				"          moveKind as string,",
+				"          isTwinMove as boolean,",
+				"          startDistance as short,",
+				"          unitReference as string,",
+				"          tranId as string,",
+				"          locType as string,",
+				"          locId as string,",
+				"          locSlot as string,",
+				"          opsPosId as string,",
+				"          unladenLoctype as string,",
+				"          unladenLocid as string,",
+				"          unladenLocSlot as string,",
+				"          ladenLoctype as string,",
+				"          ladenLocid as string,",
+				"          ladenLocSlot as string,",
+				"          Year as integer,",
+				"          Month as integer,",
+				"          Week as integer,",
+				"          operator_id as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     fileSystem: 'mct',",
+				"     folderPath: 'silver/ecevents') ~> ecevents",
+				"ecevents filter(cheKind == 'SC' && poolName == \"Y-GATE\") ~> filter1",
+				"derivedColumn4 window(over(cheID,",
+				"          EcEventDate),",
+				"     asc(cheID, true),",
+				"     asc(EcEventTime, true),",
+				"     EcEventTime_PREV = lag(EcEventTime, 1, null()),",
+				"          EcEventTime_NEXT = lead(EcEventTime, 1, null()),",
+				"          typeDescription_PREV = lag(typeDescription, 1, null()),",
+				"          typeDescription_NEXT = lead(typeDescription, 1, null()),",
+				"          cheID_PREV = lag(cheID, 1, null()),",
+				"          cheID_NEXT = lead(cheID, 1, null()),",
+				"          EcEventDate_PREV = lag(EcEventDate, 1, null()),",
+				"          EcEventDate_NEXT = lead(EcEventDate, 1, null())) ~> window1",
+				"sort1 derive(idle_time = iif(cheID_PREV == cheID && cheID == cheID_NEXT && EcEventDate_PREV == EcEventDate && EcEventDate == EcEventDate_NEXT\r",
+				"    , iif(typeDescription_PREV==\"DROP\" && typeDescription==\"DSPT\" &&  in([\"EAGD\", \"EARW\", \"EASH\", \"ETGD\", \"ETRL\", \"ETRW\", \"ETSH\"], typeDescription_NEXT), \r",
+				"    iif(:time_delta_mins >= 0.0 , :time_delta_mins, toLong(0))\r",
+				"    , toLong(0))\r",
+				"    , toLong(0)),",
+				"          time_delta_mins = :time_delta_mins,",
+				"          time_delta_mins := (toLong(EcEventTime) - toLong(EcEventTime_PREV))/(60*1000)) ~> derivedColumn3",
+				"aggregate1 select(mapColumn(",
+				"          EcEventDate,",
+				"          cheID,",
+				"          first_che_time,",
+				"          last_che_time,",
+				"          total_idle_time,",
+				"          year,",
+				"          month,",
+				"          week",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select5",
+				"select5 alterRow(upsertIf(true())) ~> alterRow5",
+				"filter1 derive(EcEventDate = toDate(toString(EcEventTime,'yyyy-MM-dd'))) ~> derivedColumn4",
+				"window1 sort(asc(EcEventDate, true),",
+				"     asc(cheID, true),",
+				"     asc(EcEventTime, true)) ~> sort1",
+				"derivedColumn3 aggregate(groupBy(EcEventDate,",
+				"          cheID),",
+				"     total_idle_time = sum(idle_time),",
+				"          first_che_time = first(EcEventTime),",
+				"          last_che_time = max(EcEventTime),",
+				"          year = first(Year),",
+				"          month = first(Month),",
+				"          week = first(Week)) ~> aggregate1",
+				"alterRow5 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'mct',",
+				"     folderPath: 'gold/sc_idle_time',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: false,",
+				"     updateable: true,",
+				"     upsertable: true,",
+				"     keys:['EcEventDate','cheID'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('key',",
+				"          0,",
+				"          year,",
+				"          month,",
+				"          week",
+				"     )) ~> sink5"
+			]
+		}
+	}
+}
