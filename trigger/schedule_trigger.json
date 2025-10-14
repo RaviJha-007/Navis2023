@@ -30,7 +30,7 @@
 			},
 			{
 				"pipelineReference": {
-					"referenceName": "MCT",
+					"referenceName": "rio",
 					"type": "PipelineReference"
 				}
 			}
