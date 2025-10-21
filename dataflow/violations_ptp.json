@@ -17,13 +17,6 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "DeckingHistory"
-				},
-				{
-					"linkedService": {
-						"referenceName": "linkedService2",
-						"type": "LinkedServiceReference"
-					},
-					"name": "XpsEcUser"
 				}
 			],
 			"sinks": [
@@ -91,9 +84,6 @@
 				},
 				{
 					"name": "select4"
-				},
-				{
-					"name": "join6"
 				},
 				{
 					"name": "select5"
@@ -239,23 +229,6 @@
 				"     escapeChar: '\\\\',",
 				"     quoteChar: '\\\"',",
 				"     columnNamesAsHeader: true) ~> DeckingHistory",
-				"source(output(",
-				"          gkey as short,",
-				"          user_id as string,",
-				"          name as string,",
-				"          yard as short",
-				"     ),",
-				"     useSchema: false,",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false,",
-				"     format: 'delimited',",
-				"     fileSystem: 'ptp',",
-				"     folderPath: 'bronze/xpsecuser',",
-				"     columnDelimiter: ',',",
-				"     escapeChar: '\\\\',",
-				"     quoteChar: '\\\"',",
-				"     columnNamesAsHeader: true) ~> XpsEcUser",
 				"MoveHistory select(mapColumn(",
 				"          mve_gkey,",
 				"          {Unit Nbr},",
@@ -367,7 +340,7 @@
 				"derivedColumn6 select(mapColumn(",
 				"          {MH Event Type Id},",
 				"          {D H Decking Type},",
-				"          gkey = select3@gkey,",
+				"          gkey,",
 				"          Year_Month,",
 				"          Year_Week,",
 				"          {MH ToPosName Short 5Char},",
@@ -385,17 +358,10 @@
 				"          Same_Block_Violation,",
 				"          Stack_Violation,",
 				"          {Location Match or Not},",
-				"          user_id,",
-				"          {User Name} = name,",
 				"          Shift_Date",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select4",
-				"derivedColumn4, XpsEcUser join(lower({MH Put CHE Operator Id}) == lower(user_id),",
-				"     joinType:'inner',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join6",
 				"select4 select(mapColumn(",
 				"          each(match(true()),",
 				"               regexReplace($$,' ','_') = $$)",
@@ -423,7 +389,7 @@
 				"filter4 aggregate(groupBy(mve_gkey),",
 				"     each(match(name!='mve_gkey'), $$ = first($$))) ~> aggregate3",
 				"select2 filter(not(isNull(gkey))) ~> filter5",
-				"join6 derive(Block_To_Block_Violation = iif(substring({MH ToPosName Short 5Char}, 1, 2) != substring({DH ToPosName Short 5Char}, 1, 2), true(), false()),",
+				"derivedColumn4 derive(Block_To_Block_Violation = iif(substring({MH ToPosName Short 5Char}, 1, 2) != substring({DH ToPosName Short 5Char}, 1, 2), true(), false()),",
 				"          Same_Block_Violation = iif(substring({MH ToPosName Short 5Char}, 1, 4) != substring({DH ToPosName Short 5Char}, 1, 4), true(), false()),",
 				"          Stack_Violation = iif(substring({MH ToPosName Short 5Char}, 1, 5) != substring({DH ToPosName Short 5Char}, 1, 5), true(), false())) ~> derivedColumn6",
 				"alterRow1 sink(allowSchemaDrift: true,",
