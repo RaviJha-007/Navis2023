@@ -138,7 +138,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'sgtd',",
-				"     folderPath: 'gold/stack_confirmity_new',",
+				"     folderPath: 'gold/stack_confirmity',",
 				"     mergeSchema: true,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
