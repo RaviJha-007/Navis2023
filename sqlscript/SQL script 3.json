@@ -2,12 +2,12 @@
 	"name": "SQL script 3",
 	"properties": {
 		"content": {
-			"query": "\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'mundra_ct04')  \n\n    CREATE EXTERNAL DATA SOURCE [mundra_ct04]  \n\n    WITH ( \n\n        LOCATION   = 'https://navispowerbidatastorage2.dfs.core.windows.net/mundra-ct04',  \n\n    ) \n\nGo \nSELECT * FROM sys.external_data_sources\nDrop EXTERNAL DATA SOURCE [mundra_ct04] \n\ncreate or alter view stack_confirmity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/stack_confirmity',\n        data_source = 'mundra_ct04',\n        FORMAT = 'DELTA'\n    ) AS [stack_confirmity];\n\ncreate view dual_cycling\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/dual_cycling',\n        data_source = 'tauranga',\n        FORMAT = 'DELTA'\n    ) AS [dual_cycling];",
+			"query": "\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'mundra_ct04')  \n\n    CREATE EXTERNAL DATA SOURCE [mundra_ct04]  \n\n    WITH ( \n\n        LOCATION   = 'https://navispowerbidatastorage2.dfs.core.windows.net/mundra-ct04',  \n\n    ) \n\nGo \nSELECT * FROM sys.external_data_sources\nDrop EXTERNAL DATA SOURCE [mundra_ct04] \n\ncreate or alter view laden_unladen\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/laden_unladen',\n        data_source = 'kattupalli',\n        FORMAT = 'DELTA'\n    ) AS [laden_unladen];\n\ncreate view dual_cycling\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/dual_cycling',\n        data_source = 'tauranga',\n        FORMAT = 'DELTA'\n    ) AS [dual_cycling];",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "mundra_ct04",
+				"databaseName": "kattupalli",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000
