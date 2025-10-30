@@ -133,6 +133,12 @@
 				},
 				{
 					"name": "filter6"
+				},
+				{
+					"name": "aggregate4"
+				},
+				{
+					"name": "filter7"
 				}
 			],
 			"scriptLines": [
@@ -456,6 +462,9 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select8",
 				"MoveHistory filter({Put CHE Kind} == \"RTG\") ~> filter6",
+				"select8 aggregate(groupBy(user_id),",
+				"     each(match(name!='user_id'), $$ = last($$))) ~> aggregate4",
+				"aggregate4 filter(not(isNull(user_id))) ~> filter7",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
