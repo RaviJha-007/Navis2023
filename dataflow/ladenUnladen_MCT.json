@@ -133,7 +133,7 @@
 				"     insertable: false,",
 				"     updateable: true,",
 				"     upsertable: true,",
-				"     keys:['ecEventGkey'],",
+				"     keys:['ecEventGkey','Date'],",
 				"     umask: 0777,",
 				"     preCommands: [],",
 				"     postCommands: [],",
