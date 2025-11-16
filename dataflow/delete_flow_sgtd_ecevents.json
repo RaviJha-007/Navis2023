@@ -191,7 +191,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'sgtd',",
-				"     folderPath: 'silver/ecevent',",
+				"     folderPath: 'silver/ecevent_v2',",
 				"     overwrite: true,",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
