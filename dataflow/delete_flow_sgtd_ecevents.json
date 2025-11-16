@@ -162,7 +162,7 @@
 				"     ignoreNoFilesFound: true,",
 				"     format: 'delta',",
 				"     fileSystem: 'sgtd',",
-				"     folderPath: 'silver/ecevents') ~> ecevents",
+				"     folderPath: 'silver/ecevents_v2') ~> ecevents",
 				"moves filter(not(isNull(t_put)) && toDate(t_put) < toDate(\"01-08-2025\", \"dd-MM-yyyy\")) ~> filter2",
 				"filter2 alterRow(upsertIf(true())) ~> alterRow2",
 				"ecevents filter(not(isNull(EcEventTime)) && toDate(EcEventTime) < toDate(\"01-08-2025\", \"dd-MM-yyyy\")) ~> filter3",
