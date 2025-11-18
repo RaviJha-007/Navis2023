@@ -103,7 +103,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"StackConfirmity filter((Cat == \"EXPORT\" || Cat == \"TRANSSHIP\") && (Sts == \"FCL\" || Sts == \"LCL\")) ~> filter2",
+				"StackConfirmity filter((Cat == \"EXPORT\" || Cat == \"TRANSSHIP\") && (Sts == \"FCL\" || Sts == \"LCL\") && ({Blk Typ} == \"T\") && (Class == \"20DR\" || Class == \"40HC\" || Class == \"40DR\") && not(startsWith({Yard Row}, \"01T\")) && not(startsWith({Yard Row}, \"01X\")) && not(startsWith({Yard Row}, \"02X\")) && not(startsWith({Yard Row}, \"03X\"))) ~> filter2",
 				"aggregate1 derive(Year = year(Date),",
 				"          Month = month(Date),",
 				"          Week = iif(dayOfWeek(Date) == 1,  weekOfYear(Date) + 1, weekOfYear(Date))) ~> derivedColumn2",
