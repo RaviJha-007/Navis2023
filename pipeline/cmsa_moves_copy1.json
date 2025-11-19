@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "MoveSrc_oldformat_cmsa",
+				"name": "Rehandle_new_cmsa",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "MoveSrc_oldformat_cmsa",
+						"referenceName": "Rehandle_new_cmsa",
 						"type": "DataFlowReference"
 					},
 					"compute": {
