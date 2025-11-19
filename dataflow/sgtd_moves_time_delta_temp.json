@@ -1,0 +1,164 @@
+{
+	"name": "sgtd_moves_time_delta_temp",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sgtd"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "filter2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          mve_gkey as integer,",
+				"          Unit_Nbr as string,",
+				"          Facility_Id as string,",
+				"          Complex_Id as string,",
+				"          Yard_Id as string,",
+				"          Carrier_Visit_Key as integer,",
+				"          Event_Type_Id as string,",
+				"          Move_Kind as string,",
+				"          From_Location as string,",
+				"          To_Location as string,",
+				"          From_Position_Name as string,",
+				"          To_Position_Name as string,",
+				"          Carry_CHE_Operator_Id as short,",
+				"          Fetch_CHE_Operator_Id as string,",
+				"          Put_CHE_Operator_Id as string,",
+				"          Fetch_CHE_Id as long,",
+				"          Fetch_CHE_Kind as string,",
+				"          Carry_CHE_Id as long,",
+				"          Carry_CHE_Kind as string,",
+				"          Put_CHE_Id as long,",
+				"          Put_CHE_Kind as string,",
+				"          QC_CHE_Id as long,",
+				"          QC_CHE_Kind as string,",
+				"          t_carry_complete as timestamp,",
+				"          t_put as timestamp,",
+				"          t_fetch as timestamp,",
+				"          t_dispatch as timestamp,",
+				"          t_discharge as timestamp,",
+				"          t_carry_dispatch as timestamp,",
+				"          t_carry_fetch_ready as timestamp,",
+				"          t_carry_put_ready as timestamp,",
+				"          dist_carry as integer,",
+				"          dist_start as short,",
+				"          Twin_Fetch as string,",
+				"          Twin_Carry as string,",
+				"          Twin_Put as string,",
+				"          Category_Id as string,",
+				"          Freight_Kind_Id as string,",
+				"          to_pos_gkey as integer,",
+				"          fm_pos_gkey as integer,",
+				"          Restow_Reason as string,",
+				"          Container_Line_Id as string,",
+				"          Container_Line_Role as string,",
+				"          pow as string,",
+				"          ufv_gkey as integer,",
+				"          Berth_Id as string,",
+				"          Goods_And_Ctr_Wt_Kg as double,",
+				"          active_ufv as integer,",
+				"          Requires_Power_Flag as string,",
+				"          OOG_Flag as string,",
+				"          Shipper_Id as string,",
+				"          Consignee_Id as string,",
+				"          Commodity_Id as string,",
+				"          ATA as timestamp,",
+				"          ATD as timestamp,",
+				"          Rehandles as string,",
+				"          Year as integer,",
+				"          Month as integer,",
+				"          Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'silver/moves') ~> sgtd",
+				"filter1 derive(exec_delta_16 = iif(:exec_time > 16, true(), false()),",
+				"          t_execution_delta = :exec_time,",
+				"          exec_time := (t_carry_complete - t_fetch)/60000) ~> derivedColumn1",
+				"sgtd filter(Carry_CHE_Kind==\"ITV\") ~> filter1",
+				"derivedColumn1 select(mapColumn(",
+				"          mve_gkey,",
+				"          Unit_Nbr,",
+				"          Facility_Id,",
+				"          Yard_Id,",
+				"          Event_Type_Id,",
+				"          Move_Kind,",
+				"          From_Location,",
+				"          To_Location,",
+				"          From_Position_Name,",
+				"          To_Position_Name,",
+				"          Carry_CHE_Kind,",
+				"          t_carry_complete,",
+				"          t_put,",
+				"          t_fetch,",
+				"          Category_Id,",
+				"          Freight_Kind_Id,",
+				"          pow,",
+				"          Commodity_Id,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          exec_delta_16,",
+				"          t_execution_delta",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"filter2 alterRow(upsertIf(true())) ~> alterRow1",
+				"select1 filter(Event_Type_Id == \"UNIT_LOAD\" && not(isNull(t_put)) && toDate(t_put) < toDate(\"01-08-2025\", \"dd-MM-yyyy\") && toDate(t_put) > toDate(\"12-06-2025\", \"dd-MM-yyyy\")) ~> filter2",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'sgtd',",
+				"     folderPath: 'gold/load_time_delta',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['mve_gkey'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
