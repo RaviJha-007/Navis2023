@@ -45,6 +45,12 @@
 					"referenceName": "TEAGTL_moves",
 					"type": "PipelineReference"
 				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "TEAGTL_ecevents",
+					"type": "PipelineReference"
+				}
 			}
 		],
 		"type": "ScheduleTrigger",
