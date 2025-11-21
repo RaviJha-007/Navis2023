@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "MoveSrc_cmsa",
+				"name": "Moves_CMSA",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "MoveSrc_cmsa",
+						"referenceName": "Moves_CMSA",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -27,11 +27,11 @@
 				}
 			},
 			{
-				"name": "Rehandle_cmsa",
+				"name": "Rehandle_new_cmsa",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "MoveSrc_cmsa",
+						"activity": "Moves_CMSA",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -47,41 +47,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "Rehandle_cmsa",
-						"type": "DataFlowReference",
-						"parameters": {
-							"customer": "'cmsa'"
-						}
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "TT_Productivity_cmsa",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "MoveSrc_cmsa",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "TT_Productivity_cmsa",
+						"referenceName": "Rehandle_new_cmsa",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -92,11 +58,11 @@
 				}
 			},
 			{
-				"name": "Yard_che_productivity_cmsa",
+				"name": "Dual Cycling_cmsa",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "MoveSrc_cmsa",
+						"activity": "Moves_CMSA",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -112,7 +78,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "Yard_che_productivity_cmsa",
+						"referenceName": "Dual Cycling_cmsa",
 						"type": "DataFlowReference"
 					},
 					"compute": {
