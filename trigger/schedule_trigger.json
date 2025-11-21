@@ -57,6 +57,12 @@
 					"referenceName": "cmsa_moves",
 					"type": "PipelineReference"
 				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "cmsa_ecevents",
+					"type": "PipelineReference"
+				}
 			}
 		],
 		"type": "ScheduleTrigger",
