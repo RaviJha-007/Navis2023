@@ -51,6 +51,12 @@
 					"referenceName": "TEAGTL_ecevents",
 					"type": "PipelineReference"
 				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "cmsa_moves",
+					"type": "PipelineReference"
+				}
 			}
 		],
 		"type": "ScheduleTrigger",
