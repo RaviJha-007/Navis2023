@@ -2,12 +2,12 @@
 	"name": "SQL script 12",
 	"properties": {
 		"content": {
-			"query": "create or alter view ecevents\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'silver/ecevents/load',\n        data_source = 'malta',\n        FORMAT = 'DELTA'\n    ) AS [ecevents];\n\ncreate or alter view move_history\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'silver/moves/load',\n        data_source = 'malta',\n        FORMAT = 'DELTA'\n    ) AS [move_history];",
+			"query": "create or alter view ecevents\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'silver/ecevents',\n        data_source = 'mct',\n        FORMAT = 'DELTA'\n    ) AS [ecevents];\n\ncreate or alter view move_history\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'silver/moves',\n        data_source = 'mct',\n        FORMAT = 'DELTA'\n    ) AS [move_history];",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "malta",
+				"databaseName": "mct",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000
