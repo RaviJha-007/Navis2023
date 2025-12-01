@@ -223,7 +223,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'teagtl',",
-				"     folderPath: 'gold/jobstep',",
+				"     folderPath: 'gold/itv_violation',",
 				"     mergeSchema: true,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
