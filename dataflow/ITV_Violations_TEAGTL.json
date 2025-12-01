@@ -39,9 +39,6 @@
 					"name": "sort1"
 				},
 				{
-					"name": "derivedColumn1"
-				},
-				{
 					"name": "AlterRow1"
 				},
 				{
@@ -61,6 +58,9 @@
 				},
 				{
 					"name": "split1"
+				},
+				{
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -151,16 +151,14 @@
 				"     asc(ecEventGkey, true),",
 				"     startRowOffset: 1L,",
 				"     endRowOffset: 1L,",
-				"     eventTypeDescription_nxt = lead(eventTypeDescription),",
+				"     eventName_nxt = lead(eventName),",
 				"          pow_nxt = lead(pow),",
 				"          cheID_nxt = lead(cheID),",
 				"          EcEventTime_nxt = lead(EcEventTime),",
 				"          locSlot_nxt = lead(locSlot)) ~> window1",
-				"filter1 sort(asc(cheID, true),",
+				"derivedColumn2 sort(asc(cheID, true),",
 				"     asc(EcEventTime, true),",
 				"     asc(ecEventGkey, true)) ~> sort1",
-				"split1@DSCH derive(violation = iif(cheID==cheID_nxt && eventTypeDescription=='TYCO' && eventTypeDescription_nxt=='AYCO', 1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TVDR' && eventTypeDescription_nxt=='AVDR',1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TYDR' && eventTypeDescription_nxt=='AYDR',1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TVCO' && eventTypeDescription_nxt=='AVCO',1,0)))),",
-				"          operator = lower(operator)) ~> derivedColumn1",
 				"select1 alterRow(upsertIf(true())) ~> AlterRow1",
 				"join1 select(mapColumn(",
 				"          ecEventGkey,",
@@ -201,7 +199,7 @@
 				"     skipDuplicateMapOutputs: true) ~> select2",
 				"select2 aggregate(groupBy(user_id),",
 				"     name = last(name)) ~> aggregate1",
-				"filter2, derivedColumn1 join(lower(trim(user_id)) == lower(trim(operator)),",
+				"filter2, split1@DSCH join(lower(trim(user_id)) == lower(trim(operator)),",
 				"     joinType:'right',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -210,6 +208,8 @@
 				"window1 split(moveKind==\"DSCH\",",
 				"     moveKind==\"LOAD\",",
 				"     disjoint: true) ~> split1@(DSCH, LOAD)",
+				"filter1 derive(operator = lower(operator),",
+				"          eventName = iif(in([\"TVCO\", \"AVCO\", \"TYCO\", \"AYCO\"], eventTypeDescription), \"EVENT_1\", iif(in([\"TYDR\", \"AYDR\", \"TVDR\", \"AVDR\"], eventTypeDescription), \"EVENT_2\", \"EVENT_DEFAULT\"))) ~> derivedColumn2",
 				"AlterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
