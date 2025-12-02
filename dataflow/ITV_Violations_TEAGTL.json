@@ -204,7 +204,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
 				"select2 aggregate(groupBy(user_id),",
-				"     name = last(name)) ~> aggregate1",
+				"     name = last(trim(name))) ~> aggregate1",
 				"filter2, derivedColumn3 join(lower(trim(user_id)) == lower(trim(operator)),",
 				"     joinType:'right',",
 				"     matchType:'exact',",
