@@ -65,6 +65,7 @@
 				"     validateSchema: false,",
 				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: true,",
+				"     moveFiles: ['/bronze/stackconformity/load','/bronze/stackconformity/archive'],",
 				"     rowUrlColumn: 'FileDate',",
 				"     format: 'delimited',",
 				"     fileSystem: 'sgtd',",
