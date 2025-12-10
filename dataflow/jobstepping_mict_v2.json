@@ -185,7 +185,7 @@
 				"AlterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
-				"     fileSystem: 'rio',",
+				"     fileSystem: 'mict',",
 				"     folderPath: 'gold/jobstep',",
 				"     mergeSchema: true,",
 				"     autoCompact: true,",
