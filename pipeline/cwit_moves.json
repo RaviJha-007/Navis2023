@@ -33,7 +33,7 @@
 					{
 						"activity": "MoveSrc_CWIT",
 						"dependencyConditions": [
-							"Skipped"
+							"Succeeded"
 						]
 					}
 				],
@@ -64,7 +64,7 @@
 					{
 						"activity": "MoveSrc_CWIT",
 						"dependencyConditions": [
-							"Skipped"
+							"Succeeded"
 						]
 					}
 				],
