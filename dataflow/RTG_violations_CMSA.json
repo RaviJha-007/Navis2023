@@ -394,7 +394,7 @@
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
-				"     fileSystem: 'teagtl',",
+				"     fileSystem: 'cmsa',",
 				"     folderPath: 'gold/rtg_violation',",
 				"     mergeSchema: false,",
 				"     autoCompact: true,",
