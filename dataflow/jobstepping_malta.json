@@ -1,0 +1,250 @@
+{
+	"name": "jobstepping_malta",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source1"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "xpseceuser"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "AlterRow1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "filter2"
+				},
+				{
+					"name": "select2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ecEventGkey as long,",
+				"          yardGkey as long,",
+				"          YardID as string,",
+				"          FcyID as string,",
+				"          cheKind as string,",
+				"          cheName as string,",
+				"          cheID as long,",
+				"          type as short,",
+				"          subType as short,",
+				"          typeDescription as string,",
+				"          fromCheIdName as short,",
+				"          ToCheIdName as short,",
+				"          unitIdName as string,",
+				"          powName as string,",
+				"          poolName as string,",
+				"          workQueue as string,",
+				"          travelDistance as short,",
+				"          moveKind as string,",
+				"          isTwin as boolean,",
+				"          startDistance as short,",
+				"          unitReference as string,",
+				"          tranId as string,",
+				"          locType as string,",
+				"          locId as string,",
+				"          locSlot as string,",
+				"          opsPosId as string,",
+				"          unladenLoctype as string,",
+				"          unladenLocId as string,",
+				"          unladenLocSlot as string,",
+				"          ladenLoctype as string,",
+				"          ladenLocId as string,",
+				"          laden_LocSlot as string,",
+				"          operatorName as string,",
+				"          EcEventTime as timestamp,",
+				"          Year as integer,",
+				"          Month as integer,",
+				"          Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'malta',",
+				"     folderPath: 'silver/ecevents') ~> source1",
+				"source(output(",
+				"          GKEY as long,",
+				"          USER_ID as string,",
+				"          NAME as string,",
+				"          YARD as integer",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'malta',",
+				"     folderPath: 'bronze/xpsecuser',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> xpseceuser",
+				"select2 filter(not(isNull(ecEventGkey)) && cheKind==\"ITV\" && (eventTypeDescription==\"AYDR\" || eventTypeDescription==\"TYDR\" || eventTypeDescription==\"AYCO\" || eventTypeDescription==\"TYCO\" || eventTypeDescription==\"AVDR\" || eventTypeDescription==\"TVDR\" || eventTypeDescription==\"AVCO\" || eventTypeDescription==\"TVCO\") && (moveKind==\"DSCH\"||moveKind==\"LOAD\")) ~> filter1",
+				"sort1 window(asc(cheID, true),",
+				"     asc(EcEventTime, true),",
+				"     asc(ecEventGkey, true),",
+				"     startRowOffset: 1L,",
+				"     endRowOffset: 1L,",
+				"     eventTypeDescription_nxt = lead(eventTypeDescription),",
+				"          unit_nxt = lead(unit),",
+				"          cheID_nxt = lead(cheID),",
+				"          EcEventTime_nxt = lead(EcEventTime)) ~> window1",
+				"filter1 sort(asc(cheID, true),",
+				"     asc(EcEventTime, true),",
+				"     asc(ecEventGkey, true)) ~> sort1",
+				"window1 derive(jobStep = iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TYCO' && eventTypeDescription_nxt=='AYCO', 1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TVDR' && eventTypeDescription_nxt=='AVDR',1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TYDR' && eventTypeDescription_nxt=='AYDR',1,iif(cheID==cheID_nxt && unit==unit_nxt && eventTypeDescription=='TVCO' && eventTypeDescription_nxt=='AVCO',1,0)))),",
+				"          operatorName = regexReplace(operatorName, `[^a-zA-Z0-9]`, '')) ~> derivedColumn1",
+				"select1 alterRow(upsertIf(true()),",
+				"     insertIf(true())) ~> AlterRow1",
+				"derivedColumn1, filter2 join(operatorName == USER_ID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 select(mapColumn(",
+				"          ecEventGkey,",
+				"          yardGkey,",
+				"          YardID,",
+				"          FcyID,",
+				"          cheKind,",
+				"          CHE_Name = cheName,",
+				"          eventType = type,",
+				"          eventSubType = subType,",
+				"          eventTypeDescription,",
+				"          unit,",
+				"          pow = powName,",
+				"          pool = poolName,",
+				"          travelDistance,",
+				"          moveKind,",
+				"          startDistance,",
+				"          EcEventTime,",
+				"          cheID,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          OperatorID = operatorName,",
+				"          eventTypeDescription_nxt,",
+				"          unit_nxt,",
+				"          cheID_nxt,",
+				"          EcEventTime_nxt,",
+				"          OperatorName = NAME,",
+				"          jobStep",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"derivedColumn2 aggregate(groupBy(USER_ID),",
+				"     NAME = last(NAME)) ~> aggregate1",
+				"xpseceuser derive(USER_ID = regexReplace(USER_ID, `[^a-zA-Z0-9]`, ''),",
+				"          NAME = regexReplace(NAME, `[^a-zA-Z0-9]`, ' ')) ~> derivedColumn2",
+				"aggregate1 filter(not(isNull(USER_ID))) ~> filter2",
+				"source1 select(mapColumn(",
+				"          ecEventGkey,",
+				"          yardGkey,",
+				"          YardID,",
+				"          FcyID,",
+				"          cheKind,",
+				"          cheName,",
+				"          cheID,",
+				"          type,",
+				"          subType,",
+				"          eventTypeDescription = typeDescription,",
+				"          fromCheIdName,",
+				"          ToCheIdName,",
+				"          unit = unitIdName,",
+				"          powName,",
+				"          poolName,",
+				"          workQueue,",
+				"          travelDistance,",
+				"          moveKind,",
+				"          isTwin,",
+				"          startDistance,",
+				"          unitReference,",
+				"          tranId,",
+				"          locType,",
+				"          locId,",
+				"          locSlot,",
+				"          opsPosId,",
+				"          unladenLoctype,",
+				"          unladenLocId,",
+				"          unladenLocSlot,",
+				"          ladenLoctype,",
+				"          ladenLocId,",
+				"          laden_LocSlot,",
+				"          operatorName,",
+				"          EcEventTime,",
+				"          Year,",
+				"          Month,",
+				"          Week",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"AlterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'malta',",
+				"     folderPath: 'gold/jobstep',",
+				"     mergeSchema: true,",
+				"     autoCompact: true,",
+				"     optimizedWrite: true,",
+				"     vacuum: 0,",
+				"     deletable: true,",
+				"     insertable: false,",
+				"     updateable: true,",
+				"     upsertable: true,",
+				"     keys:['ecEventGkey'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
