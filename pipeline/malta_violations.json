@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "violations_malta",
+				"name": "jobstepping_malta",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "violations_malta",
+						"referenceName": "jobstepping_malta",
 						"type": "DataFlowReference"
 					},
 					"compute": {
