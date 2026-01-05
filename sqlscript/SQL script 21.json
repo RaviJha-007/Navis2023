@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 21",
+	"properties": {
+		"content": {
+			"query": "create view laden_unladen as select * FROM OPENROWSET( BULK 'gold/laden_unladen', data_source = 'mundra-ct02', FORMAT = 'DELTA' ) AS [laden_unladen];",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "mundra-ct02",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
