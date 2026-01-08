@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 22",
+	"properties": {
+		"content": {
+			"query": "SELECT [ecEventGkey]\n,[cheKind]\n,[CHE_Name]\n,[CHE_ID]\n,[eventTypeDescription]\n,[unit]\n,[pow]\n,[pool]\n,[workQueue]\n,[travelDistance]\n,[moveKind]\n,[startDistance]\n,[operator_name]\n,[EcEventTime]\n,[Year]\n,[Month]\n,[Week]\n FROM [dbo].[ecevents]\n Where Year=2025 AND Month=10 AND Week = 42 AND DAY(EcEventTime) >=11 and DAY(EcEventTime) <=14\n ORDER by [EcEventTime] ASC, [ecEventGkey] ASC;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "mct",
+				"poolName": "Built-in"
+			},
+			"resultLimit": -1
+		},
+		"type": "SqlQuery"
+	}
+}
