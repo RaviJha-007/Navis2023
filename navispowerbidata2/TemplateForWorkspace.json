@@ -5991,6 +5991,44 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "CWIT_moves_time_delta",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "MoveSrc_CWIT",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "CWIT_moves_time_delta",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"cwit": {},
+									"LOAD": {},
+									"DSCH": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
@@ -6001,7 +6039,8 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/MoveSrc_CWIT')]",
 				"[concat(variables('workspaceId'), '/dataflows/Dual Cycling_CWIT')]",
-				"[concat(variables('workspaceId'), '/dataflows/TT_Productivity_CWIT')]"
+				"[concat(variables('workspaceId'), '/dataflows/TT_Productivity_CWIT')]",
+				"[concat(variables('workspaceId'), '/dataflows/CWIT_moves_time_delta')]"
 			]
 		},
 		{
@@ -7385,6 +7424,47 @@
 								"customizedCheckpointKey": "e2483d7c-639d-4bfd-8bbd-75cdca2e7d74"
 							}
 						}
+					},
+					{
+						"name": "violations_hazira",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "MoveSrc_hazira",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "violations_hazira",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"MoveHistory": {},
+									"DeckingHistory": {},
+									"XpsEcUser": {},
+									"violation": {},
+									"decking": {},
+									"move": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
@@ -7396,7 +7476,8 @@
 				"[concat(variables('workspaceId'), '/dataflows/hazira_moves_time_delta')]",
 				"[concat(variables('workspaceId'), '/dataflows/TT_Productivity_hazira')]",
 				"[concat(variables('workspaceId'), '/dataflows/Dual Cycling_hazira')]",
-				"[concat(variables('workspaceId'), '/dataflows/MoveSrc_hazira')]"
+				"[concat(variables('workspaceId'), '/dataflows/MoveSrc_hazira')]",
+				"[concat(variables('workspaceId'), '/dataflows/violations_hazira')]"
 			]
 		},
 		{
@@ -13883,6 +13964,208 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/linkedService2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/CWIT_moves_time_delta')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "cwit"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "LOAD"
+						},
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "DSCH"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "filter1"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "alterRow1"
+						},
+						{
+							"name": "filter2"
+						},
+						{
+							"name": "split1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          mve_gkey as integer,",
+						"          Unit_Nbr as string,",
+						"          Facility_Id as string,",
+						"          Complex_Id as string,",
+						"          Yard_Id as string,",
+						"          Carrier_Visit_Key as integer,",
+						"          Event_Type_Id as string,",
+						"          Move_Kind as string,",
+						"          From_Location as string,",
+						"          To_Location as string,",
+						"          From_Position_Name as string,",
+						"          To_Position_Name as string,",
+						"          Carry_CHE_Operator_Id as short,",
+						"          Fetch_CHE_Operator_Id as string,",
+						"          Put_CHE_Operator_Id as string,",
+						"          Fetch_CHE_Id as long,",
+						"          Fetch_CHE_Kind as string,",
+						"          Carry_CHE_Id as long,",
+						"          Carry_CHE_Kind as string,",
+						"          Put_CHE_Id as long,",
+						"          Put_CHE_Kind as string,",
+						"          QC_CHE_Id as long,",
+						"          QC_CHE_Kind as string,",
+						"          t_carry_complete as timestamp,",
+						"          t_put as timestamp,",
+						"          t_fetch as timestamp,",
+						"          t_dispatch as timestamp,",
+						"          t_discharge as timestamp,",
+						"          t_carry_dispatch as timestamp,",
+						"          t_carry_fetch_ready as timestamp,",
+						"          t_carry_put_ready as timestamp,",
+						"          dist_carry as integer,",
+						"          dist_start as short,",
+						"          Twin_Fetch as string,",
+						"          Twin_Carry as string,",
+						"          Twin_Put as string,",
+						"          Category_Id as string,",
+						"          Freight_Kind_Id as string,",
+						"          to_pos_gkey as integer,",
+						"          fm_pos_gkey as integer,",
+						"          Restow_Reason as string,",
+						"          Container_Line_Id as string,",
+						"          Container_Line_Role as string,",
+						"          pow as string,",
+						"          ufv_gkey as integer,",
+						"          Berth_Id as string,",
+						"          Goods_And_Ctr_Wt_Kg as double,",
+						"          active_ufv as integer,",
+						"          Requires_Power_Flag as string,",
+						"          OOG_Flag as string,",
+						"          Shipper_Id as string,",
+						"          Consignee_Id as string,",
+						"          Commodity_Id as string,",
+						"          ATA as timestamp,",
+						"          ATD as timestamp,",
+						"          Rehandles as string,",
+						"          Year as integer,",
+						"          Month as integer,",
+						"          Week as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: true,",
+						"     format: 'delta',",
+						"     fileSystem: 'cwit',",
+						"     folderPath: 'silver/moves') ~> cwit",
+						"filter1 derive(exec_delta_15 = iif(:exec_time > 15, true(), false()),",
+						"          t_execution_delta = :exec_time,",
+						"          Event_Type_Id = iif(Event_Type_Id=='UNIT_YARD_MOVE' && Move_Kind=='DSCH', 'UNIT_DISCH', Event_Type_Id),",
+						"          exec_time := (t_carry_complete - t_fetch)/60000) ~> derivedColumn1",
+						"cwit filter(Carry_CHE_Kind==\"ITV\" && not(isNull(t_fetch)) && not(isNull(t_carry_complete))) ~> filter1",
+						"derivedColumn1 select(mapColumn(",
+						"          mve_gkey,",
+						"          Unit_Nbr,",
+						"          Facility_Id,",
+						"          Yard_Id,",
+						"          Event_Type_Id,",
+						"          Move_Kind,",
+						"          From_Location,",
+						"          To_Location,",
+						"          From_Position_Name,",
+						"          To_Position_Name,",
+						"          Carry_CHE_Kind,",
+						"          t_carry_complete,",
+						"          t_put,",
+						"          t_fetch,",
+						"          Category_Id,",
+						"          Freight_Kind_Id,",
+						"          pow,",
+						"          Commodity_Id,",
+						"          Year,",
+						"          Month,",
+						"          Week,",
+						"          exec_delta_16 = exec_delta_15,",
+						"          t_execution_delta",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"filter2 alterRow(upsertIf(true())) ~> alterRow1",
+						"select1 filter((t_execution_delta >= 0.0) && (t_execution_delta >= 0) && not(isNull(t_execution_delta))) ~> filter2",
+						"alterRow1 split(Event_Type_Id == \"UNIT_LOAD\",",
+						"     Event_Type_Id == \"UNIT_DISCH\",",
+						"     disjoint: true) ~> split1@(load, discharge)",
+						"split1@load sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'cwit',",
+						"     folderPath: 'gold/load_time_delta',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: false,",
+						"     updateable: false,",
+						"     upsertable: true,",
+						"     keys:['mve_gkey'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> LOAD",
+						"split1@discharge sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'cwit',",
+						"     folderPath: 'gold/dsch_time_delta',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: false,",
+						"     updateable: false,",
+						"     upsertable: true,",
+						"     keys:['mve_gkey'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> DSCH"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]"
 			]
 		},
 		{
@@ -43669,8 +43952,7 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select1",
-						"select1 alterRow(upsertIf(true()),",
-						"     insertIf(true())) ~> alterRow1",
+						"select1 alterRow(upsertIf(true())) ~> alterRow1",
 						"alterRow1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'delta',",
@@ -52873,15 +53155,17 @@
 						"          from_pos_tier as short,",
 						"          to_pos_loctype as string,",
 						"          to_pos_locid as string,",
-						"          to_pos_loc_gkey as boolean,",
+						"          to_pos_loc_gkey as string,",
 						"          to_pos_slot as string,",
 						"          to_pos_name as string,",
 						"          to_pos_bin as string,",
-						"          to_pos_tier as boolean,",
+						"          to_pos_tier as string,",
 						"          total_score as integer,",
 						"          execution_time as short,",
 						"          details as string,",
-						"          phase as string",
+						"          phase as string,",
+						"          tbd_unit_gkey as string,",
+						"          cas_unit_reference as string",
 						"     ),",
 						"     useSchema: false,",
 						"     allowSchemaDrift: true,",
@@ -57950,6 +58234,26 @@
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 22')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "SELECT [ecEventGkey]\n,[cheKind]\n,[CHE_Name]\n,[CHE_ID]\n,[eventTypeDescription]\n,[unit]\n,[pow]\n,[pool]\n,[workQueue]\n,[travelDistance]\n,[moveKind]\n,[startDistance]\n,[operator_name]\n,[EcEventTime]\n,[Year]\n,[Month]\n,[Week]\n FROM [dbo].[ecevents]\n Where Year=2025 AND Month=10 AND Week = 42 AND DAY(EcEventTime) >=11 and DAY(EcEventTime) <=14\n ORDER by [EcEventTime] ASC, [ecEventGkey] ASC;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "mct",
+						"poolName": "Built-in"
+					},
+					"resultLimit": -1
 				},
 				"type": "SqlQuery"
 			},
