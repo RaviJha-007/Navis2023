@@ -192,7 +192,6 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: true,",
-				"     moveFiles: ['/bronze/movehistory/load','bronze/moves/archive'],",
 				"     format: 'delimited',",
 				"     fileSystem: 'cmatk',",
 				"     folderPath: 'bronze/moves/load',",
