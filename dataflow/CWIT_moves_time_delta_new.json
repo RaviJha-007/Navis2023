@@ -127,7 +127,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'cwit',",
-				"     folderPath: 'gold/laden_unladen',",
+				"     folderPath: 'gold/moves_time_delta',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
