@@ -42,6 +42,12 @@
 				},
 				{
 					"name": "aggregate1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "filter4"
 				}
 			],
 			"scriptLines": [
@@ -92,7 +98,7 @@
 				"     fileSystem: 'cwit',",
 				"     folderPath: 'silver/ecevents') ~> ecevents",
 				"split1@LOAD filter(cheKind==\"RTG\" || cheKind==\"QC\") ~> filter1",
-				"aggregate1 alterRow(upsertIf(true()),",
+				"select1 alterRow(upsertIf(true()),",
 				"     insertIf(true())) ~> alterRow1",
 				"derivedColumn2 split(moveKind== \"LOAD\",",
 				"     moveKind== \"DSCH\",",
@@ -112,6 +118,22 @@
 				"          execution_gkey = concat(toString(max(ecEventGkey)), \"_\", max(pow), \"_\", toString(min(ecEventGkey))),",
 				"          exec_delta_15 = iif(((max(EcEventTime) - min(EcEventTime))/60000) > 15, true(), false()),",
 				"     exec_time := (max(EcEventTime) - min(EcEventTime))/60000) ~> aggregate1",
+				"filter4 select(mapColumn(",
+				"          Date,",
+				"          unit,",
+				"          eventTypeDescription,",
+				"          moveKind,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          is_valid_move,",
+				"          t_execution_delta,",
+				"          execution_gkey,",
+				"          exec_delta_15",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"aggregate1 filter(is_valid_move) ~> filter4",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
