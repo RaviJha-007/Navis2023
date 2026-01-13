@@ -405,7 +405,7 @@
 				"     insertable: false,",
 				"     updateable: false,",
 				"     upsertable: true,",
-				"     keys:['mve_gkey','gkey'],",
+				"     keys:['mve_gkey','gkey','Date'],",
 				"     umask: 0777,",
 				"     preCommands: [],",
 				"     postCommands: [],",
