@@ -29,13 +29,7 @@
 					"name": "alterRow1"
 				},
 				{
-					"name": "split1"
-				},
-				{
 					"name": "filter2"
-				},
-				{
-					"name": "filter3"
 				},
 				{
 					"name": "derivedColumn2"
@@ -97,14 +91,9 @@
 				"     format: 'delta',",
 				"     fileSystem: 'cwit',",
 				"     folderPath: 'silver/ecevents') ~> ecevents",
-				"split1@LOAD filter(cheKind==\"RTG\" || cheKind==\"QC\") ~> filter1",
-				"select1 alterRow(upsertIf(true()),",
-				"     insertIf(true())) ~> alterRow1",
-				"derivedColumn2 split(moveKind== \"LOAD\",",
-				"     moveKind== \"DSCH\",",
-				"     disjoint: true) ~> split1@(LOAD, DSCH)",
+				"derivedColumn2 filter(iif(moveKind==\"DSCH\", (cheKind==\"ITV\" || cheKind==\"QC\"), iif(moveKind==\"LOAD\", (cheKind==\"RTG\" || cheKind==\"QC\"),false())) ) ~> filter1",
+				"select1 alterRow(upsertIf(true())) ~> alterRow1",
 				"ecevents filter(eventTypeDescription=='CMPL'&& (cheKind=='RTG' || cheKind=='ITV' || cheKind=='QC') && not(isNull(EcEventTime))) ~> filter2",
-				"split1@DSCH filter(cheKind==\"ITV\" || cheKind==\"QC\") ~> filter3",
 				"filter2 derive(Date = toDate(EcEventTime)) ~> derivedColumn2",
 				"filter1 aggregate(groupBy(Date,",
 				"          unit,",
@@ -115,7 +104,7 @@
 				"          Week),",
 				"     is_valid_move = count(ecEventGkey)>=2,",
 				"          t_execution_delta = (max(EcEventTime) - min(EcEventTime))/60000,",
-				"          execution_gkey = concat(toString(max(ecEventGkey)), \"_\", max(pow), \"_\", toString(min(ecEventGkey))),",
+				"          execution_gkey = concat(toString(max(ecEventGkey)), \"_\", max(unit), \"_\", toString(min(ecEventGkey))),",
 				"          exec_delta_15 = iif(((max(EcEventTime) - min(EcEventTime))/60000) > 15, true(), false()),",
 				"     exec_time := (max(EcEventTime) - min(EcEventTime))/60000) ~> aggregate1",
 				"filter4 select(mapColumn(",
