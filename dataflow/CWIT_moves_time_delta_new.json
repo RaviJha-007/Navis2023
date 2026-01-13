@@ -26,13 +26,22 @@
 					"name": "filter1"
 				},
 				{
-					"name": "derivedColumn1"
-				},
-				{
-					"name": "select1"
-				},
-				{
 					"name": "alterRow1"
+				},
+				{
+					"name": "split1"
+				},
+				{
+					"name": "filter2"
+				},
+				{
+					"name": "filter3"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -82,53 +91,27 @@
 				"     format: 'delta',",
 				"     fileSystem: 'cwit',",
 				"     folderPath: 'silver/ecevents') ~> ecevents",
-				"ecevents filter(cheKind == 'ITV' && (moveKind == 'DSCH' || moveKind == 'LOAD') && (eventTypeDescription == 'TVCO' || eventTypeDescription == 'TYCO')) ~> filter1",
-				"filter1 derive(Date = toDate(EcEventTime),",
-				"          Day_of_Week = dayOfWeek(EcEventTime)) ~> derivedColumn1",
-				"derivedColumn1 select(mapColumn(",
-				"          ecEventGkey,",
-				"          yardGkey,",
-				"          YardID,",
-				"          FcyID,",
-				"          cheKind,",
-				"          cheName = CHE_Name,",
-				"          cheID,",
-				"          EcEventTime,",
-				"          type = eventType,",
-				"          subType = eventSubType,",
-				"          typeDescription = eventTypeDescription,",
-				"          fromCheIdName,",
-				"          ToCheIdName,",
-				"          unitIdName = unit,",
-				"          powName = pow,",
-				"          poolName = pool,",
-				"          workQueue,",
-				"          Laden = travelDistance,",
+				"split1@LOAD filter(cheKind==\"RTG\" || cheKind==\"QC\") ~> filter1",
+				"aggregate1 alterRow(upsertIf(true()),",
+				"     insertIf(true())) ~> alterRow1",
+				"derivedColumn2 split(moveKind== \"LOAD\",",
+				"     moveKind== \"DSCH\",",
+				"     disjoint: true) ~> split1@(LOAD, DSCH)",
+				"ecevents filter(eventTypeDescription=='CMPL'&& (cheKind=='RTG' || cheKind=='ITV' || cheKind=='QC') && not(isNull(EcEventTime))) ~> filter2",
+				"split1@DSCH filter(cheKind==\"ITV\" || cheKind==\"QC\") ~> filter3",
+				"filter2 derive(Date = toDate(EcEventTime)) ~> derivedColumn2",
+				"filter1 aggregate(groupBy(Date,",
+				"          unit,",
+				"          eventTypeDescription,",
 				"          moveKind,",
-				"          isTwinMove = isTwin,",
-				"          UnLaden = startDistance,",
-				"          unitReference = unitRef,",
-				"          tranId = tran_ID,",
-				"          locType,",
-				"          locId = locID,",
-				"          locSlot,",
-				"          opsPosId = opsPosID,",
-				"          unladenLoctype,",
-				"          unladenLocid = unladenLocID,",
-				"          unladenLocSlot,",
-				"          ladenLoctype,",
-				"          ladenLocid = ladenLocID,",
-				"          ladenLocSlot = laden_LocSlot,",
 				"          Year,",
 				"          Month,",
-				"          Week,",
-				"          Date,",
-				"          Day_of_Week",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 alterRow(upsertIf(true()),",
-				"     insertIf(true())) ~> alterRow1",
+				"          Week),",
+				"     is_valid_move = count(ecEventGkey)>=2,",
+				"          t_execution_delta = (max(EcEventTime) - min(EcEventTime))/60000,",
+				"          execution_gkey = concat(toString(max(ecEventGkey)), \"_\", max(pow), \"_\", toString(min(ecEventGkey))),",
+				"          exec_delta_15 = iif(((max(EcEventTime) - min(EcEventTime))/60000) > 15, true(), false()),",
+				"     exec_time := (max(EcEventTime) - min(EcEventTime))/60000) ~> aggregate1",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
