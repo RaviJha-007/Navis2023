@@ -1,5 +1,5 @@
 {
-	"name": "ITV_Violations_TEAGTL",
+	"name": "ITV_Violations_TEAGTL_v2",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -61,6 +61,9 @@
 				},
 				{
 					"name": "derivedColumn3"
+				},
+				{
+					"name": "aggregate2"
 				}
 			],
 			"scriptLines": [
@@ -145,8 +148,8 @@
 				"     escapeChar: '\\\\',",
 				"     quoteChar: '\\\"',",
 				"     columnNamesAsHeader: true) ~> source2",
-				"source1 filter(cheKind==\"ITV\" && (eventTypeDescription==\"AYDR\" || eventTypeDescription==\"TYDR\" || eventTypeDescription==\"AYCO\" || eventTypeDescription==\"TYCO\" || eventTypeDescription==\"AVDR\" || eventTypeDescription==\"TVDR\" || eventTypeDescription==\"AVCO\" || eventTypeDescription==\"TVCO\") && (moveKind==\"DSCH\"||moveKind==\"LOAD\")) ~> filter1",
-				"sort1 window(asc(cheID, true),",
+				"source1 filter(iif(cheKind==\"ITV\", moveKind==\"DSCH\" && (eventTypeDescription==\"AYDR\" || eventTypeDescription==\"TYDR\" || eventTypeDescription==\"CMPL\") , iif(cheKind==\"RTG\", moveKind==\"DSCH\" && (eventTypeDescription==\"DSPT\" || eventTypeDescription==\"CMPL\") , false()))) ~> filter1",
+				"aggregate2 window(asc(cheID, true),",
 				"     asc(EcEventTime, true),",
 				"     asc(ecEventGkey, true),",
 				"     startRowOffset: 1L,",
@@ -157,7 +160,7 @@
 				"          EcEventTime_nxt = lead(EcEventTime),",
 				"          yardBlock_nxt = lead(yardBlock),",
 				"          yardRow_nxt = lead(yardRow)) ~> window1",
-				"derivedColumn2 sort(asc(cheID, true),",
+				"derivedColumn2 sort(asc(unit, true),",
 				"     asc(EcEventTime, true),",
 				"     asc(ecEventGkey, true)) ~> sort1",
 				"select1 alterRow(upsertIf(true())) ~> AlterRow1",
@@ -211,14 +214,21 @@
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
 				"aggregate1 filter(not(isNull(user_id))) ~> filter2",
-				"filter1 derive(eventName = iif(in([\"TVCO\", \"AVCO\", \"TYCO\", \"AYCO\"], eventTypeDescription), \"EVENT_1\", iif(in([\"TYDR\", \"AYDR\", \"TVDR\", \"AVDR\"], eventTypeDescription), \"EVENT_2\", \"EVENT_DEFAULT\")),",
-				"          yardBlock = left(locSlot , 5),",
-				"          yardRow = substring(locSlot , 3, 3)) ~> derivedColumn2",
+				"filter1 derive(yardBlock = left(locSlot , 5),",
+				"          yardRow = substring(locSlot , 3, 3),",
+				"          locslot_new = split(locSlot, \".\")[1],",
+				"          ecEventDate = toDate(toString(EcEventTime), \"yyyy-MM-dd\")) ~> derivedColumn2",
 				"window1 derive(violation = iif(moveKind==\"DSCH\",\r",
 				" iif(cheID==cheID_nxt && eventName==\"EVENT_1\" && eventName_nxt==\"EVENT_2\" && pow!=pow_nxt, 1, 0), \r",
 				"    iif(moveKind==\"LOAD\", \r",
 				"        iif(cheID==cheID_nxt && eventName==\"EVENT_1\" && eventName_nxt==\"EVENT_2\" && (yardBlock!=yardBlock_nxt || yardRow!=yardRow_nxt), 1, 0),0)\r",
 				")) ~> derivedColumn3",
+				"sort1 aggregate(groupBy(ecEventDate,",
+				"          moveKind,",
+				"          unit,",
+				"          cheKind,",
+				"          cheID,",
+				"          CHE_Name)) ~> aggregate2",
 				"AlterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
