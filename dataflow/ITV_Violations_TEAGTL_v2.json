@@ -228,7 +228,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'teagtl',",
-				"     folderPath: 'gold/itv_violation',",
+				"     folderPath: 'gold/itv_violation_laden',",
 				"     mergeSchema: true,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
