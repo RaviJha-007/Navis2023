@@ -58,7 +58,7 @@
 				}
 			},
 			{
-				"name": "ITV_Violations_TEAGTL",
+				"name": "ITV_Violations_TEAGTL_v1",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
@@ -78,7 +78,38 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "ITV_Violations_TEAGTL",
+						"referenceName": "ITV_Violations_TEAGTL_v1",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "ITV_Violations_TEAGTL_v2",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "EcEvents_TEAGTL_new",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "ITV_Violations_TEAGTL_v2",
 						"type": "DataFlowReference"
 					},
 					"compute": {
