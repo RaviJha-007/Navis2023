@@ -4505,7 +4505,7 @@
 						}
 					},
 					{
-						"name": "ITV_Violations_TEAGTL",
+						"name": "ITV_Violations_TEAGTL_v1",
 						"type": "ExecuteDataFlow",
 						"dependsOn": [
 							{
@@ -4525,7 +4525,45 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "ITV_Violations_TEAGTL",
+								"referenceName": "ITV_Violations_TEAGTL_v1",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"source2": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "ITV_Violations_TEAGTL_v2",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "EcEvents_TEAGTL_new",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "ITV_Violations_TEAGTL_v2",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
@@ -4550,8 +4588,10 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/jobstepping_TEAGTL')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
 				"[concat(variables('workspaceId'), '/dataflows/EcEvents_TEAGTL_new')]",
-				"[concat(variables('workspaceId'), '/dataflows/ITV_Violations_TEAGTL')]"
+				"[concat(variables('workspaceId'), '/dataflows/ITV_Violations_TEAGTL_v1')]",
+				"[concat(variables('workspaceId'), '/dataflows/ITV_Violations_TEAGTL_v2')]"
 			]
 		},
 		{
@@ -21202,7 +21242,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/ITV_Violations_TEAGTL')]",
+			"name": "[concat(parameters('workspaceName'), '/ITV_Violations_TEAGTL_v2')]",
 			"type": "Microsoft.Synapse/workspaces/dataflows",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -21266,6 +21306,12 @@
 						},
 						{
 							"name": "derivedColumn3"
+						},
+						{
+							"name": "aggregate2"
+						},
+						{
+							"name": "filter3"
 						}
 					],
 					"scriptLines": [
@@ -21350,54 +21396,47 @@
 						"     escapeChar: '\\\\',",
 						"     quoteChar: '\\\"',",
 						"     columnNamesAsHeader: true) ~> source2",
-						"source1 filter(cheKind==\"ITV\" && (eventTypeDescription==\"AYDR\" || eventTypeDescription==\"TYDR\" || eventTypeDescription==\"AYCO\" || eventTypeDescription==\"TYCO\" || eventTypeDescription==\"AVDR\" || eventTypeDescription==\"TVDR\" || eventTypeDescription==\"AVCO\" || eventTypeDescription==\"TVCO\") && (moveKind==\"DSCH\"||moveKind==\"LOAD\")) ~> filter1",
-						"sort1 window(asc(cheID, true),",
-						"     asc(EcEventTime, true),",
-						"     asc(ecEventGkey, true),",
+						"source1 filter(iif(cheKind==\"ITV\", moveKind==\"DSCH\" && (eventTypeDescription==\"AYDR\" || eventTypeDescription==\"TYDR\" || eventTypeDescription==\"CMPL\") , iif(cheKind==\"RTG\", moveKind==\"DSCH\" && (eventTypeDescription==\"DSPT\" || eventTypeDescription==\"CMPL\") , false()))) ~> filter1",
+						"aggregate2 window(over(Year,",
+						"          Month,",
+						"          Week,",
+						"          ecEventDate,",
+						"          unit),",
+						"     asc(ecEventDate, true),",
+						"     asc(unit, true),",
+						"     asc(cheKind, true),",
 						"     startRowOffset: 1L,",
 						"     endRowOffset: 1L,",
-						"     eventName_nxt = lead(eventName),",
-						"          pow_nxt = lead(pow),",
-						"          cheID_nxt = lead(cheID),",
-						"          EcEventTime_nxt = lead(EcEventTime),",
-						"          yardBlock_nxt = lead(yardBlock),",
-						"          yardRow_nxt = lead(yardRow)) ~> window1",
-						"derivedColumn2 sort(asc(cheID, true),",
+						"     ecEventDate_nxt = lead(ecEventDate),",
+						"          unit_nxt = lead(unit),",
+						"          cheKind_nxt = lead(cheKind),",
+						"          locslot_new_nxt = lead(locslot_new),",
+						"     rangeSpecified: true) ~> window1",
+						"derivedColumn2 sort(asc(unit, true),",
+						"     asc(cheKind, true),",
 						"     asc(EcEventTime, true),",
 						"     asc(ecEventGkey, true)) ~> sort1",
 						"select1 alterRow(upsertIf(true())) ~> AlterRow1",
 						"join1 select(mapColumn(",
-						"          ecEventGkey,",
-						"          YardID,",
-						"          FcyID,",
-						"          cheKind,",
-						"          CHE_Name,",
-						"          eventTypeDescription,",
-						"          unit,",
-						"          pow,",
-						"          pool,",
-						"          workQueue,",
-						"          travelDistance,",
-						"          moveKind,",
-						"          startDistance,",
-						"          locSlot,",
-						"          cheID,",
-						"          EcEventTime,",
-						"          eventName,",
-						"          yardBlock,",
-						"          yardRow,",
-						"          eventName_nxt,",
-						"          pow_nxt,",
-						"          cheID_nxt,",
-						"          EcEventTime_nxt,",
-						"          yardBlock_nxt,",
-						"          yardRow_nxt,",
-						"          operator,",
-						"          user_id,",
 						"          name,",
 						"          Year,",
 						"          Month,",
 						"          Week,",
+						"          ecEventDate,",
+						"          moveKind,",
+						"          unit,",
+						"          cheKind,",
+						"          CHE_Name,",
+						"          eventTypeDescription,",
+						"          pow,",
+						"          pool,",
+						"          operator,",
+						"          user_id,",
+						"          cheID,",
+						"          locslot_new,",
+						"          locslot_new_nxt,",
+						"          EcEventTime,",
+						"          ecEventGkey,",
 						"          violation",
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
@@ -21416,19 +21455,25 @@
 						"     ignoreSpaces: false,",
 						"     broadcast: 'auto')~> join1",
 						"aggregate1 filter(not(isNull(user_id))) ~> filter2",
-						"filter1 derive(eventName = iif(in([\"TVCO\", \"AVCO\", \"TYCO\", \"AYCO\"], eventTypeDescription), \"EVENT_1\", iif(in([\"TYDR\", \"AYDR\", \"TVDR\", \"AVDR\"], eventTypeDescription), \"EVENT_2\", \"EVENT_DEFAULT\")),",
-						"          yardBlock = left(locSlot , 5),",
-						"          yardRow = substring(locSlot , 3, 3)) ~> derivedColumn2",
-						"window1 derive(violation = iif(moveKind==\"DSCH\",\r",
-						" iif(cheID==cheID_nxt && eventName==\"EVENT_1\" && eventName_nxt==\"EVENT_2\" && pow!=pow_nxt, 1, 0), \r",
-						"    iif(moveKind==\"LOAD\", \r",
-						"        iif(cheID==cheID_nxt && eventName==\"EVENT_1\" && eventName_nxt==\"EVENT_2\" && (yardBlock!=yardBlock_nxt || yardRow!=yardRow_nxt), 1, 0),0)\r",
-						")) ~> derivedColumn3",
+						"filter1 derive(locslot_new = split(locSlot, \".\")[1],",
+						"          ecEventDate = toDate(toString(EcEventTime), \"yyyy-MM-dd\")) ~> derivedColumn2",
+						"filter3 derive(violation = iif(moveKind==\"DSCH\" && unit==unit_nxt && ecEventDate==ecEventDate_nxt && locslot_new!=locslot_new_nxt, 1, 0)) ~> derivedColumn3",
+						"sort1 aggregate(groupBy(Year,",
+						"          Month,",
+						"          Week,",
+						"          ecEventDate,",
+						"          moveKind,",
+						"          unit,",
+						"          cheKind),",
+						"     each(match(name=='eventTypeDescription'||name=='pow'||name=='pool'||name=='locslot_new'||name=='operator'||name=='CHE_Name'||name=='cheID'), $$ = last($$)),",
+						"          EcEventTime = max(EcEventTime),",
+						"          ecEventGkey = max(ecEventGkey)) ~> aggregate2",
+						"window1 filter(cheKind==\"ITV\") ~> filter3",
 						"AlterRow1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'delta',",
 						"     fileSystem: 'teagtl',",
-						"     folderPath: 'gold/itv_violation',",
+						"     folderPath: 'gold/itv_violation_laden',",
 						"     mergeSchema: true,",
 						"     autoCompact: true,",
 						"     optimizedWrite: true,",
