@@ -75,7 +75,7 @@
 		"typeProperties": {
 			"recurrence": {
 				"frequency": "Day",
-				"interval": 2,
+				"interval": 1,
 				"startTime": "2024-09-04T04:45:00",
 				"timeZone": "India Standard Time",
 				"schedule": {
