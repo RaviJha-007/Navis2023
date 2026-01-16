@@ -1123,6 +1123,53 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "RTG_violations_CMSA_new",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Moves_CMSA",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Decking_CMSA",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "RTG_violations_CMSA_new",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"MoveHistory": {},
+									"DeckingHistory": {},
+									"XpsEcUser": {},
+									"violation": {},
+									"decking": {},
+									"move": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
@@ -1132,7 +1179,9 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/Moves_CMSA')]",
-				"[concat(variables('workspaceId'), '/dataflows/Decking_CMSA')]"
+				"[concat(variables('workspaceId'), '/dataflows/Decking_CMSA')]",
+				"[concat(variables('workspaceId'), '/dataflows/RTG_violations_CMSA_new')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
 			]
 		},
 		{
@@ -6129,11 +6178,47 @@
 						}
 					},
 					{
-						"name": "RTG_violations_CMSA",
+						"name": "Decking_CMSA",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Decking_CMSA",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"CSV": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "RTG_violations_CMSA_new",
 						"type": "ExecuteDataFlow",
 						"dependsOn": [
 							{
 								"activity": "Moves_CMSA",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Decking_CMSA",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -6149,7 +6234,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "RTG_violations_CMSA",
+								"referenceName": "RTG_violations_CMSA_new",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
@@ -6178,9 +6263,11 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/Moves_CMSA')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
 				"[concat(variables('workspaceId'), '/dataflows/Rehandle_new_cmsa')]",
 				"[concat(variables('workspaceId'), '/dataflows/Dual Cycling_cmsa')]",
-				"[concat(variables('workspaceId'), '/dataflows/RTG_violations_CMSA')]"
+				"[concat(variables('workspaceId'), '/dataflows/Decking_CMSA')]",
+				"[concat(variables('workspaceId'), '/dataflows/RTG_violations_CMSA_new')]"
 			]
 		},
 		{
