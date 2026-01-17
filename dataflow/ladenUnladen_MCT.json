@@ -125,6 +125,7 @@
 				"     format: 'delta',",
 				"     fileSystem: 'mct',",
 				"     folderPath: 'gold/laden_unladen',",
+				"     deltaTruncate: true,",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
