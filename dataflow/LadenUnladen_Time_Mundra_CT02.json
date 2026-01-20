@@ -1,5 +1,5 @@
 {
-	"name": "TTWaitTime_mundra_ct02",
+	"name": "LadenUnladen_Time_Mundra_CT02",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
