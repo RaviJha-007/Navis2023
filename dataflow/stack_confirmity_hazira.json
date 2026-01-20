@@ -48,6 +48,9 @@
 				},
 				{
 					"name": "select2"
+				},
+				{
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -79,12 +82,13 @@
 				"     columnNamesAsHeader: true,",
 				"     skipLines: -2) ~> StackConfirmity",
 				"StackConfirmity derive(Pos_WO_Tier = iif(isInteger(right({Current Position}, 1)), left({Current Position}, length({Current Position}) - 1), {Current Position}),",
-				"          Date = :stack_date,",
-				"          Week = iif(dayOfWeek(:stack_date) == 1,  weekOfYear(:stack_date) + 1, weekOfYear(:stack_date)),",
+				"          Date = iif(length(:FileDatePart)==8, toDate(:FileDatePart, 'yyyyMMdd'),\r",
+				" iif(length(:FileDatePart)==6, toDate(:FileDatePart, 'ddMMyy'),currentDate())\r",
+				"),",
 				"          Stacking_Factor = {Stacking Factor},",
 				"          stacking_array := split({Stacking Factor}, '/'),",
-				"          stack_date := toDate(substring(FileDate, -10, 6), 'ddMMyy')) ~> derivedColumn1",
-				"derivedColumn1 window(over(Date,",
+				"          FileDatePart := split(split(FileDate,\".\")[1],\"/\")[5]) ~> derivedColumn1",
+				"derivedColumn2 window(over(Date,",
 				"          Pos_WO_Tier),",
 				"     asc(Stacking_Factor, true),",
 				"     stackrank = rank()) ~> window1",
@@ -125,6 +129,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
+				"derivedColumn1 derive(Week = iif(dayOfWeek(Date) == 1,  weekOfYear(Date) + 1, weekOfYear(Date))) ~> derivedColumn2",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
