@@ -48,6 +48,9 @@
 				},
 				{
 					"name": "select2"
+				},
+				{
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -78,11 +81,11 @@
 				"     quoteChar: '',",
 				"     columnNamesAsHeader: true,",
 				"     skipLines: -2) ~> SectionConfirmity",
-				"SectionConfirmity derive(Date = toDate(substring(FileDate, -10, 6), 'ddMMyy'),",
-				"          Week = iif(dayOfWeek(toDate(substring(FileDate, -10, 6), 'ddMMyy')) == 1,  weekOfYear(toDate(substring(FileDate, -10, 6), 'ddMMyy')) + 1, weekOfYear(toDate(substring(FileDate, -10, 6), 'ddMMyy'))),",
+				"SectionConfirmity derive(Date = iif(length(:FileDatePart)==8, toDate(:FileDatePart, 'yyyyMMdd'), iif(length(:FileDatePart)==6, toDate(:FileDatePart, 'ddMMyy'),currentDate())),",
 				"          Yard_Block = left({Yard Row}, 3),",
-				"          stacking_array := split({Stacking Factor}, '/')) ~> derivedColumn1",
-				"derivedColumn1 window(over(Date,",
+				"          stacking_array := split({Stacking Factor}, '/'),",
+				"          FileDatePart := split(split(FileDate,\".\")[1],\"/\")[5]) ~> derivedColumn1",
+				"derivedColumn2 window(over(Date,",
 				"          {Yard Row}),",
 				"     asc({Section Factor}, true),",
 				"     sectionrank = rank()) ~> window1",
@@ -117,13 +120,14 @@
 				"select1 sort(asc(Date, true),",
 				"     asc({Container No}, true)) ~> sort1",
 				"join1 filter(not(isDate({Container No.})) && not(isNull({Container No.})) && {Container No.} != '') ~> filter1",
-				"select2 alterRow(insertIf(true())) ~> alterRow1",
+				"select2 alterRow(upsertIf(true())) ~> alterRow1",
 				"sort1 select(mapColumn(",
 				"          each(match(true()),",
 				"               regexReplace($$,' ','_') = $$)",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
+				"derivedColumn1 derive(Week = iif(dayOfWeek(Date) == 1,  weekOfYear(Date) + 1, weekOfYear(Date))) ~> derivedColumn2",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
