@@ -69,6 +69,12 @@
 					"referenceName": "cwit_moves",
 					"type": "PipelineReference"
 				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "CWIT_ecevents",
+					"type": "PipelineReference"
+				}
 			}
 		],
 		"type": "ScheduleTrigger",
