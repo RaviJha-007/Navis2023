@@ -136,7 +136,7 @@
 				"     deletable: false,",
 				"     insertable: false,",
 				"     updateable: false,",
-				"     upsertable: false,",
+				"     upsertable: true,",
 				"     keys:['ecEventGkey'],",
 				"     umask: 0777,",
 				"     preCommands: [],",
