@@ -115,6 +115,7 @@
 				"     format: 'delta',",
 				"     fileSystem: 'rio',",
 				"     folderPath: 'gold/laden_unladen',",
+				"     deltaTruncate: true,",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
