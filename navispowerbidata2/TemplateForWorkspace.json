@@ -14731,6 +14731,7 @@
 						"     format: 'delta',",
 						"     fileSystem: 'cwit',",
 						"     folderPath: 'gold/moves_time_delta',",
+						"     deltaTruncate: true,",
 						"     mergeSchema: false,",
 						"     autoCompact: false,",
 						"     optimizedWrite: false,",
