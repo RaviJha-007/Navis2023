@@ -75,6 +75,12 @@
 					"referenceName": "CWIT_ecevents",
 					"type": "PipelineReference"
 				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "mundra_ct02",
+					"type": "PipelineReference"
+				}
 			}
 		],
 		"type": "ScheduleTrigger",
