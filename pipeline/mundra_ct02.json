@@ -117,7 +117,7 @@
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "EcEvents_mundra_ct02",
+						"activity": "MoveSrc_mundra_ct02",
 						"dependencyConditions": [
 							"Succeeded"
 						]
