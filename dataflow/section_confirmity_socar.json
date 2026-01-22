@@ -71,7 +71,7 @@
 				"     rowUrlColumn: 'FileDate',",
 				"     format: 'delimited',",
 				"     fileSystem: 'socar',",
-				"     folderPath: 'bronze/stackconformity/load',",
+				"     folderPath: '/bronze/sectionconformity/load',",
 				"     columnDelimiter: '\\t',",
 				"     escapeChar: '\\\\',",
 				"     quoteChar: '',",
