@@ -184,7 +184,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'off')~> join1",
-				"source1 filter(Year >=2025 && Week >=28 && Month >= 7) ~> filter2",
+				"source1 filter(Year >=2025 && Week >=28 && Month >= 7 || Year >= 2026) ~> filter2",
 				"AlterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
