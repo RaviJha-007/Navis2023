@@ -291,7 +291,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1 filter(From_Location != 'YARD' && Unit_Nbr != '' && not(isNull(Unit_Nbr)) && !startsWith(split(To_Position_Name, \"-\")[3], 'CR') && t_put > addDays(time_stamp, -15)) ~> filter2",
+				"join1 filter(From_Location != 'YARD' && Unit_Nbr != '' && not(isNull(Unit_Nbr))  && !startsWith(split(To_Position_Name, \"-\")[3], 'CR') && t_put > addDays(time_stamp, -15)) ~> filter2",
 				"filter2 derive(MH_t_put_4 = add(t_put , -4*60*60*1000),",
 				"          DH_timestamp_within_4 = iif((time_stamp >= add(t_put , -4*60*60*1000)) && (time_stamp <= t_put), 1, 0),",
 				"          MH_To_Position_Name_Short = split(To_Position_Name, \"-\")[3],",
