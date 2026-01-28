@@ -64182,7 +64182,7 @@
 						"     validateSchema: false,",
 						"     format: 'delta',",
 						"     fileSystem: 'hhab',",
-						"     folderPath: 'gold/rtg_violation',",
+						"     folderPath: 'gold/violation',",
 						"     mergeSchema: false,",
 						"     autoCompact: true,",
 						"     optimizedWrite: true,",
