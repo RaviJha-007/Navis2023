@@ -366,7 +366,6 @@
 				"     format: 'delta',",
 				"     fileSystem: 'cmsa',",
 				"     folderPath: 'gold/rtg_violation',",
-				"     deltaTruncate: true,",
 				"     mergeSchema: false,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
