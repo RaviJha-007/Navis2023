@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "section_confirmity_HHAB",
+				"name": "section_confirmity_HHAB_v2",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "section_confirmity_HHAB",
+						"referenceName": "section_confirmity_HHAB_v2",
 						"type": "DataFlowReference"
 					},
 					"compute": {
