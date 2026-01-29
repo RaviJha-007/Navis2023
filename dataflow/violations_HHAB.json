@@ -361,7 +361,7 @@
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
 				"     vacuum: 0,",
-				"     deletable: false,",
+				"     deletable: true,",
 				"     insertable: false,",
 				"     updateable: false,",
 				"     upsertable: true,",
