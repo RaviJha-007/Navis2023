@@ -356,7 +356,6 @@
 				"     format: 'delta',",
 				"     fileSystem: 'hhab',",
 				"     folderPath: 'gold/violation',",
-				"     deltaTruncate: true,",
 				"     mergeSchema: false,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
