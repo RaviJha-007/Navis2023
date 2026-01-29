@@ -105,7 +105,7 @@
 				"          {Yard Row} = SectionConfirmity@{Yard Row},",
 				"          Cat,",
 				"          Sts,",
-				"          {Section Factor} = SectionConfirmity@{Section Factor},",
+				"          {Section Factor},",
 				"          Date = derivedColumn1@Date,",
 				"          Week,",
 				"          Section_conformity",
