@@ -238,7 +238,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'kln',",
-				"     folderPath: 'gold/jobstep',",
+				"     folderPath: 'gold/jobstep_missed',",
 				"     mergeSchema: true,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
