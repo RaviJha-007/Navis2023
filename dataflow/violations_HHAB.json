@@ -33,20 +33,6 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "violation"
-				},
-				{
-					"linkedService": {
-						"referenceName": "linkedService2",
-						"type": "LinkedServiceReference"
-					},
-					"name": "decking"
-				},
-				{
-					"linkedService": {
-						"referenceName": "linkedService2",
-						"type": "LinkedServiceReference"
-					},
-					"name": "move"
 				}
 			],
 			"transformations": [
@@ -88,15 +74,6 @@
 				},
 				{
 					"name": "alterRow1"
-				},
-				{
-					"name": "AlterRow2"
-				},
-				{
-					"name": "alterRow3"
-				},
-				{
-					"name": "select6"
 				},
 				{
 					"name": "filter5"
@@ -264,6 +241,7 @@
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"DeckingHistory select(mapColumn(",
 				"          gkey,",
+				"          uyv_gkey,",
 				"          unit_id,",
 				"          time_stamp,",
 				"          decking_Type = decking_type,",
@@ -328,6 +306,7 @@
 				"          {MH Put CHE Operator Id} = select1@Put_CHE_Operator_Id,",
 				"          mve_gkey = aggregate1@mve_gkey,",
 				"          gkey = select2@gkey,",
+				"          ufv_gkey,",
 				"          {MH Put CHE Id} = select1@Put_CHE_Id,",
 				"          {Freight Kind Id} = select1@Freight_Kind_Id,",
 				"          MaxDHTime,",
@@ -354,14 +333,6 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
 				"select5 alterRow(upsertIf(true())) ~> alterRow1",
-				"select6 alterRow(upsertIf(true())) ~> AlterRow2",
-				"select1 alterRow(upsertIf(true())) ~> alterRow3",
-				"filter5 select(mapColumn(",
-				"          each(match(true()),",
-				"               regexReplace($$,' ','_') = $$)",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select6",
 				"select2 filter(not(isNull(gkey)) && (decking_Type == 'Bump Intruder' || decking_Type == 'Vessel Discharge' || decking_Type == 'Vessel Discharge - Twin' || decking_Type == 'XD Drop if Floating Refine' || decking_Type == 'XD Refine Request' || decking_Type == 'XD Rehandle Request')) ~> filter5",
 				"join6 derive(Block_To_Block_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 3) != substring(DH_To_Position_Name_Short_5, 1, 3), true(), false()),",
 				"          Same_Block_Violation = iif( (substring(MH_To_Position_Name_Short_5, 1, 3) == substring(DH_To_Position_Name_Short_5, 1, 3)) && (substring(MH_To_Position_Name_Short_5, 5, 2) == substring(DH_To_Position_Name_Short_5, 5, 2)), false(), true()),",
@@ -385,25 +356,6 @@
 				"     format: 'delta',",
 				"     fileSystem: 'hhab',",
 				"     folderPath: 'gold/violation',",
-				"     mergeSchema: false,",
-				"     autoCompact: true,",
-				"     optimizedWrite: true,",
-				"     vacuum: 0,",
-				"     deletable: false,",
-				"     insertable: false,",
-				"     updateable: false,",
-				"     upsertable: true,",
-				"     keys:['mve_gkey','gkey','Date'],",
-				"     umask: 0777,",
-				"     preCommands: [],",
-				"     postCommands: [],",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> violation",
-				"AlterRow2 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'delta',",
-				"     fileSystem: 'hhab',",
-				"     folderPath: 'gold/decking',",
 				"     deltaTruncate: true,",
 				"     mergeSchema: false,",
 				"     autoCompact: true,",
@@ -413,32 +365,12 @@
 				"     insertable: false,",
 				"     updateable: false,",
 				"     upsertable: true,",
-				"     keys:['gkey'],",
+				"     keys:['mve_gkey','gkey','ufv_gkey','MH_Unit_Nbr','Date'],",
 				"     umask: 0777,",
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> decking",
-				"alterRow3 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'delta',",
-				"     fileSystem: 'hhab',",
-				"     folderPath: 'gold/move',",
-				"     deltaTruncate: true,",
-				"     mergeSchema: false,",
-				"     autoCompact: true,",
-				"     optimizedWrite: true,",
-				"     vacuum: 0,",
-				"     deletable: false,",
-				"     insertable: false,",
-				"     updateable: false,",
-				"     upsertable: true,",
-				"     keys:['mve_gkey'],",
-				"     umask: 0777,",
-				"     preCommands: [],",
-				"     postCommands: [],",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> move"
+				"     skipDuplicateMapOutputs: true) ~> violation"
 			]
 		}
 	}
