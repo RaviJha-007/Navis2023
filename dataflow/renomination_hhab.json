@@ -53,7 +53,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     inferDriftedColumnTypes: true,",
-				"     ignoreNoFilesFound: false,",
+				"     ignoreNoFilesFound: true,",
 				"     moveFiles: ['/bronze/renomination/load','/bronze/renomination/archive'],",
 				"     format: 'delimited',",
 				"     fileSystem: 'hhab',",
