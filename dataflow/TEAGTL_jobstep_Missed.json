@@ -123,7 +123,7 @@
 				"     escapeChar: '\\\\',",
 				"     quoteChar: '\\\"',",
 				"     columnNamesAsHeader: true) ~> xpseceuser",
-				"select2 filter(not(isNull(ecEventGkey)) && cheKind==\"ITV\" && (eventTypeDescription==\"AYCO\" || eventTypeDescription==\"TVDR\" || eventTypeDescription==\"AVDR\" || eventTypeDescription==\"AVCO\" || eventTypeDescription==\"TYDR\" || eventTypeDescription==\"AYDR\" ) && (moveKind==\"DSCH\"||moveKind==\"LOAD\")) ~> filter1",
+				"select2 filter(not(isNull(ecEventGkey)) && cheKind == \"ITV\" && (eventTypeDescription == \"AYCO\" || eventTypeDescription==\"TVDR\" || eventTypeDescription==\"AVDR\" || eventTypeDescription==\"AVCO\" || eventTypeDescription==\"TYDR\" || eventTypeDescription==\"AYDR\" ) && (moveKind == \"DSCH\"|| moveKind == \"LOAD\")) ~> filter1",
 				"filter1 window(over(cheID),",
 				"     asc(EcEventTime, true),",
 				"     asc(ecEventGkey, true),",
