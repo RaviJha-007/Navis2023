@@ -1,5 +1,5 @@
 {
-	"name": "KLN_jobstepping",
+	"name": "KLN_jobstep_Missed",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -145,7 +145,7 @@
 				"        iif(eventTypeDescription_lag != 'AYCO' || isNull(eventTypeDescription_lag), 'Load-Miss Arrive at Row', 'No Violation'))),\r",
 				"    \r",
 				"    eventTypeDescription == 'TYDR', \r",
-				"        iif((eventTypeDescription_nxt != 'AYDR' || isNull(eventTypeDescription_nxt)) && (eventTypeDescription_lag != 'AVCO' || isNull(eventTypeDescription_lag)), 'Violation at Vessel and Row',\r",
+				"        iif((eventTypeDescription_nxt != 'AYDR' || isNull(eventTypeDescription_nxt)) && (eventTypeDescription_lag != 'AVCO' || isNull(eventTypeDescription_lag)), 'Miss at Vessel and Row',\r",
 				"        iif(eventTypeDescription_nxt != 'AYDR' || isNull(eventTypeDescription_nxt), 'DSCH-Miss Arrive at Row',\r",
 				"        iif(eventTypeDescription_lag != 'AVCO' || isNull(eventTypeDescription_lag), 'DSCH-Miss Arrive at Vessel', 'No Violation'))),\r",
 				"    \r",
