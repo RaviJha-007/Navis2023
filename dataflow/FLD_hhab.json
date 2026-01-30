@@ -33,6 +33,9 @@
 				},
 				{
 					"name": "AlterRow1"
+				},
+				{
+					"name": "window1"
 				}
 			],
 			"scriptLines": [
@@ -60,7 +63,7 @@
 				"          total_score as long,",
 				"          execution_time as long,",
 				"          phase as string,",
-				"          time_stamp as string,",
+				"          time_stamp as timestamp,",
 				"          Year as integer,",
 				"          Month as integer,",
 				"          Week as integer",
@@ -106,8 +109,14 @@
 				"select2 filter((decking_type == 'Bump Intruder' || decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin' || decking_type == 'Gate Receival Assign Position') && to_pos_slot=='FLD') ~> filter1",
 				"filter1 derive(Decking_Type = iif((decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin'), 'Vessel Discharge',decking_type),",
 				"          Year_Week = (Year * 100) + Week,",
-				"          Year_Month = (Year * 100) + Month) ~> derivedColumn1",
-				"derivedColumn1 alterRow(upsertIf(true())) ~> AlterRow1",
+				"          Year_Month = (Year * 100) + Month,",
+				"          Date = toDate(time_stamp)) ~> derivedColumn1",
+				"window1 alterRow(upsertIf(true())) ~> AlterRow1",
+				"derivedColumn1 window(over(Date,",
+				"          unit_id,",
+				"          derivedColumn1@Decking_Type),",
+				"     asc(time_stamp, true),",
+				"     fld_actual_count = iif((rank() > 1), 0, 1) ) ~> window1",
 				"AlterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -121,12 +130,38 @@
 				"     insertable: false,",
 				"     updateable: false,",
 				"     upsertable: true,",
-				"     keys:['mve_gkey','gkey','ufv_gkey','MH_Unit_Nbr','Date'],",
+				"     keys:['gkey','ufv_gkey','unit_id','Date'],",
 				"     umask: 0777,",
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> fld"
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          gkey,",
+				"          uyv_gkey,",
+				"          unit_id,",
+				"          decking_type = select2@decking_type,",
+				"          from_pos_locid,",
+				"          from_pos_slot,",
+				"          from_pos_name,",
+				"          from_pos_tier,",
+				"          to_pos_locid,",
+				"          to_pos_slot,",
+				"          to_pos_name,",
+				"          to_pos_tier,",
+				"          total_score,",
+				"          execution_time,",
+				"          phase,",
+				"          time_stamp,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          Decking_Type = derivedColumn1@Decking_Type,",
+				"          Year_Week,",
+				"          Year_Month,",
+				"          Date,",
+				"          fld_actual_count",
+				"     )) ~> fld"
 			]
 		}
 	}
