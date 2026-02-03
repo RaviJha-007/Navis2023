@@ -18,7 +18,7 @@
 						"referenceName": "linkedService2",
 						"type": "LinkedServiceReference"
 					},
-					"name": "StackConformity"
+					"name": "StackConformitySocar"
 				}
 			],
 			"transformations": [
@@ -139,7 +139,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> StackConformity"
+				"     skipDuplicateMapOutputs: true) ~> StackConformitySocar"
 			]
 		}
 	}
