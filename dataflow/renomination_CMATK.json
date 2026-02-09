@@ -1,0 +1,112 @@
+{
+	"name": "renomination_CMATK",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "AlterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {Container Nbr} as string,",
+				"          Status as string,",
+				"          {Current POD} as string,",
+				"          {Outbound Carrier} as string,",
+				"          {Outbound Service} as string,",
+				"          {POD Changes} as string,",
+				"          {Outbound Carrier Changes} as string,",
+				"          {Re-route Time} as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: true,",
+				"     moveFiles: ['/bronze/renomination/load','/bronze/renomination/archive'],",
+				"     format: 'delimited',",
+				"     fileSystem: 'cmatk',",
+				"     folderPath: 'bronze/renomination/load',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> source1",
+				"source1 select(mapColumn(",
+				"          each(match(true()),",
+				"               regexReplace($$,'[ -]+','_') = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select2 filter(not((trim(POD_Changes)=='NULL' || isNull(POD_Changes)) && (trim(Outbound_Carrier_Changes)=='NULL' || isNull(Outbound_Carrier_Changes))) && not(trim(Container_Nbr)=='NULL' || isNull(Container_Nbr)) && not(trim(Re_route_Time)=='NULL' || isNull(Re_route_Time))) ~> filter1",
+				"filter1 derive(Re_route_Time = coalesce(toTimestamp(Re_route_Time,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(Re_route_Time,'MM/dd/yyyy HH:mm:ss'),toTimestamp(Re_route_Time,'dd-MM-yy HH:mm:ss'),toTimestamp(Re_route_Time,'dd/MM/yyyy\\'T\\'HH:mm:ss'),toTimestamp(Re_route_Time,'dd/MM/yyyy HH:mm:ss'),toTimestamp(Re_route_Time,'dd-MM-yyyy HH:mm:ss')),",
+				"          Re_route_Date = :date,",
+				"          POD_Change_Flag = iif((trim(POD_Changes)=='NULL' || isNull(POD_Changes)),0,1),",
+				"          Outbound_Carrier_Change_Flag = iif((trim(Outbound_Carrier_Changes)=='NULL' || isNull(Outbound_Carrier_Changes)),0,1),",
+				"          date := toDate((Re_route_Time) ,\"dd/MM/yyyy\")) ~> derivedColumn1",
+				"select1 select(mapColumn(",
+				"          Container_Nbr,",
+				"          Status,",
+				"          Current_POD,",
+				"          Outbound_Carrier,",
+				"          Outbound_Service,",
+				"          POD_Changes,",
+				"          Outbound_Carrier_Changes,",
+				"          Re_route_Time",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"derivedColumn1 alterRow(upsertIf(true())) ~> AlterRow1",
+				"AlterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'cmatk',",
+				"     folderPath: 'gold/renomination',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Container_Nbr','Status','Current_POD','Outbound_Carrier','Outbound_Service','POD_Changes','Outbound_Carrier_Changes','Re_route_Time'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
