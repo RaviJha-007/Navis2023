@@ -87,7 +87,7 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false,",
+				"     ignoreNoFilesFound: true,",
 				"     format: 'delta',",
 				"     fileSystem: ($Customer),",
 				"     folderPath: 'silver/ecevents') ~> ecevents",
