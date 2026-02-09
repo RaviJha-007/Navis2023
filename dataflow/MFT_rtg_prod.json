@@ -158,7 +158,7 @@
 				"     format: 'delta',",
 				"     fileSystem: ($Customer),",
 				"     folderPath: 'silver/moves') ~> moves",
-				"ecevents filter(cheKind == 'ITV' && (moveKind == 'DSCH' || moveKind == 'LOAD') && (typeDescription == 'TVCO' || typeDescription == 'TYCO')) ~> filter1",
+				"ecevents filter(cheKind == 'RTG' && (typeDescription == 'LGON' || typeDescription == 'LGOFF')) ~> filter1",
 				"filter1 derive(Date = toDate(EcEventTime),",
 				"          Day_of_Week = dayOfWeek(EcEventTime)) ~> derivedColumn1",
 				"derivedColumn1 select(mapColumn(",
