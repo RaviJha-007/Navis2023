@@ -1,9 +1,40 @@
 {
-	"name": "cmsa_moves",
+	"name": "HHAB",
 	"properties": {
 		"activities": [
 			{
-				"name": "Moves_CMSA",
+				"name": "FLD_hhab",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "Decking_HHAB",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "FLD_hhab",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "MoveSrc_HHAB",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +47,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "Moves_CMSA",
+						"referenceName": "MoveSrc_HHAB",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -27,69 +58,7 @@
 				}
 			},
 			{
-				"name": "Rehandle_new_cmsa",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "Moves_CMSA",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "Rehandle_new_cmsa",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "Dual Cycling_cmsa",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "Moves_CMSA",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "Dual Cycling_cmsa",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "Decking_CMSA",
+				"name": "Decking_HHAB",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -102,7 +71,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "Decking_CMSA",
+						"referenceName": "Decking_HHAB",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -113,17 +82,41 @@
 				}
 			},
 			{
-				"name": "RTG_violations_CMSA_new",
+				"name": "renomination_hhab",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "renomination_hhab",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "violations_HHAB",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "Moves_CMSA",
+						"activity": "Decking_HHAB",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					},
 					{
-						"activity": "Decking_CMSA",
+						"activity": "MoveSrc_HHAB",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -139,7 +132,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "RTG_violations_CMSA_new",
+						"referenceName": "violations_HHAB",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -150,11 +143,11 @@
 				}
 			},
 			{
-				"name": "FLD_cmsa",
+				"name": "Rehandle_HHAB",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "Decking_CMSA",
+						"activity": "MoveSrc_HHAB",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -170,7 +163,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "FLD_cmsa",
+						"referenceName": "Rehandle_HHAB",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -181,8 +174,6 @@
 				}
 			}
 		],
-		"annotations": [],
-		"lastPublishTime": "2023-05-25T03:09:56Z"
-	},
-	"type": "Microsoft.Synapse/workspaces/pipelines"
+		"annotations": []
+	}
 }

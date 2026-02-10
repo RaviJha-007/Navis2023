@@ -81,7 +81,7 @@
 				"     ignoreNoFilesFound: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'mict',",
-				"     folderPath: 'silver/ecevents') ~> ecevents",
+				"     folderPath: 'silver/ecevents_v2') ~> ecevents",
 				"ecevents filter(cheKind == 'ITV' && (moveKind == 'DSCH' || moveKind == 'LOAD') && (eventTypeDescription == 'TVCO' || eventTypeDescription == 'TYCO')) ~> filter1",
 				"filter1 derive(Date = toDate(EcEventTime),",
 				"          Day_of_Week = dayOfWeek(EcEventTime)) ~> derivedColumn1",

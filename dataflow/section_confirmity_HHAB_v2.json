@@ -1,5 +1,5 @@
 {
-	"name": "stack_conformity_socar",
+	"name": "section_confirmity_HHAB_v2",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -9,7 +9,7 @@
 						"referenceName": "linkedService2",
 						"type": "LinkedServiceReference"
 					},
-					"name": "StackConfirmity"
+					"name": "SectionConfirmity"
 				}
 			],
 			"sinks": [
@@ -18,7 +18,7 @@
 						"referenceName": "linkedService2",
 						"type": "LinkedServiceReference"
 					},
-					"name": "StackConformitySocar"
+					"name": "SectionConformity"
 				}
 			],
 			"transformations": [
@@ -63,33 +63,34 @@
 				"          Sts as string,",
 				"          {Section Factor} as string",
 				"     ),",
-				"     useSchema: true,",
-				"     allowSchemaDrift: false,",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: true,",
-				"     moveFiles: ['/bronze/stackconformity/load','bronze/sectionconformity/load'],",
+				"     moveFiles: ['/bronze/sectionconformity/load','bronze/sectionconformity/archive'],",
 				"     rowUrlColumn: 'FileDate',",
 				"     format: 'delimited',",
-				"     fileSystem: 'socar',",
-				"     folderPath: 'bronze/stackconformity/load',",
+				"     fileSystem: 'hhab',",
+				"     folderPath: '/bronze/sectionconformity/load',",
 				"     columnDelimiter: '\\t',",
 				"     escapeChar: '\\\\',",
 				"     quoteChar: '',",
 				"     columnNamesAsHeader: true,",
-				"     skipLines: -2) ~> StackConfirmity",
-				"StackConfirmity derive(Pos_WO_Tier = iif(isInteger(right({Current Position}, 1)), left({Current Position}, length({Current Position}) - 1), {Current Position}),",
-				"          Date = toDate(substring(FileDate, -12, 8), 'yyyyMMdd'),",
+				"     skipLines: -2) ~> SectionConfirmity",
+				"SectionConfirmity derive(Date = toDate(substring(FileDate, -12, 8), 'yyyyMMdd'),",
 				"          Week = iif(dayOfWeek(toDate(substring(FileDate, -12, 8), 'yyyyMMdd')) == 1,  weekOfYear(toDate(substring(FileDate, -12, 8), 'yyyyMMdd')) + 1, weekOfYear(toDate(substring(FileDate, -12, 8), 'yyyyMMdd'))),",
+				"          {Section Factor} = {Stacking Factor},",
 				"          stacking_array := split({Stacking Factor}, '/')) ~> derivedColumn1",
 				"derivedColumn1 window(over(Date,",
-				"          Pos_WO_Tier),",
-				"     asc({Stacking Factor}, true),",
-				"     stackrank = rank()) ~> window1",
+				"          {Yard Row}),",
+				"     asc({Section Factor}, true),",
+				"     sectionrank = rank()) ~> window1",
 				"window1 aggregate(groupBy(Date,",
-				"          Pos_WO_Tier),",
-				"     Stack_confirmty = iif(max(stackrank) > 1, 'Mix', 'Pure')) ~> aggregate1",
+				"          {Yard Row}),",
+				"     Section_conformity = iif(max(sectionrank) > 1, 'Mix', 'Pure')) ~> aggregate1",
 				"window1, aggregate1 join(derivedColumn1@Date == aggregate1@Date",
-				"     && derivedColumn1@Pos_WO_Tier == aggregate1@Pos_WO_Tier,",
+				"     && SectionConfirmity@{Yard Row} == aggregate1@{Yard Row},",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -101,14 +102,13 @@
 				"          {Blk Typ},",
 				"          Type = Class,",
 				"          {Current position} = {Current Position},",
-				"          {Yard Row},",
+				"          {Yard Row} = SectionConfirmity@{Yard Row},",
 				"          Cat,",
 				"          Sts,",
 				"          {Section Factor},",
-				"          Pos_WO_Tier = derivedColumn1@Pos_WO_Tier,",
 				"          Date = derivedColumn1@Date,",
 				"          Week,",
-				"          Stack_confirmty",
+				"          Section_conformity",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
@@ -125,8 +125,8 @@
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
-				"     fileSystem: 'socar',",
-				"     folderPath: 'gold/stack_confirmity',",
+				"     fileSystem: 'hhab',",
+				"     folderPath: 'gold/section_conformity',",
 				"     mergeSchema: true,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
@@ -139,7 +139,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> StackConformitySocar"
+				"     skipDuplicateMapOutputs: true) ~> SectionConformity"
 			]
 		}
 	}

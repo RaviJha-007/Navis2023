@@ -1,0 +1,227 @@
+{
+	"name": "ITV_Violations_socar_v1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source1"
+				},
+				{
+					"linkedService": {
+						"referenceName": "navispowerbidata2-WorkspaceDefaultStorage",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "AlterRow1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "filter2"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "derivedColumn3"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ecEventGkey as long,",
+				"          yardGkey as string,",
+				"          YardID as string,",
+				"          FcyID as string,",
+				"          cheKind as string,",
+				"          CHE_Name as string,",
+				"          CHE_ID as string,",
+				"          eventType as short,",
+				"          eventSubType as short,",
+				"          eventTypeDescription as string,",
+				"          fromCheIdName as string,",
+				"          ToCheIdName as string,",
+				"          unit as string,",
+				"          pow as string,",
+				"          pool as string,",
+				"          workQueue as string,",
+				"          travelDistance as integer,",
+				"          moveKind as string,",
+				"          isTwin as boolean,",
+				"          startDistance as short,",
+				"          workAssignment as long,",
+				"          unitRef as string,",
+				"          tran_ID as string,",
+				"          locType as string,",
+				"          locID as string,",
+				"          locSlot as string,",
+				"          opsPosID as string,",
+				"          unladenLoctype as string,",
+				"          unladenLocID as string,",
+				"          unladenLocSlot as string,",
+				"          ladenLoctype as string,",
+				"          ladenLocID as string,",
+				"          laden_LocSlot as string,",
+				"          lastEstMoveTime as string,",
+				"          operator_name as string,",
+				"          EcEventTime as timestamp,",
+				"          Year as integer,",
+				"          Month as integer,",
+				"          Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'socar',",
+				"     folderPath: 'silver/ecevents') ~> source1",
+				"source(output(",
+				"          gkey as short,",
+				"          user_id as string,",
+				"          name as string,",
+				"          yard as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'socar',",
+				"     folderPath: 'bronze/xpsecuser',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> source2",
+				"source1 filter(cheKind==\"ITV\" && (eventTypeDescription==\"AYDR\" || eventTypeDescription==\"TYDR\" || eventTypeDescription==\"AYCO\" || eventTypeDescription==\"TYCO\" || eventTypeDescription==\"AVDR\" || eventTypeDescription==\"TVDR\" || eventTypeDescription==\"AVCO\" || eventTypeDescription==\"TVCO\") && (moveKind==\"DSCH\"||moveKind==\"LOAD\")) ~> filter1",
+				"sort1 window(asc(CHE_ID, true),",
+				"     asc(EcEventTime, true),",
+				"     asc(ecEventGkey, true),",
+				"     startRowOffset: 1L,",
+				"     endRowOffset: 1L,",
+				"     eventName_nxt = lead(eventName),",
+				"          pow_nxt = lead(pow),",
+				"          cheID_nxt = lead(CHE_ID),",
+				"          EcEventTime_nxt = lead(EcEventTime),",
+				"          yardBlock_nxt = lead(yardBlock),",
+				"          yardRow_nxt = lead(yardRow)) ~> window1",
+				"derivedColumn2 sort(asc(CHE_ID, true),",
+				"     asc(EcEventTime, true),",
+				"     asc(ecEventGkey, true)) ~> sort1",
+				"select1 alterRow(upsertIf(true())) ~> AlterRow1",
+				"join1 select(mapColumn(",
+				"          ecEventGkey,",
+				"          YardID,",
+				"          FcyID,",
+				"          cheKind,",
+				"          CHE_Name,",
+				"          eventTypeDescription,",
+				"          unit,",
+				"          pow,",
+				"          pool,",
+				"          workQueue,",
+				"          travelDistance,",
+				"          moveKind,",
+				"          startDistance,",
+				"          locSlot,",
+				"          cheID = CHE_ID,",
+				"          EcEventTime,",
+				"          eventName,",
+				"          yardBlock,",
+				"          yardRow,",
+				"          eventName_nxt,",
+				"          pow_nxt,",
+				"          cheID_nxt,",
+				"          EcEventTime_nxt,",
+				"          yardBlock_nxt,",
+				"          yardRow_nxt,",
+				"          operator = operator_name,",
+				"          user_id,",
+				"          name,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          violation",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"source2 select(mapColumn(",
+				"          user_id,",
+				"          name",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 aggregate(groupBy(user_id),",
+				"     name = last(trim(name))) ~> aggregate1",
+				"filter2, derivedColumn3 join(lower(trim(user_id)) == lower(trim(operator_name)),",
+				"     joinType:'right',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"aggregate1 filter(not(isNull(user_id))) ~> filter2",
+				"filter1 derive(eventName = iif(in([\"TVCO\", \"AVCO\", \"TYCO\", \"AYCO\"], eventTypeDescription), \"EVENT_1\", iif(in([\"TYDR\", \"AYDR\", \"TVDR\", \"AVDR\"], eventTypeDescription), \"EVENT_2\", \"EVENT_DEFAULT\")),",
+				"          yardBlock = left(locSlot , 5),",
+				"          yardRow = substring(locSlot , 3, 3)) ~> derivedColumn2",
+				"window1 derive(violation = iif(moveKind==\"DSCH\",\r",
+				" iif(CHE_ID==cheID_nxt && eventName==\"EVENT_1\" && eventName_nxt==\"EVENT_2\" && pow!=pow_nxt, 1, 0), \r",
+				"    iif(moveKind==\"LOAD\", \r",
+				"        iif(CHE_ID==cheID_nxt && eventName==\"EVENT_1\" && eventName_nxt==\"EVENT_2\" && (yardBlock!=yardBlock_nxt || yardRow!=yardRow_nxt), 1, 0),0)\r",
+				")) ~> derivedColumn3",
+				"AlterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'socar',",
+				"     folderPath: 'gold/itv_violation',",
+				"     mergeSchema: true,",
+				"     autoCompact: true,",
+				"     optimizedWrite: true,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: true,",
+				"     upsertable: false,",
+				"     keys:['ecEventGkey','user_id'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
