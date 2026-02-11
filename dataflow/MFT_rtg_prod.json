@@ -49,6 +49,9 @@
 				},
 				{
 					"name": "filter2"
+				},
+				{
+					"name": "derivedColumn3"
 				}
 			],
 			"scriptLines": [
@@ -220,8 +223,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"filter2 alterRow(upsertIf(true()),",
-				"     insertIf(true())) ~> alterRow1",
+				"derivedColumn3 alterRow(upsertIf(true())) ~> alterRow1",
 				"select1 window(over(cheID,",
 				"          ShiftDateName),",
 				"     asc(EcEventTime, true),",
@@ -234,12 +236,13 @@
 				"          ActualEvent_next = iif((typeDescription==\"LGOFF\" && isNull(typeDescription_prev)) || (typeDescription==\"LGON\" && isNull(typeDescription_next)), \"LGOFF\", typeDescription_next),",
 				"          ActualTime = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), ShiftStartTime, EcEventTime),",
 				"          ActualTime_next = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), EcEventTime, iif(typeDescription==\"LGON\" && isNull(typeDescription_next), ShiftEndTime,EcEventTime_next))) ~> derivedColumn2",
-				"derivedColumn2 filter(ActualEvent==\"LGON\" && ActualEvent_next==\"LGOFF\" && not(isNull(ActualTime)) && not(isNull(ActualEvent_next))) ~> filter2",
+				"derivedColumn2 filter(ActualEvent==\"LGON\" && ActualEvent_next==\"LGOFF\") ~> filter2",
+				"filter2 derive(WorktimeSeconds = (ActualTime_next - ActualTime)/1000) ~> derivedColumn3",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
-				"     fileSystem: 'malta',",
-				"     folderPath: 'gold/laden_unladen',",
+				"     fileSystem: ($Customer),",
+				"     folderPath: 'gold/rtg_worktime_seconds',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
