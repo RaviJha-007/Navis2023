@@ -40,6 +40,15 @@
 				},
 				{
 					"name": "alterRow1"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "filter2"
 				}
 			],
 			"scriptLines": [
@@ -160,13 +169,10 @@
 				"     folderPath: 'silver/moves') ~> moves",
 				"ecevents filter(cheKind == 'RTG' && (typeDescription == 'LGON' || typeDescription == 'LGOFF')) ~> filter1",
 				"filter1 derive(Date = :CurrentDate,",
-				"          ShiftStartTime = iif((EcEventTime > :NightShift.Start) && (EcEventTime < :NightShift.End), :NightShift.Start, iif((EcEventTime > :MorningShift.Start) && (EcEventTime < :MorningShift.End), :MorningShift.Start, iif((EcEventTime > :EveningShift.Start) && (EcEventTime < :EveningShift.End), :EveningShift.Start, EcEventTime)) )\r",
-				"\r",
-				",",
-				"          ShiftEndTime = iif((EcEventTime > :NightShift.Start) && (EcEventTime < :NightShift.End), :NightShift.End, iif((EcEventTime > :MorningShift.Start) && (EcEventTime < :MorningShift.End), :MorningShift.End, iif((EcEventTime > :EveningShift.Start) && (EcEventTime < :EveningShift.End), :EveningShift.End, EcEventTime)) )\r",
-				",",
-				"          ShiftName = iif((EcEventTime > :NightShift.Start) && (EcEventTime < :NightShift.End), :NightShift.Name, iif((EcEventTime > :MorningShift.Start) && (EcEventTime < :MorningShift.End), :MorningShift.Name, iif((EcEventTime > :EveningShift.Start) && (EcEventTime < :EveningShift.End), :EveningShift.Name, \"\"))),",
-				"          ShiftDateName = toString(:CurrentDate)+ \" \" + iif((EcEventTime > :NightShift.Start) && (EcEventTime < :NightShift.End), :NightShift.Name, iif((EcEventTime > :MorningShift.Start) && (EcEventTime < :MorningShift.End), :MorningShift.Name, iif((EcEventTime > :EveningShift.Start) && (EcEventTime < :EveningShift.End), :EveningShift.Name, \"\"))),",
+				"          ShiftStartTime = iif((EcEventTime >= :NightShift.Start) && (EcEventTime <= :NightShift.End), :NightShift.Start, iif((EcEventTime >= :MorningShift.Start) && (EcEventTime <= :MorningShift.End), :MorningShift.Start, iif((EcEventTime >= :EveningShift.Start) && (EcEventTime <= :EveningShift.End), :EveningShift.Start, EcEventTime)) ),",
+				"          ShiftEndTime = iif((EcEventTime >= :NightShift.Start) && (EcEventTime <= :NightShift.End), :NightShift.End, iif((EcEventTime >= :MorningShift.Start) && (EcEventTime <= :MorningShift.End), :MorningShift.End, iif((EcEventTime >= :EveningShift.Start) && (EcEventTime <= :EveningShift.End), :EveningShift.End, EcEventTime)) ),",
+				"          ShiftName = iif((EcEventTime >= :NightShift.Start) && (EcEventTime <= :NightShift.End), :NightShift.Name, iif((EcEventTime >= :MorningShift.Start) && (EcEventTime <= :MorningShift.End), :MorningShift.Name, iif((EcEventTime >= :EveningShift.Start) && (EcEventTime <= :EveningShift.End), :EveningShift.Name, \"\"))),",
+				"          ShiftDateName = toString(:CurrentDate)+ \" \" + iif((EcEventTime >= :NightShift.Start) && (EcEventTime <= :NightShift.End), :NightShift.Name, iif((EcEventTime >= :MorningShift.Start) && (EcEventTime <= :MorningShift.End), :MorningShift.Name, iif((EcEventTime >= :EveningShift.Start) && (EcEventTime <= :EveningShift.End), :EveningShift.Name, \"\"))),",
 				"          customer = $Customer,",
 				"          CurrentDate := toDate(EcEventTime),",
 				"          NightShift := @(Name=\"Night\",",
@@ -214,8 +220,21 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 alterRow(upsertIf(true()),",
+				"filter2 alterRow(upsertIf(true()),",
 				"     insertIf(true())) ~> alterRow1",
+				"select1 window(over(cheID,",
+				"          ShiftDateName),",
+				"     asc(EcEventTime, true),",
+				"     asc(ecEventGkey, true),",
+				"     typeDescription_next = lead(typeDescription),",
+				"          EcEventTime_next = lead(EcEventTime),",
+				"          typeDescription_prev = lag(typeDescription)) ~> window1",
+				"window1 derive(ActualEvent = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), \"LGON\", typeDescription)\r",
+				",",
+				"          ActualEvent_next = iif((typeDescription==\"LGOFF\" && isNull(typeDescription_prev)) || (typeDescription==\"LGON\" && isNull(typeDescription_next)), \"LGOFF\", typeDescription_next),",
+				"          ActualTime = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), ShiftStartTime, EcEventTime),",
+				"          ActualTime_next = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), EcEventTime, iif(typeDescription==\"LGON\" && isNull(typeDescription_next), ShiftEndTime,EcEventTime_next))) ~> derivedColumn2",
+				"derivedColumn2 filter(ERROR_FUNCTION('')) ~> filter2",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
