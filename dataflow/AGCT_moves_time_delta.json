@@ -1,0 +1,198 @@
+{
+	"name": "AGCT_moves_time_delta",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "agct"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "LOAD"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "DSCH"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "filter2"
+				},
+				{
+					"name": "split1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          mve_gkey as integer,",
+				"          Unit_Nbr as string,",
+				"          Facility_Id as string,",
+				"          Complex_Id as string,",
+				"          Yard_Id as string,",
+				"          Carrier_Visit_Key as string,",
+				"          Event_Type_Id as string,",
+				"          Move_Kind as string,",
+				"          From_Location as string,",
+				"          To_Location as string,",
+				"          From_Position_Name as string,",
+				"          To_Position_Name as string,",
+				"          Carry_CHE_Operator_Id as string,",
+				"          Fetch_CHE_Operator_Id as string,",
+				"          Put_CHE_Operator_Id as string,",
+				"          Fetch_CHE_Id as string,",
+				"          Fetch_CHE_Kind as string,",
+				"          Carry_CHE_Id as string,",
+				"          Carry_CHE_Kind as string,",
+				"          Put_CHE_Id as string,",
+				"          Put_CHE_Kind as string,",
+				"          QC_CHE_Id as string,",
+				"          QC_CHE_Kind as string,",
+				"          t_carry_complete as timestamp,",
+				"          t_put as timestamp,",
+				"          t_fetch as timestamp,",
+				"          t_dispatch as timestamp,",
+				"          t_discharge as timestamp,",
+				"          t_carry_dispatch as timestamp,",
+				"          t_carry_fetch_ready as timestamp,",
+				"          t_carry_put_ready as timestamp,",
+				"          dist_carry as integer,",
+				"          dist_start as short,",
+				"          Twin_Fetch as boolean,",
+				"          Twin_Carry as boolean,",
+				"          Twin_Put as boolean,",
+				"          Category_Id as string,",
+				"          Freight_Kind_Id as string,",
+				"          to_pos_gkey as string,",
+				"          fm_pos_gkey as string,",
+				"          Restow_Reason as string,",
+				"          Container_Line_Id as string,",
+				"          Container_Line_Role as string,",
+				"          pow as string,",
+				"          ufv_gkey as integer,",
+				"          Berth_Id as string,",
+				"          Goods_And_Ctr_Wt_Kg as integer,",
+				"          active_ufv as integer,",
+				"          Requires_Power_Flag as boolean,",
+				"          OOG_Flag as boolean,",
+				"          Shipper_Id as string,",
+				"          Consignee_Id as string,",
+				"          Commodity_Id as string,",
+				"          ATA as timestamp,",
+				"          ATD as timestamp,",
+				"          Rehandles as short,",
+				"          Date as date,",
+				"          Year as integer,",
+				"          Month as integer,",
+				"          Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     fileSystem: 'agct',",
+				"     folderPath: 'silver/moves') ~> agct",
+				"filter1 derive(exec_delta_16 = iif(:exec_time > 16, true(), false()),",
+				"          t_execution_delta = :exec_time,",
+				"          exec_time := (t_carry_complete - t_fetch)/60000) ~> derivedColumn1",
+				"agct filter(Carry_CHE_Kind==\"ITV\") ~> filter1",
+				"derivedColumn1 select(mapColumn(",
+				"          mve_gkey,",
+				"          Unit_Nbr,",
+				"          Facility_Id,",
+				"          Yard_Id,",
+				"          Event_Type_Id,",
+				"          Move_Kind,",
+				"          From_Location,",
+				"          To_Location,",
+				"          From_Position_Name,",
+				"          To_Position_Name,",
+				"          Carry_CHE_Kind,",
+				"          t_carry_complete,",
+				"          t_put,",
+				"          t_fetch,",
+				"          Category_Id,",
+				"          Freight_Kind_Id,",
+				"          pow,",
+				"          Commodity_Id,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          Date,",
+				"          exec_delta_16,",
+				"          t_execution_delta",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"filter2 alterRow(upsertIf(true())) ~> alterRow1",
+				"select1 filter((t_execution_delta >= 0.0) || (t_execution_delta >= 0)) ~> filter2",
+				"alterRow1 split(Event_Type_Id == \"UNIT_LOAD\",",
+				"     Event_Type_Id == \"UNIT_DISCH\",",
+				"     disjoint: false) ~> split1@(load, discharge)",
+				"split1@load sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'agct',",
+				"     folderPath: 'gold/load_time_delta',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['mve_gkey'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> LOAD",
+				"split1@discharge sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'agct',",
+				"     folderPath: 'gold/dsch_time_delta',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['mve_gkey'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> DSCH"
+			]
+		}
+	}
+}
