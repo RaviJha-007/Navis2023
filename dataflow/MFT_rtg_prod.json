@@ -234,7 +234,7 @@
 				"          ActualEvent_next = iif((typeDescription==\"LGOFF\" && isNull(typeDescription_prev)) || (typeDescription==\"LGON\" && isNull(typeDescription_next)), \"LGOFF\", typeDescription_next),",
 				"          ActualTime = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), ShiftStartTime, EcEventTime),",
 				"          ActualTime_next = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), EcEventTime, iif(typeDescription==\"LGON\" && isNull(typeDescription_next), ShiftEndTime,EcEventTime_next))) ~> derivedColumn2",
-				"derivedColumn2 filter(ERROR_FUNCTION('')) ~> filter2",
+				"derivedColumn2 filter(ActualEvent==\"LGON\" && ActualEvent_next==\"LGOFF\" && not(isNull(ActualTime)) && not(isNull(ActualEvent_next))) ~> filter2",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
