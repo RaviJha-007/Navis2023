@@ -1,5 +1,5 @@
 {
-	"name": "RTG_violations_DGT",
+	"name": "SC_violations_DGT",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -383,7 +383,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'dgt',",
-				"     folderPath: 'gold/rtg_violation',",
+				"     folderPath: 'gold/sc_violation',",
 				"     mergeSchema: false,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
