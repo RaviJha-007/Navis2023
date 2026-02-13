@@ -192,7 +192,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: true,",
-				"     moveFiles: ['/bronze/moves/load','bronze/moves/archive'],",
+				"     moveFiles: ['/bronze/movehistory/load','bronze/moves/archive'],",
 				"     format: 'delimited',",
 				"     fileSystem: 'agct',",
 				"     folderPath: 'bronze/movehistory/load',",
