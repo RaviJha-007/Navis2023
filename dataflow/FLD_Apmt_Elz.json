@@ -120,7 +120,7 @@
 				"AlterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
-				"     fileSystem: 'apmt',",
+				"     fileSystem: 'apmt-elz',",
 				"     folderPath: 'gold/fld',",
 				"     mergeSchema: false,",
 				"     autoCompact: true,",
