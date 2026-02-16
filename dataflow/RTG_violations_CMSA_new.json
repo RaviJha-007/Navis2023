@@ -366,6 +366,7 @@
 				"     format: 'delta',",
 				"     fileSystem: 'cmsa',",
 				"     folderPath: 'gold/rtg_violation',",
+				"     deltaTruncate: true,",
 				"     mergeSchema: false,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
@@ -381,7 +382,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
 				"     partitionBy('key',",
-				"          1,",
+				"          0,",
 				"          Year_Month",
 				"     )) ~> violation"
 			]
