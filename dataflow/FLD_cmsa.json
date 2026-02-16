@@ -131,7 +131,7 @@
 				"     insertable: false,",
 				"     updateable: false,",
 				"     upsertable: true,",
-				"     keys:['gkey','ufv_gkey','unit_id','Date'],",
+				"     keys:['gkey','uyv_gkey','unit_id','Date'],",
 				"     umask: 0777,",
 				"     preCommands: [],",
 				"     postCommands: [],",
