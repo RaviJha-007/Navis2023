@@ -52,6 +52,9 @@
 				},
 				{
 					"name": "derivedColumn3"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -170,7 +173,7 @@
 				"     format: 'delta',",
 				"     fileSystem: ($Customer),",
 				"     folderPath: 'silver/moves') ~> moves",
-				"ecevents filter(cheKind == 'RTG' && (typeDescription == 'LGON' || typeDescription == 'LGOFF')) ~> filter1",
+				"aggregate1 filter(not(isNull(ecEventGkey)) && cheKind == 'RTG' && (typeDescription == 'LGON' || typeDescription == 'LGOFF')) ~> filter1",
 				"filter1 derive(Date = :CurrentDate,",
 				"          ShiftStartTime = iif((EcEventTime >= :NightShift.Start) && (EcEventTime <= :NightShift.End), :NightShift.Start, iif((EcEventTime >= :MorningShift.Start) && (EcEventTime <= :MorningShift.End), :MorningShift.Start, iif((EcEventTime >= :EveningShift.Start) && (EcEventTime <= :EveningShift.End), :EveningShift.Start, EcEventTime)) ),",
 				"          ShiftEndTime = iif((EcEventTime >= :NightShift.Start) && (EcEventTime <= :NightShift.End), :NightShift.End, iif((EcEventTime >= :MorningShift.Start) && (EcEventTime <= :MorningShift.End), :MorningShift.End, iif((EcEventTime >= :EveningShift.Start) && (EcEventTime <= :EveningShift.End), :EveningShift.End, EcEventTime)) ),",
@@ -231,13 +234,14 @@
 				"     typeDescription_next = lead(typeDescription),",
 				"          EcEventTime_next = lead(EcEventTime),",
 				"          typeDescription_prev = lag(typeDescription)) ~> window1",
-				"window1 derive(ActualEvent = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), \"LGON\", typeDescription)\r",
-				",",
+				"window1 derive(ActualEvent = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), \"LGON\", typeDescription),",
 				"          ActualEvent_next = iif((typeDescription==\"LGOFF\" && isNull(typeDescription_prev)) || (typeDescription==\"LGON\" && isNull(typeDescription_next)), \"LGOFF\", typeDescription_next),",
 				"          ActualTime = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), ShiftStartTime, EcEventTime),",
 				"          ActualTime_next = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), EcEventTime, iif(typeDescription==\"LGON\" && isNull(typeDescription_next), ShiftEndTime,EcEventTime_next))) ~> derivedColumn2",
 				"derivedColumn2 filter(ActualEvent==\"LGON\" && ActualEvent_next==\"LGOFF\") ~> filter2",
 				"filter2 derive(WorktimeSeconds = (ActualTime_next - ActualTime)/1000) ~> derivedColumn3",
+				"ecevents aggregate(groupBy(ecEventGkey),",
+				"     each(match(name!='ecEventGkey'), $$ = first($$))) ~> aggregate1",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
