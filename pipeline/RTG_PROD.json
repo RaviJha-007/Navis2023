@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "MFT_rtg_prod",
+						"referenceName": "rtg_prod",
 						"type": "DataFlowReference"
 					},
 					"compute": {

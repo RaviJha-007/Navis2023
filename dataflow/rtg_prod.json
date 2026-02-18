@@ -1,5 +1,5 @@
 {
-	"name": "MFT_rtg_prod",
+	"name": "rtg_prod",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
