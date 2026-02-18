@@ -30,6 +30,12 @@
 				}
 			}
 		],
+		"parameters": {
+			"Customer": {
+				"type": "string",
+				"defaultValue": "malta"
+			}
+		},
 		"annotations": []
 	}
 }
