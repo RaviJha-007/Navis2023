@@ -33,6 +33,13 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "rtgmoves"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
 				}
 			],
 			"transformations": [
@@ -104,6 +111,15 @@
 				},
 				{
 					"name": "alterRow2"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "aggregate4"
+				},
+				{
+					"name": "AlterRow3"
 				}
 			],
 			"scriptLines": [
@@ -452,6 +468,24 @@
 				"union1 aggregate(groupBy(Move_Primary_key),",
 				"     each(match(name!='Move_Primary_key'), $$ = first($$))) ~> aggregate3",
 				"aggregate3 alterRow(upsertIf(true())) ~> alterRow2",
+				"aggregate3, derivedColumn3 join(toString(CHE_Id) == toString(cheID)",
+				"     && move_time >= ActualTime",
+				"     && move_time <= ActualTime_next,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'left')~> join1",
+				"join1 aggregate(groupBy(aggregate3@Year,",
+				"          aggregate3@Month,",
+				"          aggregate3@Week,",
+				"          Date,",
+				"          ShiftDateName,",
+				"          CHE_Kind,",
+				"          cheName,",
+				"          CHE_Id),",
+				"     move_count = countDistinct(Move_Primary_key),",
+				"          rtg_workhours = sum(WorktimeSeconds)/3600) ~> aggregate4",
+				"aggregate4 alterRow(upsertIf(true())) ~> AlterRow3",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -489,7 +523,26 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> rtgmoves"
+				"     skipDuplicateMapOutputs: true) ~> rtgmoves",
+				"AlterRow3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: ($Customer),",
+				"     folderPath: 'gold/rtg_productivity',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Year','Month','Week','Date','ShiftDateName','CHE_Id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
