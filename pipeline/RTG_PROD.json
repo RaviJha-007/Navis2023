@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "MFT_rtg_prod",
+				"name": "rtg_prod",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -17,7 +17,10 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "rtg_prod",
-						"type": "DataFlowReference"
+						"type": "DataFlowReference",
+						"parameters": {
+							"Customer": "'malta'"
+						}
 					},
 					"compute": {
 						"coreCount": 8,
