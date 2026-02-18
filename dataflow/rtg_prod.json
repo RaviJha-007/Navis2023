@@ -39,7 +39,7 @@
 						"referenceName": "linkedService1",
 						"type": "LinkedServiceReference"
 					},
-					"name": "sink1"
+					"name": "rtgprod"
 				}
 			],
 			"transformations": [
@@ -542,7 +542,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true) ~> rtgprod"
 			]
 		}
 	}
