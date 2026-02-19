@@ -1,0 +1,44 @@
+{
+	"name": "EcEvents_BHCT",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "CSV"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "DataTypeConversion"
+				},
+				{
+					"name": "AlterRow1"
+				},
+				{
+					"name": "Select1"
+				},
+				{
+					"name": "Filter1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"script": "source(output(\n\t\tECEVENTGKEY as string,\n\t\tYARDGKEY as string,\n\t\tYARDID as string,\n\t\tFCYID as string,\n\t\tCHEKIND as string,\n\t\tCHE_NAME as string,\n\t\tCHE_ID as string,\n\t\tEVENT_TIMESTAMP as string,\n\t\tEVENTTYPE as string,\n\t\tEVENTSUBTYPE as string,\n\t\tEVENTTYPEDESCRIPTION as string,\n\t\tFROMCHEIDNAME as string,\n\t\tTOCHEIDNAME as string,\n\t\tUNIT as string,\n\t\tPOW as string,\n\t\tPOOL as string,\n\t\tWORKQUEUE as string,\n\t\tTRAVELDISTANCE as string,\n\t\tMOVEKIND as string,\n\t\tISTWIN as string,\n\t\tSTARTDISTANCE as string,\n\t\tWORKASSIGNMENT as string,\n\t\tUNITREF as string,\n\t\tTRAN_ID as string,\n\t\tLOCTYPE as string,\n\t\tLOCID as string,\n\t\tLOCSLOT as string,\n\t\tOPSPOSID as string,\n\t\tUNLADENLOCTYPE as string,\n\t\tUNLADENLOCID as string,\n\t\tUNLADENLOCSLOT as string,\n\t\tLADENLOCTYPE as string,\n\t\tLADENLOCID as string,\n\t\tLADEN_LOCSLOT as string,\n\t\tLASTESTMOVETIME as string,\n\t\tOPERATOR_NAME as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: false,\n\tvalidateSchema: true,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/ecevents/load','bronze/ecevents/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'bhct',\n\tfolderPath: 'bronze/ecevents/load',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\'']) ~> CSV\nCSV derive(EcEventTime = coalesce(toTimestamp(EVENT_TIMESTAMP,'MM/dd/yyyy HH:mm:ss'),toTimestamp(EVENT_TIMESTAMP,'dd-MM-yy HH:mm:ss'),toTimestamp(EVENT_TIMESTAMP,'dd/MM/yy HH:mm'),toTimestamp(EVENT_TIMESTAMP,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(EVENT_TIMESTAMP,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(EVENT_TIMESTAMP,'dd/MM/yyyy HH:mm:ss'),toTimestamp(EVENT_TIMESTAMP,'dd-MM-yyyy HH:mm:ss')),\n\t\tYear = iifNull(year(coalesce(toTimestamp(EVENT_TIMESTAMP,'MM/dd/yyyy HH:mm:ss'),toTimestamp(EVENT_TIMESTAMP,'dd-MM-yy HH:mm:ss'),toTimestamp(EVENT_TIMESTAMP,'dd/MM/yy HH:mm'),toTimestamp(EVENT_TIMESTAMP,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(EVENT_TIMESTAMP,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(EVENT_TIMESTAMP,'dd/MM/yyyy HH:mm:ss'),toTimestamp(EVENT_TIMESTAMP,'dd-MM-yyyy HH:mm:ss')))),\n\t\tMonth = iifNull(month(coalesce(toTimestamp(EVENT_TIMESTAMP,'MM/dd/yyyy HH:mm:ss'),toTimestamp(EVENT_TIMESTAMP,'dd-MM-yy HH:mm:ss'),toTimestamp(EVENT_TIMESTAMP,'dd/MM/yy HH:mm'),toTimestamp(EVENT_TIMESTAMP,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(EVENT_TIMESTAMP,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(EVENT_TIMESTAMP,'dd/MM/yyyy HH:mm:ss'),toTimestamp(EVENT_TIMESTAMP,'dd-MM-yyyy HH:mm:ss')))),\n\t\tWeek = iifNull(weekOfYear(coalesce(toTimestamp(EVENT_TIMESTAMP,'MM/dd/yyyy HH:mm:ss'),toTimestamp(EVENT_TIMESTAMP,'dd-MM-yy HH:mm:ss'),toTimestamp(EVENT_TIMESTAMP,'dd/MM/yy HH:mm'),toTimestamp(EVENT_TIMESTAMP,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(EVENT_TIMESTAMP,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(EVENT_TIMESTAMP,'dd/MM/yyyy HH:mm:ss'),toTimestamp(EVENT_TIMESTAMP,'dd-MM-yyyy HH:mm:ss'))))) ~> DataTypeConversion\nFilter1 alterRow(upsertIf(true())) ~> AlterRow1\nDataTypeConversion select(mapColumn(\n\t\tecEventGkey = ECEVENTGKEY,\n\t\tyardGkey = YARDGKEY,\n\t\tYardID = YARDID,\n\t\tFcyID = FCYID,\n\t\tcheKind = CHEKIND,\n\t\tcheName = CHE_NAME,\n\t\tcheID = CHE_ID,\n\t\ttype = EVENTTYPE,\n\t\tsubType = EVENTSUBTYPE,\n\t\ttypeDescription = EVENTTYPEDESCRIPTION,\n\t\tfromCheIdName = FROMCHEIDNAME,\n\t\tToCheIdName = TOCHEIDNAME,\n\t\tunitIdName = UNIT,\n\t\tpowName = POW,\n\t\tpoolName = POOL,\n\t\tworkQueue = WORKQUEUE,\n\t\ttravelDistance = TRAVELDISTANCE,\n\t\tmoveKind = MOVEKIND,\n\t\tisTwin = ISTWIN,\n\t\tstartDistance = STARTDISTANCE,\n\t\tunitReference = UNITREF,\n\t\ttranId = TRAN_ID,\n\t\tlocType = LOCTYPE,\n\t\tlocId = LOCID,\n\t\tlocSlot = LOCSLOT,\n\t\topsPosId = OPSPOSID,\n\t\tunladenLoctype = UNLADENLOCTYPE,\n\t\tunladenLocId = UNLADENLOCID,\n\t\tunladenLocSlot = UNLADENLOCSLOT,\n\t\tladenLoctype = LADENLOCTYPE,\n\t\tladenLocId = LADENLOCID,\n\t\tladen_LocSlot = LADEN_LOCSLOT,\n\t\toperatorName = OPERATOR_NAME,\n\t\tEcEventTime,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nderivedColumn1 filter(not(isNull(ecEventGkey))) ~> Filter1\nSelect1 derive(cheID = toLong(cheID),\n\t\tecEventGkey = toLong(ecEventGkey),\n\t\tyardGkey = toLong(yardGkey)) ~> derivedColumn1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'bhct',\n\tfolderPath: 'silver/ecevents',\n\tmergeSchema: true,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['ecEventGkey'],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink1"
+		}
+	}
+}
