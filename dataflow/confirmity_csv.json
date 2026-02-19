@@ -1,0 +1,171 @@
+{
+	"name": "confirmity_csv",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "StackConfirmity"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "StackConformity"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "window2"
+				},
+				{
+					"name": "aggregate2"
+				},
+				{
+					"name": "join2"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     customer as string ('mct')",
+				"}",
+				"source(output(",
+				"          ContainerNo as string,",
+				"          StackingFactor as string,",
+				"          AssignedCHE as string,",
+				"          BlockType as string,",
+				"          Type as string,",
+				"          CurrentPosition as string,",
+				"          YardRow as string,",
+				"          Cat as string,",
+				"          Sts as string,",
+				"          SectionFactor as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: true,",
+				"     moveFiles: ['/bronze/stackconformitycsvs/load','bronze/stackconformitycsvs/archive'],",
+				"     rowUrlColumn: 'FileDate',",
+				"     format: 'delimited',",
+				"     fileSystem: ($customer),",
+				"     folderPath: 'bronze/stackconformitycsvs/load',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '',",
+				"     columnNamesAsHeader: true) ~> StackConfirmity",
+				"StackConfirmity derive(Pos_WO_Tier = (iif(isInteger(right({CurrentPosition}, 1)), left({CurrentPosition}, length({CurrentPosition}) - 2), {CurrentPosition})),",
+				"          Date = :created_date,",
+				"          Week = iif(dayOfWeek(:created_date) == 1,  weekOfYear(:created_date) + 1, weekOfYear(:created_date)),",
+				"          stacking_array := split(StackingFactor, '/'),",
+				"          created_date := toDate(split(split(FileDate, \"_\")[2],\".\")[1], 'ddMMyyyy')) ~> derivedColumn1",
+				"derivedColumn1 window(over(Date,",
+				"          Pos_WO_Tier),",
+				"     asc(StackingFactor, true),",
+				"     stackrank = rank()) ~> window1",
+				"window1 aggregate(groupBy(Date,",
+				"          Pos_WO_Tier),",
+				"     Stack_confirmty = iif(max(stackrank) > 1, 'Mix', 'Pure')) ~> aggregate1",
+				"window1, aggregate1 join(derivedColumn1@Date == aggregate1@Date",
+				"     && derivedColumn1@Pos_WO_Tier == aggregate1@Pos_WO_Tier,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"filter1 select(mapColumn(",
+				"          {Container No.} = ContainerNo,",
+				"          {Stacking Factor} = StackingFactor,",
+				"          Type,",
+				"          {Current position} = CurrentPosition,",
+				"          {Yard Row} = StackConfirmity@YardRow,",
+				"          Cat,",
+				"          Sts,",
+				"          {Section Factor} = SectionFactor,",
+				"          Pos_WO_Tier = derivedColumn1@Pos_WO_Tier,",
+				"          Date = derivedColumn1@Date,",
+				"          Week,",
+				"          Stack_confirmty,",
+				"          Section_conformity",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sort(asc(Date, true),",
+				"     asc({Container No.}, true)) ~> sort1",
+				"join2 filter(not(isDate({ContainerNo})) && not(isNull({ContainerNo})) && {ContainerNo} != '') ~> filter1",
+				"select2 alterRow(insertIf(true())) ~> alterRow1",
+				"sort1 select(mapColumn(",
+				"          each(match(true()),",
+				"               regexReplace($$,' ','_') = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"derivedColumn1 window(over(Date,",
+				"          YardRow),",
+				"     asc(SectionFactor, true),",
+				"     sectionrank = rank()) ~> window2",
+				"window2 aggregate(groupBy(Date,",
+				"          YardRow),",
+				"     Section_conformity = iif(max(sectionrank) > 1, 'Mix', 'Pure')) ~> aggregate2",
+				"aggregate2, join1 join(aggregate2@Date == aggregate1@Date",
+				"     && aggregate2@YardRow == StackConfirmity@YardRow,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: ($customer),",
+				"     folderPath: 'gold/conformities',",
+				"     mergeSchema: true,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> StackConformity"
+			]
+		}
+	}
+}
