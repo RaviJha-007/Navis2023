@@ -441,7 +441,7 @@
 				"     insertable: false,",
 				"     updateable: false,",
 				"     upsertable: true,",
-				"     keys:['mve_gkey'],",
+				"     keys:['mve_gkey','gkey','user_id','MH_Unit_Nbr','Shift_Date'],",
 				"     umask: 0777,",
 				"     preCommands: [],",
 				"     postCommands: [],",
