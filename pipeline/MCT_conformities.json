@@ -1,9 +1,9 @@
 {
-	"name": "CMATK_Violations",
+	"name": "MCT_conformities",
 	"properties": {
 		"activities": [
 			{
-				"name": "Violations_CMATK",
+				"name": "confirmity_csv",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,8 +16,11 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "violations_CMATK",
-						"type": "DataFlowReference"
+						"referenceName": "confirmity_csv",
+						"type": "DataFlowReference",
+						"parameters": {
+							"customer": "'mct'"
+						}
 					},
 					"compute": {
 						"coreCount": 8,
@@ -27,6 +30,12 @@
 				}
 			}
 		],
+		"parameters": {
+			"customer": {
+				"type": "string",
+				"defaultValue": "mct"
+			}
+		},
 		"annotations": []
 	}
 }

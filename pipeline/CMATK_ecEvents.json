@@ -1,9 +1,9 @@
 {
-	"name": "CMATK_Move_Rehandle",
+	"name": "CMATK_ecEvents",
 	"properties": {
 		"activities": [
 			{
-				"name": "MoveSrc_CMATK",
+				"name": "EcEvents_CMATK",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "MoveSrc_CMATK",
+						"referenceName": "EcEvents_CMATK",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -27,11 +27,11 @@
 				}
 			},
 			{
-				"name": "Rehandle_CMATK",
+				"name": "Jobstepping_CMATK",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "MoveSrc_CMATK",
+						"activity": "EcEvents_CMATK",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -47,7 +47,31 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "Rehandle_CMATK",
+						"referenceName": "jobstepping_CMATK",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "renomination_CMATK",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "renomination_CMATK",
 						"type": "DataFlowReference"
 					},
 					"compute": {
