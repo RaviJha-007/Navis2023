@@ -99,7 +99,7 @@
 				"aggregate1 filter(not(isNull(ecEventGkey)) && cheKind == 'RTG' && (typeDescription == 'DSPT' || typeDescription == 'CMPL')) ~> filter1",
 				"filter1 derive(Date = toDate(EcEventTime),",
 				"          customer = upper($Customer),",
-				"          RTG_Type = iif(in(:ARTG_ids, cheName) , \"ARTG\", iif(in(:Manual_RTG_ids, cheName), \"Manual_RTG\", iif(like(cheName, \"ARMG\"), \"ARMG\", \"\"))),",
+				"          RTG_Type = iif(in(:ARTG_ids, cheName) , \"ARTG\", iif(in(:Manual_RTG_ids, cheName), \"Manual_RTG\", iif(startsWith(cheName, \"ARMG\"), \"ARMG\", \"\"))),",
 				"          ARTG_ids := mapIndex(([\"50\", \"51\", \"52\", \"55\", \"71\", \"72\", \"73\", \"74\", \"75\", \"76\", \"77\", \"78\", \"79\"]), 'RTG'+ #item) ,",
 				"          Manual_RTG_ids := mapIndex(([\"01\",\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\",\"12\",\"13\",\"14\",\"16\",\"17\",\"20\",\"53\",\"54\",\"56\",\"57\",\"59\",\"61\",\"62\",\"63\",\"64\",\"65\",\"66\",\"67\",\"69\",\"70\",\"80\",\"81\"]), 'RTG'+ #item) ) ~> derivedColumn1",
 				"derivedColumn1 select(mapColumn(",
@@ -164,7 +164,13 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> rtgecevents"
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('key',",
+				"          1,",
+				"          Year,",
+				"          Month,",
+				"          Week",
+				"     )) ~> rtgecevents"
 			]
 		}
 	}
