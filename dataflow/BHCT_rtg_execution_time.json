@@ -1,0 +1,171 @@
+{
+	"name": "BHCT_rtg_execution_time",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "ecevents"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "rtgecevents"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "filter2"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "aggregate1"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     Customer as string ('bhct')",
+				"}",
+				"source(output(",
+				"          ecEventGkey as long,",
+				"          yardGkey as long,",
+				"          YardID as string,",
+				"          FcyID as string,",
+				"          cheKind as string,",
+				"          cheName as string,",
+				"          cheID as long,",
+				"          type as string,",
+				"          subType as string,",
+				"          typeDescription as string,",
+				"          fromCheIdName as string,",
+				"          ToCheIdName as string,",
+				"          unitIdName as string,",
+				"          powName as string,",
+				"          poolName as string,",
+				"          workQueue as string,",
+				"          travelDistance as string,",
+				"          moveKind as string,",
+				"          isTwin as string,",
+				"          startDistance as string,",
+				"          unitReference as string,",
+				"          tranId as string,",
+				"          locType as string,",
+				"          locId as string,",
+				"          locSlot as string,",
+				"          opsPosId as string,",
+				"          unladenLoctype as string,",
+				"          unladenLocId as string,",
+				"          unladenLocSlot as string,",
+				"          ladenLoctype as string,",
+				"          ladenLocId as string,",
+				"          laden_LocSlot as string,",
+				"          operatorName as string,",
+				"          EcEventTime as timestamp,",
+				"          Year as integer,",
+				"          Month as integer,",
+				"          Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     fileSystem: ($Customer),",
+				"     folderPath: 'silver/ecevents') ~> ecevents",
+				"aggregate1 filter(not(isNull(ecEventGkey)) && cheKind == 'RTG' && (typeDescription == 'DSPT' || typeDescription == 'CMPL')) ~> filter1",
+				"filter1 derive(Date = toDate(EcEventTime),",
+				"          customer = upper($Customer),",
+				"          RTG_Type = iif(in(:ARTG_ids, cheName) , \"ARTG\", iif(in(:Manual_RTG_ids, cheName), \"Manual_RTG\", iif(like(cheName, \"ARMG\"), \"ARMG\", \"\"))),",
+				"          ARTG_ids := mapIndex(([\"50\", \"51\", \"52\", \"55\", \"71\", \"72\", \"73\", \"74\", \"75\", \"76\", \"77\", \"78\", \"79\"]), 'RTG'+ #item) ,",
+				"          Manual_RTG_ids := mapIndex(([\"01\",\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\",\"12\",\"13\",\"14\",\"16\",\"17\",\"20\",\"53\",\"54\",\"56\",\"57\",\"59\",\"61\",\"62\",\"63\",\"64\",\"65\",\"66\",\"67\",\"69\",\"70\",\"80\",\"81\"]), 'RTG'+ #item) ) ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          ecEventGkey,",
+				"          yardGkey,",
+				"          YardID,",
+				"          FcyID,",
+				"          cheKind,",
+				"          cheName,",
+				"          cheID,",
+				"          type,",
+				"          subType,",
+				"          typeDescription,",
+				"          fromCheIdName,",
+				"          ToCheIdName,",
+				"          unitIdName,",
+				"          powName,",
+				"          poolName,",
+				"          workQueue,",
+				"          travelDistance,",
+				"          moveKind,",
+				"          isTwin,",
+				"          startDistance,",
+				"          locSlot,",
+				"          operatorName,",
+				"          customer,",
+				"          RTG_Type,",
+				"          EcEventTime,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          Date",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"derivedColumn3 alterRow(upsertIf(true())) ~> alterRow1",
+				"select1 window(over(Date,",
+				"          cheName),",
+				"     asc(EcEventTime, true),",
+				"     asc(ecEventGkey, true),",
+				"     typeDescription_next = lead(typeDescription),",
+				"          EcEventTime_next = lead(EcEventTime)) ~> window1",
+				"window1 filter(typeDescription==\"DSPT\" && typeDescription_next==\"CMPL\" && RTG_Type!=\"\") ~> filter2",
+				"filter2 derive(WorktimeSeconds = (EcEventTime_next - EcEventTime)/1000) ~> derivedColumn3",
+				"ecevents aggregate(groupBy(ecEventGkey),",
+				"     each(match(name!='ecEventGkey'), $$ = first($$))) ~> aggregate1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: ($Customer),",
+				"     folderPath: 'gold/rtg_execution_time',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['ecEventGkey'],",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> rtgecevents"
+			]
+		}
+	}
+}
