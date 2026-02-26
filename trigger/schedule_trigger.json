@@ -1,6 +1,7 @@
 {
 	"name": "schedule_trigger",
 	"properties": {
+		"description": "cmatk schedule trigger",
 		"annotations": [],
 		"runtimeState": "Started",
 		"pipelines": [
@@ -79,6 +80,12 @@
 			{
 				"pipelineReference": {
 					"referenceName": "mundra_ct02",
+					"type": "PipelineReference"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "CMATK",
 					"type": "PipelineReference"
 				}
 			}
