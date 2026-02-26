@@ -1,0 +1,177 @@
+{
+	"name": "stack_confirmity_MCT_v2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "StackConfirmity"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "StackConformity"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "derivedColumn2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ContainerNo as string,",
+				"          StackingFactor as string,",
+				"          AssignedCHE as string,",
+				"          BlockType as string,",
+				"          {Eq Type} as string,",
+				"          {Equipment Class} as string,",
+				"          CurrentPosition as string,",
+				"          YardRow as string,",
+				"          Cat as string,",
+				"          Sts as string,",
+				"          SectionFactor as string,",
+				"          {Outbound Carrier} as string,",
+				"          {Current POD} as string,",
+				"          {Gross Weight} as integer,",
+				"          {Special Stow1} as string,",
+				"          {Special Stow2} as string,",
+				"          {Special Stow3} as string,",
+				"          {Group Code} as string,",
+				"          Line as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: true,",
+				"     moveFiles: ['/bronze/stackconformitycsvs/load','bronze/stackconformitycsvs/archive'],",
+				"     rowUrlColumn: 'FileDate',",
+				"     format: 'delimited',",
+				"     fileSystem: 'mct',",
+				"     folderPath: 'bronze/stackconformitycsvs/load',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '',",
+				"     columnNamesAsHeader: true) ~> StackConfirmity",
+				"select3 derive(Pos_WO_Tier = iif(instr(CurrentPosition, \".\")!=0, split(CurrentPosition, \".\")[1] ,CurrentPosition),",
+				"          Date = :created_date,",
+				"          Week = iif(dayOfWeek(:created_date) == 1,  weekOfYear(:created_date) + 1, weekOfYear(:created_date)),",
+				"          Tier = iif(instr(CurrentPosition, \".\")!=0, split(CurrentPosition, \".\")[2], \"\"),",
+				"          stacking_array := split(StackingFactor, '/'),",
+				"          created_date := toDate(split(split(FileDate, \"_\")[2],\".\")[1], 'ddMMyyyy')) ~> derivedColumn1",
+				"derivedColumn1 aggregate(groupBy(Date,",
+				"          Pos_WO_Tier),",
+				"     Stack_Distinct = countDistinct(StackingFactor),",
+				"          maxTier = max(Tier),",
+				"          maxWeight = max({Gross Weight}),",
+				"          minWeight = min({Gross Weight})) ~> aggregate1",
+				"derivedColumn1, aggregate1 join(derivedColumn1@Date == aggregate1@Date",
+				"     && derivedColumn1@Pos_WO_Tier == aggregate1@Pos_WO_Tier,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"filter1 select(mapColumn(",
+				"          {Container No.} = ContainerNo,",
+				"          {Stacking Factor} = StackingFactor,",
+				"          Type,",
+				"          {Current position} = CurrentPosition,",
+				"          {Yard Row} = YardRow,",
+				"          Cat,",
+				"          Sts,",
+				"          {Section Factor} = SectionFactor,",
+				"          Pos_WO_Tier = derivedColumn1@Pos_WO_Tier,",
+				"          Date = derivedColumn1@Date,",
+				"          Week,",
+				"          Stack_confirmty = Stack_Distinct",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sort(asc(Date, true),",
+				"     asc({Container No.}, true)) ~> sort1",
+				"join1 filter(not(isDate(ContainerNo)) && not(isNull(ContainerNo)) && ContainerNo != '') ~> filter1",
+				"select2 alterRow(insertIf(true())) ~> alterRow1",
+				"sort1 select(mapColumn(",
+				"          each(match(true()),",
+				"               regexReplace($$,' ','_') = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"StackConfirmity select(mapColumn(",
+				"          ContainerNo,",
+				"          StackingFactor,",
+				"          {Eq Type},",
+				"          {Equipment Class},",
+				"          CurrentPosition,",
+				"          YardRow,",
+				"          Cat,",
+				"          Sts,",
+				"          SectionFactor,",
+				"          {Outbound Carrier},",
+				"          {Current POD},",
+				"          {Gross Weight},",
+				"          {Group Code},",
+				"          Line,",
+				"          FileDate",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"aggregate1 derive(Stack_Conformity = iif(Stack_Distinct>1, \"Mix Stack\", \"Pure Stack\")) ~> derivedColumn2",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'mct',",
+				"     folderPath: 'gold/stack_confirmity_new',",
+				"     mergeSchema: true,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> StackConformity"
+			]
+		}
+	}
+}
