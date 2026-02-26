@@ -1,9 +1,9 @@
 {
-	"name": "CMATK",
+	"name": "BHCT_moves",
 	"properties": {
 		"activities": [
 			{
-				"name": "MoveSrc",
+				"name": "MoveSrc_BHCT",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "MoveSrc_CMATK",
+						"referenceName": "MoveSrc_BHCT",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -27,11 +27,11 @@
 				}
 			},
 			{
-				"name": "Rehandle",
+				"name": "Rehandle_BHCT",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "MoveSrc",
+						"activity": "MoveSrc_BHCT",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -47,7 +47,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "Rehandle_CMATK",
+						"referenceName": "Rehandle_BHCT",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -58,35 +58,11 @@
 				}
 			},
 			{
-				"name": "EcEvents",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "EcEvents_CMATK",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "jobStepping",
+				"name": "Dual Cycling_BHCT",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "EcEvents",
+						"activity": "MoveSrc_BHCT",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -102,7 +78,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "jobstepping_CMATK",
+						"referenceName": "Dual Cycling_BHCT",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -113,7 +89,7 @@
 				}
 			},
 			{
-				"name": "StackConformity",
+				"name": "BHCT_Decking",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -126,7 +102,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "stack_confirmity_CMATK",
+						"referenceName": "BHCT_Decking",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -137,11 +113,11 @@
 				}
 			},
 			{
-				"name": "SectionConformity",
+				"name": "FLD_BHCT",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "StackConformity",
+						"activity": "BHCT_Decking",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -157,7 +133,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "section_confirmity_CMATK",
+						"referenceName": "FLD_BHCT",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -168,11 +144,11 @@
 				}
 			},
 			{
-				"name": "Violations",
+				"name": "LadenUnladen_Time_DualyCycle_BHCT",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "MoveSrc",
+						"activity": "MoveSrc_BHCT",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -188,7 +164,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "violations_CMATK",
+						"referenceName": "LadenUnladen_Time_DualyCycle_BHCT",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -199,9 +175,16 @@
 				}
 			},
 			{
-				"name": "renomination_CMATK",
+				"name": "bhct_moves_time_delta",
 				"type": "ExecuteDataFlow",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "MoveSrc_BHCT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -212,7 +195,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "renomination_CMATK",
+						"referenceName": "bhct_moves_time_delta",
 						"type": "DataFlowReference"
 					},
 					"compute": {
