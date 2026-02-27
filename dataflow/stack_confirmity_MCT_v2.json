@@ -163,7 +163,7 @@
 				"aggregate1 derive(Stack_Conformity = iif(Stack_Distinct>1, \"Mix\", \"Pure\")) ~> derivedColumn2",
 				"join1 filter(Tier==minTier) ~> filter2",
 				"aggregate3 derive(Weight_Conformity = iif((maxWeight>=:maxLimit || minWeight<=:minLimit), \"Mix\", \"Pure\"),",
-				"          MaxWeightLimit = :maxLimit,",
+				"          MaxWeightLimit = :maxLimit + 1000,",
 				"          MinWeightLimit = :minLimit,",
 				"          maxLimit := 1.15*refWeight,",
 				"          minLimit := refWeight*0.85) ~> derivedColumn3",
