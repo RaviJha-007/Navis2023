@@ -1,7 +1,7 @@
 {
 	"name": "schedule_trigger",
 	"properties": {
-		"description": "cmatk schedule trigger",
+		"description": "schedule trigger",
 		"annotations": [],
 		"runtimeState": "Started",
 		"pipelines": [
@@ -86,6 +86,12 @@
 			{
 				"pipelineReference": {
 					"referenceName": "CMATK",
+					"type": "PipelineReference"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "MCT_conformities",
 					"type": "PipelineReference"
 				}
 			}
