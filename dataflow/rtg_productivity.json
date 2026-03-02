@@ -62,9 +62,6 @@
 					"name": "derivedColumn2"
 				},
 				{
-					"name": "derivedColumn3"
-				},
-				{
 					"name": "aggregate1"
 				},
 				{
@@ -104,7 +101,7 @@
 					"name": "union1"
 				},
 				{
-					"name": "aggregate3"
+					"name": "aggregate"
 				},
 				{
 					"name": "alterRow2"
@@ -113,10 +110,19 @@
 					"name": "join1"
 				},
 				{
-					"name": "aggregate4"
+					"name": "AlterRow3"
 				},
 				{
-					"name": "AlterRow3"
+					"name": "filter4"
+				},
+				{
+					"name": "derivedColumn6"
+				},
+				{
+					"name": "derivedColumn8"
+				},
+				{
+					"name": "aggregate3"
 				}
 			],
 			"scriptLines": [
@@ -280,23 +286,21 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"derivedColumn3 alterRow(upsertIf(true())) ~> alterRow1",
+				"derivedColumn6 alterRow(upsertIf(true())) ~> alterRow1",
 				"select1 window(over(cheID,",
 				"          Date),",
 				"     asc(EcEventTime, true),",
 				"     asc(ecEventGkey, true),",
 				"     typeDescription_next = lead(typeDescription),",
-				"          EcEventTime_next = lead(EcEventTime),",
-				"          typeDescription_prev = lag(typeDescription)) ~> window1",
+				"          EcEventTime_next = lead(EcEventTime)) ~> window1",
 				"window1 derive(LgonTime = iif(typeDescription==\"LGON\", EcEventTime,toTimestamp(\"\")),",
 				"          LgOffTime = iif(typeDescription_next==\"LGOF\", EcEventTime_next,toTimestamp(\"\"))) ~> derivedColumn2",
-				"derivedColumn2 derive(WorktimeSeconds = iif(isNull(typeDescription) || isNull(LgonTime) || isNull(LgOffTime), 0, (LgOffTime-LgonTime)/1000)) ~> derivedColumn3",
 				"ecevents aggregate(groupBy(ecEventGkey),",
 				"     each(match(name!='ecEventGkey'), $$ = first($$))) ~> aggregate1",
 				"moves aggregate(groupBy(mve_gkey),",
 				"     each(match(name!='mve_gkey'), $$ = first($$))) ~> aggregate2",
 				"aggregate2 filter(not(isNull(mve_gkey))) ~> filter3",
-				"filter3 split(in([\"DLVR\",\"LOAD\",\"SHIFT\"], Move_Kind) && Fetch_CHE_Kind==\"RTG\" && not(isNull(Fetch_CHE_Id)),",
+				"filter3 split(in([\"DLVR\",\"LOAD\",\"SHFT\"], Move_Kind) && Fetch_CHE_Kind==\"RTG\" && not(isNull(Fetch_CHE_Id)),",
 				"     in([\"DSCH\",\"RECV\"], Move_Kind) && Put_CHE_Kind==\"RTG\"  && not(isNull(Put_CHE_Id)),",
 				"     Move_Kind==\"YARD\",",
 				"     disjoint: true) ~> split1@(LSD, RD, Y)",
@@ -452,26 +456,30 @@
 				"select6Put derive(Move_Primary_key = toString(Move_Primary_key) + \"-\" + toString(CHE_Id)) ~> derivedColumn5",
 				"select3, select4, select2, derivedColumn4, derivedColumn5 union(byName: true)~> union1",
 				"union1 aggregate(groupBy(Move_Primary_key),",
-				"     each(match(name!='Move_Primary_key'), $$ = first($$))) ~> aggregate3",
-				"aggregate3 alterRow(upsertIf(true())) ~> alterRow2",
-				"aggregate3, derivedColumn3 join(toString(CHE_Id) == toString(cheID)",
-				"     && move_time >= {}",
-				"     && move_time <= ActualTime_next,",
-				"     joinType:'inner',",
+				"     each(match(name!='Move_Primary_key'), $$ = first($$))) ~> aggregate",
+				"aggregate alterRow(upsertIf(true())) ~> alterRow2",
+				"aggregate, derivedColumn8 join(toString(cheID)==toString(CHE_Id) && move_time>=LgonTime && move_time<=LgOffTime,",
+				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'left')~> join1",
-				"join1 aggregate(groupBy(aggregate3@Year,",
-				"          aggregate3@Month,",
-				"          aggregate3@Week,",
+				"     partitionBy('key',",
+				"          0,",
+				"          CHE_Id",
+				"     ),",
+				"     broadcast: 'right')~> join1",
+				"aggregate3 alterRow(upsertIf(true())) ~> AlterRow3",
+				"derivedColumn2 filter(!isNull(typeDescription) && !isNull(LgonTime) && !isNull(LgOffTime)) ~> filter4",
+				"derivedColumn2 derive(lgoff_miss_flag = iif(typeDescription==\"LGON\" && typeDescription_next!=\"LGOF\", 1,0)) ~> derivedColumn6",
+				"filter4 derive(WorkTimeSeconds = iif(isNull(LgOffTime) || isNull(LgonTime), 0, toInteger((LgOffTime-LgonTime)/1000))) ~> derivedColumn8",
+				"join1 aggregate(groupBy(aggregate@Year,",
+				"          aggregate@Month,",
+				"          aggregate@Week,",
 				"          Date,",
-				"          ShiftDateName,",
 				"          CHE_Kind,",
-				"          cheName,",
-				"          CHE_Id),",
-				"     move_count = countDistinct(Move_Primary_key),",
-				"          rtg_workhours = sum(WorktimeSeconds)/3600) ~> aggregate4",
-				"aggregate4 alterRow(upsertIf(true())) ~> AlterRow3",
+				"          cheID,",
+				"          cheName),",
+				"     Total_move_count = countDistinct(Move_Primary_key),",
+				"          Total_rtg_worktime_seconds = sum(WorkTimeSeconds)) ~> aggregate3",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
