@@ -120,9 +120,6 @@
 				},
 				{
 					"name": "AlterRow3"
-				},
-				{
-					"name": "filter4"
 				}
 			],
 			"scriptLines": [
@@ -288,19 +285,17 @@
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"derivedColumn3 alterRow(upsertIf(true())) ~> alterRow1",
 				"select1 window(over(cheID,",
-				"          ShiftDateName),",
+				"          Date),",
 				"     asc(EcEventTime, true),",
 				"     asc(ecEventGkey, true),",
 				"     typeDescription_next = lead(typeDescription),",
 				"          EcEventTime_next = lead(EcEventTime),",
 				"          typeDescription_prev = lag(typeDescription)) ~> window1",
-				"window1 derive(ActualEvent = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), \"LGON\", typeDescription),",
-				"          ActualEvent_next = iif((typeDescription==\"LGOFF\" && isNull(typeDescription_prev)) || (typeDescription==\"LGON\" && isNull(typeDescription_next)), \"LGOFF\", typeDescription_next),",
-				"          ActualTime = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), ShiftStartTime, EcEventTime),",
-				"          ActualTime_next = iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev), EcEventTime, iif(typeDescription==\"LGON\" && isNull(typeDescription_next), ShiftEndTime,EcEventTime_next))) ~> derivedColumn2",
-				"derivedColumn2 filter(ActualEvent==\"LGON\" && ActualEvent_next==\"LGOFF\") ~> filter2",
-				"filter2 derive(WorktimeSeconds = (ActualTime_next - ActualTime)/1000) ~> derivedColumn3",
-				"filter4 aggregate(groupBy(ecEventGkey),",
+				"window1 derive(LgonTime = iif(typeDescription==\"LGON\", EcEventTime),",
+				"          LgOffTime = iif(typeDescription==\"LGOFF\", EcEventTime_next)) ~> derivedColumn2",
+				"derivedColumn2 filter({}==\"LGON\" && ActualEvent_next==\"LGOFF\") ~> filter2",
+				"filter2 derive(WorktimeSeconds = (ActualTime_next - {})/1000) ~> derivedColumn3",
+				"ecevents aggregate(groupBy(ecEventGkey),",
 				"     each(match(name!='ecEventGkey'), $$ = first($$))) ~> aggregate1",
 				"moves aggregate(groupBy(mve_gkey),",
 				"     each(match(name!='mve_gkey'), $$ = first($$))) ~> aggregate2",
@@ -464,7 +459,7 @@
 				"     each(match(name!='Move_Primary_key'), $$ = first($$))) ~> aggregate3",
 				"aggregate3 alterRow(upsertIf(true())) ~> alterRow2",
 				"aggregate3, derivedColumn3 join(toString(CHE_Id) == toString(cheID)",
-				"     && move_time >= ActualTime",
+				"     && move_time >= {}",
 				"     && move_time <= ActualTime_next,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
@@ -481,7 +476,6 @@
 				"     move_count = countDistinct(Move_Primary_key),",
 				"          rtg_workhours = sum(WorktimeSeconds)/3600) ~> aggregate4",
 				"aggregate4 alterRow(upsertIf(true())) ~> AlterRow3",
-				"ecevents filter(cheKind!=\"QC\" ) ~> filter4",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
