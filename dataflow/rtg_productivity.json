@@ -62,9 +62,6 @@
 					"name": "derivedColumn2"
 				},
 				{
-					"name": "filter2"
-				},
-				{
 					"name": "derivedColumn3"
 				},
 				{
@@ -238,7 +235,7 @@
 				"     format: 'delta',",
 				"     fileSystem: ($Customer),",
 				"     folderPath: 'silver/moves') ~> moves",
-				"aggregate1 filter(not(isNull(ecEventGkey)) && cheKind == 'RTG' && (eventTypeDescription == 'LGON' || eventTypeDescription == 'LGOFF')) ~> filter1",
+				"aggregate1 filter(not(isNull(ecEventGkey)) && cheKind == 'RTG' && (eventTypeDescription == 'LGON' || eventTypeDescription == 'LGOF')) ~> filter1",
 				"filter1 derive(Date = :CurrentDate,",
 				"          customer = upper($Customer),",
 				"          CurrentDate := toDate(EcEventTime),",
@@ -291,10 +288,9 @@
 				"     typeDescription_next = lead(typeDescription),",
 				"          EcEventTime_next = lead(EcEventTime),",
 				"          typeDescription_prev = lag(typeDescription)) ~> window1",
-				"window1 derive(LgonTime = iif(typeDescription==\"LGON\", EcEventTime),",
-				"          LgOffTime = iif(typeDescription==\"LGOFF\", EcEventTime_next)) ~> derivedColumn2",
-				"derivedColumn2 filter({}==\"LGON\" && ActualEvent_next==\"LGOFF\") ~> filter2",
-				"filter2 derive(WorktimeSeconds = (ActualTime_next - {})/1000) ~> derivedColumn3",
+				"window1 derive(LgonTime = iif(typeDescription==\"LGON\", EcEventTime,toTimestamp(\"\")),",
+				"          LgOffTime = iif(typeDescription_next==\"LGOF\", EcEventTime_next,toTimestamp(\"\"))) ~> derivedColumn2",
+				"derivedColumn2 derive(WorktimeSeconds = iif(isNull(typeDescription) || isNull(LgonTime) || isNull(LgOffTime), 0, (LgOffTime-LgonTime)/1000)) ~> derivedColumn3",
 				"ecevents aggregate(groupBy(ecEventGkey),",
 				"     each(match(name!='ecEventGkey'), $$ = first($$))) ~> aggregate1",
 				"moves aggregate(groupBy(mve_gkey),",
