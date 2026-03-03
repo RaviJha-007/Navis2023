@@ -270,7 +270,7 @@
 				"     each(match(name!='ecEventGkey'), $$ = first($$))) ~> aggregate1",
 				"moves aggregate(groupBy(mve_gkey),",
 				"     each(match(name!='mve_gkey'), $$ = first($$))) ~> aggregate2",
-				"aggregate2 filter(not(isNull(mve_gkey)) && in([\"DLVR\",\"LOAD\",\"SHFT\",\"DSCH\",\"RECV\", \"YARD\"], Move_Kind) && Carry_CHE_Kind==\"RTG\" && not(isNull(Carry_CHE_Id))) ~> filter3",
+				"aggregate2 filter(not(isNull(mve_gkey)) && in([\"DLVR\",\"LOAD\",\"SHFT\",\"DSCH\",\"RECV\", \"YARD\"], Move_Kind) && Carry_CHE_Kind==\"ITV\" && not(isNull(Carry_CHE_Id))) ~> filter3",
 				"derivedColumn9 select(mapColumn(",
 				"          Move_Primary_key = mve_gkey,",
 				"          Unit_Nbr,",
