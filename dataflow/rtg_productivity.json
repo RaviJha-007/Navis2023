@@ -46,7 +46,7 @@
 						"referenceName": "linkedService1",
 						"type": "LinkedServiceReference"
 					},
-					"name": "sink1"
+					"name": "rtgmoves"
 				}
 			],
 			"transformations": [
@@ -624,21 +624,22 @@
 				"alterRow5 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
-				"     fileSystem: '$Customer',",
+				"     fileSystem: ($Customer),",
 				"     folderPath: 'gold/rtg_moves',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
 				"     vacuum: 0,",
 				"     deletable: false,",
-				"     insertable: true,",
+				"     insertable: false,",
 				"     updateable: false,",
-				"     upsertable: false,",
+				"     upsertable: true,",
+				"     keys:['Move_Primary_key'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true) ~> rtgmoves"
 			]
 		}
 	}
