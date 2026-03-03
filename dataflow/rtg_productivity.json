@@ -32,7 +32,7 @@
 						"referenceName": "linkedService1",
 						"type": "LinkedServiceReference"
 					},
-					"name": "rtgmoves"
+					"name": "rtgnonmoves"
 				},
 				{
 					"linkedService": {
@@ -40,6 +40,13 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "rtgprod"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
 				}
 			],
 			"transformations": [
@@ -125,10 +132,13 @@
 					"name": "derivedColumn7"
 				},
 				{
-					"name": "exists1"
+					"name": "rtgnotexist"
 				},
 				{
 					"name": "select5"
+				},
+				{
+					"name": "alterRow5"
 				}
 			],
 			"scriptLines": [
@@ -464,7 +474,7 @@
 				"select3, select4, select2, derivedColumn4, derivedColumn5 union(byName: true)~> union1",
 				"union1 aggregate(groupBy(Move_Primary_key),",
 				"     each(match(name!='Move_Primary_key'), $$ = first($$))) ~> aggregate",
-				"exists1 alterRow(upsertIf(true())) ~> alterRow2",
+				"rtgnotexist alterRow(upsertIf(true())) ~> alterRow2",
 				"aggregate, filter4 join(toString(cheID)==toString(CHE_Id) && move_time>=LgonTime && move_time<=LgOffTime,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
@@ -488,9 +498,9 @@
 				"          LgOffTime),",
 				"     Move_count = countDistinct(Move_Primary_key)) ~> aggregate3",
 				"aggregate3 derive(Worktime_Seconds = (toLong(LgOffTime) - toLong(LgonTime))/1000) ~> derivedColumn7",
-				"aggregate, select5 exists(aggregate@Move_Primary_key == aggregate@Move_Primary_key,",
+				"aggregate, select5 exists(select5@Move_Primary_key == aggregate@Move_Primary_key,",
 				"     negate:true,",
-				"     broadcast: 'auto')~> exists1",
+				"     broadcast: 'right')~> rtgnotexist",
 				"join1 select(mapColumn(",
 				"          Move_Primary_key,",
 				"          Unit_Nbr,",
@@ -553,6 +563,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
+				"aggregate alterRow() ~> alterRow5",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -576,7 +587,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: ($Customer),",
-				"     folderPath: 'gold/rtg_moves',",
+				"     folderPath: 'gold/rtg_invalid_moves',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
@@ -590,7 +601,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> rtgmoves",
+				"     skipDuplicateMapOutputs: true) ~> rtgnonmoves",
 				"AlterRow3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -609,7 +620,25 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> rtgprod"
+				"     skipDuplicateMapOutputs: true) ~> rtgprod",
+				"alterRow5 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: '$Customer',",
+				"     folderPath: 'gold/rtg_moves',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
