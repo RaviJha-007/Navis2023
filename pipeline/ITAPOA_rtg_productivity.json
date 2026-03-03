@@ -54,6 +54,12 @@
 				}
 			}
 		],
+		"parameters": {
+			"customer": {
+				"type": "string",
+				"defaultValue": "itapoa"
+			}
+		},
 		"annotations": []
 	}
 }
