@@ -1,5 +1,5 @@
 {
-	"name": "rtg_prod",
+	"name": "shift_rtg_prod",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -124,7 +124,7 @@
 			],
 			"scriptLines": [
 				"parameters{",
-				"     Customer as string ('malta')",
+				"     Customer as string ('itapoa')",
 				"}",
 				"source(output(",
 				"          ecEventGkey as long,",
@@ -490,7 +490,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: ($Customer),",
-				"     folderPath: 'gold/rtg_ecevents',",
+				"     folderPath: 'gold/shift_rtg_ecevents',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
@@ -509,7 +509,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: ($Customer),",
-				"     folderPath: 'gold/rtg_moves',",
+				"     folderPath: 'gold/shift_rtg_moves',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
@@ -528,7 +528,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: ($Customer),",
-				"     folderPath: 'gold/rtg_productivity',",
+				"     folderPath: 'gold/shift_rtg_productivity',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
