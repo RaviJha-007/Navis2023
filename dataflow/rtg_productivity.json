@@ -531,7 +531,7 @@
 				"     insertable: false,",
 				"     updateable: false,",
 				"     upsertable: true,",
-				"     keys:['Year','Month','Week','Date','ShiftDateName','CHE_Id'],",
+				"     keys:['Year','Month','Week','Date','cheID','cheName'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
