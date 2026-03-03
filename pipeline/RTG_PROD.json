@@ -16,10 +16,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "rtg_prod",
+						"referenceName": "shift_rtg_prod",
 						"type": "DataFlowReference",
 						"parameters": {
-							"Customer": "'malta'"
+							"Customer": "'itapoa'"
 						}
 					},
 					"compute": {
