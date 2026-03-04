@@ -321,7 +321,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
 				"select4 alterRow(upsertIf(true())) ~> alterRow2",
-				"select2, filter4 join(CHE_Kind==cheKind && toString(cheID)==toString(CHE_Id) && move_time>=LgonTime && move_time<=LgOffTime,",
+				"select2, filter4 join(lower(CHE_Kind)==lower(cheKind) && toString(cheID)==toString(CHE_Id) && move_time>=LgonTime && move_time<=LgOffTime,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
