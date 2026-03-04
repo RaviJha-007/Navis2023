@@ -85,7 +85,7 @@
 				"     format: 'delimited',",
 				"     fileSystem: ($customer),",
 				"     folderPath: 'bronze/yardreport/load',",
-				"     columnDelimiter: ',',",
+				"     columnDelimiter: ';',",
 				"     escapeChar: '\\\\',",
 				"     quoteChar: '',",
 				"     columnNamesAsHeader: true) ~> StackConfirmity",
