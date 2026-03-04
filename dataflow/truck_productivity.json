@@ -86,9 +86,6 @@
 					"name": "filter4"
 				},
 				{
-					"name": "derivedColumn8"
-				},
-				{
 					"name": "aggregate3"
 				},
 				{
@@ -108,6 +105,9 @@
 				},
 				{
 					"name": "select4"
+				},
+				{
+					"name": "window2"
 				}
 			],
 			"scriptLines": [
@@ -272,16 +272,19 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"derivedColumn2 alterRow(upsertIf(true())) ~> alterRow1",
-				"select1 window(over(cheID,",
+				"window2 window(over(cheID,",
 				"          Date),",
 				"     asc(EcEventTime, true),",
 				"     asc(ecEventGkey, true),",
 				"     typeDescription_next = lead(typeDescription),",
 				"          typeDescription_prev = lag(typeDescription),",
 				"          EcEventTime_next = lead(EcEventTime)) ~> window1",
-				"window1 derive(LgonTime = iif(typeDescription==\"LGON\", EcEventTime, iif(typeDescription==\"LGOFF\" && isNull(typeDescription_prev) , toTimestamp(Date) , toTimestamp(\"\")) ),",
-				"          LgOffTime = iif(typeDescription_next==\"LGOF\", EcEventTime_next, iif(typeDescription_next==\"LGON\" && typeDescription==\"LGOFF\" && isNull(typeDescription_prev) , EcEventTime , toTimestamp(\"\"))),",
-				"          lgoff_miss_flag = iif(typeDescription==\"LGON\" && typeDescription_next!=\"LGOF\" && not(isNull(typeDescription_next)), 1,0)) ~> derivedColumn2",
+				"window1 derive(LgonTime = iif(typeDescription=='LGON' && typeDescription_next=='LGOF', EcEventTime, iif((typeDescription=='LGOFF' && typeDescription_prev==\"\" && typeDescriptionGlobalPrev ==\"LGON\" && typeDescription_next=='LGON'), :Day.Start, iif(typeDescription==\"LGON\" && typeDescription_next==\"\" && typeDescriptionGlobalNext==\"LGOF\" && typeDescription_prev=='LGOF',EcEventTime, toTimestamp(null())))),",
+				"          LgOffTime = iif(typeDescription=='LGON' && typeDescription_next=='LGOF', EcEventTime_next, iif((typeDescription=='LGOFF' && typeDescription_prev==\"\" && typeDescriptionGlobalPrev ==\"LGON\" && typeDescription_next=='LGON'), EcEventTime, iif(typeDescription==\"LGON\" && typeDescription_next==\"\" && typeDescriptionGlobalNext==\"LGOF\" && typeDescription_prev=='LGOF',:Day.End, toTimestamp(null())))),",
+				"          lgoff_miss_flag = iif(typeDescription==\"LGON\" && typeDescriptionGlobalNext!=\"LGOF\", 1,0),",
+				"          lgon_miss_flag = iif(typeDescription==\"LGOF\" && typeDescriptionGlobalPrev!=\"LGON\", 1,0),",
+				"          Day := @(Start=toTimestamp((toString(toDate(EcEventTime)) + \" \" + \"00:00:00\"), \"yyyy-MM-dd HH:mm:ss\"),",
+				"          End=toTimestamp((toString(toDate(EcEventTime)) + \" \" + \"23:59:59\"), \"yyyy-MM-dd HH:mm:ss\"))) ~> derivedColumn2",
 				"ecevents aggregate(groupBy(ecEventGkey),",
 				"     each(match(name!='ecEventGkey'), $$ = first($$))) ~> aggregate1",
 				"moves aggregate(groupBy(mve_gkey),",
@@ -318,7 +321,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
 				"select4 alterRow(upsertIf(true())) ~> alterRow2",
-				"select2, derivedColumn8 join(toString(cheID)==toString(CHE_Id) && move_time>=LgonTime && move_time<=LgOffTime,",
+				"select2, filter4 join(CHE_Kind==cheKind && toString(cheID)==toString(CHE_Id) && move_time>=LgonTime && move_time<=LgOffTime,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -329,7 +332,6 @@
 				"     broadcast: 'right')~> join1",
 				"derivedColumn10 alterRow(upsertIf(true())) ~> AlterRow3",
 				"derivedColumn2 filter(!isNull(typeDescription) && !isNull(LgonTime) && !isNull(LgOffTime)) ~> filter4",
-				"filter4 derive(WorkTimeSeconds = iif(isNull(LgOffTime) || isNull(LgonTime), 0, toInteger((LgOffTime-LgonTime)/1000))) ~> derivedColumn8",
 				"select3 aggregate(groupBy(CHE_Kind,",
 				"          cheID,",
 				"          cheName,",
@@ -344,12 +346,13 @@
 				"filter3 derive(valid_twin_flag = iif(Twin_Carry==\"Yes\",1,0)) ~> derivedColumn9",
 				"aggregate3 derive(Worktime_seconds = (toLong(LgOffTime) - toLong(LgonTime))/1000) ~> derivedColumn10",
 				"join1 select(mapColumn(",
-				"          each(match(/* All input columns */ true()),",
-				"               /* Input name */ $$ = $$)",
+				"          each(match(/* All input columns */true()),",
+				"               /* Input name */$$ = $$)",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
-				"select2, derivedColumn8 join(CHE_Id == cheID",
+				"select2, filter4 join(CHE_Id == cheID",
+				"     && CHE_Kind == cheKind",
 				"     && move_time >= LgonTime",
 				"     && move_time <= LgOffTime,",
 				"     joinType:'left',",
@@ -388,6 +391,12 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select4",
+				"select1 window(over(cheKind,",
+				"          cheID),",
+				"     asc(EcEventTime, true),",
+				"     asc(ecEventGkey, true),",
+				"     typeDescriptionGlobalNext = lead(typeDescription),",
+				"          typeDescriptionGlobalPrev = lag(typeDescription)) ~> window2",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
