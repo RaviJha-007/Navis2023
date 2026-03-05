@@ -144,7 +144,7 @@
 				}
 			},
 			{
-				"name": "jobstepping_malta",
+				"name": "jobstep_missed",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
@@ -164,7 +164,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "jobstepping_malta",
+						"referenceName": "MALTA_jobstep_Missed",
 						"type": "DataFlowReference"
 					},
 					"compute": {
