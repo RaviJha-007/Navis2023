@@ -199,7 +199,7 @@
 				"          yardGkey,",
 				"          YardID,",
 				"          FcyID,",
-				"          cheKind = ToCheIdName,",
+				"          cheKind,",
 				"          cheName = CHE_Name,",
 				"          cheID,",
 				"          type = eventType,",
