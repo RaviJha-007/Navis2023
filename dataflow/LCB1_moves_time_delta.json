@@ -1,5 +1,5 @@
 {
-	"name": "LCB1_moves_time_delta_copy1",
+	"name": "LCB1_moves_time_delta",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
