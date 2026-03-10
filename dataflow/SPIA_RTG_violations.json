@@ -312,7 +312,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
-				"join2 derive({Location Match or Not} = iif(substring(MH_To_Position_Name_Short_5, 1, 6) == substring(DH_To_Position_Name_Short_5, 1, 6), 'Position Followed', 'Position Not Followed'),",
+				"join2 derive({Location Match or Not} = iif(substring(MH_To_Position_Name_Short_5, 1, length(MH_To_Position_Name_Short_5)) == substring(DH_To_Position_Name_Short_5, 1, length(DH_To_Position_Name_Short_5)), 'Position Followed', 'Position Not Followed'),",
 				"          {T Put Time} = MaxDHTime,",
 				"          {T Put Hour} = hour(MaxDHTime),",
 				"          {T Put Minute} = minute(MaxDHTime),",
