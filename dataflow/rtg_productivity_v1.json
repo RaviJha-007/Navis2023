@@ -39,14 +39,14 @@
 						"referenceName": "linkedService1",
 						"type": "LinkedServiceReference"
 					},
-					"name": "rtgprod"
+					"name": "ActualRtgProd"
 				},
 				{
 					"linkedService": {
 						"referenceName": "linkedService1",
 						"type": "LinkedServiceReference"
 					},
-					"name": "sink1"
+					"name": "ProvisionalRtgProd"
 				}
 			],
 			"transformations": [
@@ -684,7 +684,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> rtgprod",
+				"     skipDuplicateMapOutputs: true) ~> ActualRtgProd",
 				"AlterRow4 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -703,7 +703,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true) ~> ProvisionalRtgProd"
 			]
 		}
 	}
