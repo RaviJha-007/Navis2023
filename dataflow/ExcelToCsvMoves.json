@@ -1,0 +1,114 @@
+{
+	"name": "ExcelToCsvMoves",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {Unit Nbr} as string,",
+				"          {Facility Id} as string,",
+				"          {Complex Id} as string,",
+				"          {Yard Id} as string,",
+				"          {Carrier Visit Key} as string,",
+				"          {Event Type Id} as string,",
+				"          {Move Kind} as string,",
+				"          {From Location} as string,",
+				"          {To Location} as string,",
+				"          {From Position Name} as string,",
+				"          {To Position Name} as string,",
+				"          {Carry CHE Operator Id} as string,",
+				"          {Fetch CHE Operator Id} as string,",
+				"          {Put CHE Operator Id} as string,",
+				"          {Fetch CHE Id} as string,",
+				"          {Fetch CHE Kind} as string,",
+				"          {Carry CHE Id} as string,",
+				"          {Carry CHE Kind} as string,",
+				"          {Put CHE Id} as string,",
+				"          {Put CHE Kind} as string,",
+				"          {QC CHE Id} as string,",
+				"          {QC CHE Kind} as string,",
+				"          t_carry_complete as string,",
+				"          t_put as string,",
+				"          t_fetch as string,",
+				"          t_dispatch as string,",
+				"          t_discharge as string,",
+				"          t_carry_dispatch as string,",
+				"          t_carry_fetch_ready as string,",
+				"          t_carry_put_ready as string,",
+				"          dist_carry as string,",
+				"          dist_start as string,",
+				"          {Twin Fetch} as string,",
+				"          {Twin Carry} as string,",
+				"          {Twin Put} as string,",
+				"          {Category Id} as string,",
+				"          {Freight Kind Id} as string,",
+				"          to_pos_gkey as string,",
+				"          fm_pos_gkey as string,",
+				"          {Restow Reason} as string,",
+				"          {Container Line Id} as string,",
+				"          {Container Line Role} as string,",
+				"          pow as string,",
+				"          mve_gkey as string,",
+				"          ufv_gkey as string,",
+				"          {Berth Id} as string,",
+				"          {Goods And Ctr Wt Kg} as string,",
+				"          active_ufv as string,",
+				"          {Requires Power Flag} as string,",
+				"          {OOG Flag} as string,",
+				"          {Shipper Id} as string,",
+				"          {Consignee Id} as string,",
+				"          {Commodity Id} as string,",
+				"          ATA as string,",
+				"          ATD as string,",
+				"          Rehandles as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'excel',",
+				"     fileSystem: 'apmt-salalah',",
+				"     folderPath: 'bronze/excels',",
+				"     sheetName: 'Sheet1',",
+				"     firstRowAsHeader: true) ~> source1",
+				"source1 alterRow(upsertIf(true())) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'apmt-salalah',",
+				"     folderPath: 'bronze/csvs',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
