@@ -1,5 +1,5 @@
 {
-	"name": "ExcelToCsv",
+	"name": "ExcelToCsvEvents",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
