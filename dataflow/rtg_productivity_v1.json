@@ -129,15 +129,6 @@
 				},
 				{
 					"name": "window2"
-				},
-				{
-					"name": "join2"
-				},
-				{
-					"name": "aggregate4"
-				},
-				{
-					"name": "derivedColumn8"
 				}
 			],
 			"scriptLines": [
@@ -595,27 +586,6 @@
 				"     asc(ecEventGkey, true),",
 				"     typeDescriptionGlobalNext = lead(typeDescription,1),",
 				"          typeDescriptionGlobalPrev = lag(typeDescription,1)) ~> window2",
-				"filter4, select6 join(lower(toString(cheID)) == lower(toString(CHE_Id))",
-				"     && lower(toString(cheKind)) == lower(toString(CHE_Kind))",
-				"     && LgonTime <= move_time",
-				"     && LgOffTime >= move_time,",
-				"     joinType:'left',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'right')~> join2",
-				"join2 aggregate(groupBy(cheKind,",
-				"          cheID,",
-				"          cheName,",
-				"          select1@Year,",
-				"          select1@Month,",
-				"          select1@Week,",
-				"          Date,",
-				"          LgonTime,",
-				"          LgOffTime),",
-				"     Move_count = countDistinct(Move_Primary_key),",
-				"          LgOnMissSessionCount = sum(lgon_miss_flag),",
-				"          LgOffMissSessionCount = sum(lgoff_miss_flag)) ~> aggregate4",
-				"aggregate4 derive(WorkTime_Seconds = (toLong(LgOffTime) - toLong(LgonTime))/1000) ~> derivedColumn8",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
