@@ -129,6 +129,18 @@
 				},
 				{
 					"name": "window2"
+				},
+				{
+					"name": "aggregate4"
+				},
+				{
+					"name": "aggregate5"
+				},
+				{
+					"name": "derivedColumn8"
+				},
+				{
+					"name": "derivedColumn9"
 				}
 			],
 			"scriptLines": [
@@ -586,6 +598,17 @@
 				"     asc(ecEventGkey, true),",
 				"     typeDescriptionGlobalNext = lead(typeDescription,1),",
 				"          typeDescriptionGlobalPrev = lag(typeDescription,1)) ~> window2",
+				"derivedColumn9 aggregate(groupBy(Date,",
+				"          cheKind,",
+				"          cheID,",
+				"          cheName),",
+				"     WorkTime_seconds = sum(WorkTime_seconds)) ~> aggregate4",
+				"derivedColumn8 aggregate(groupBy(move_date,",
+				"          CHE_Kind,",
+				"          CHE_Id),",
+				"     Move_count = countDistinct(Move_Primary_key)) ~> aggregate5",
+				"select6 derive(move_date = toDate(move_time)) ~> derivedColumn8",
+				"filter4 derive(WorkTime_seconds = (toLong(LgOffTime) - toLong(LgonTime))/1000) ~> derivedColumn9",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
