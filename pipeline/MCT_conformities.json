@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "confirmity_csv",
+				"name": "stack_confirmity_MCT_v2",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,11 +16,8 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "confirmity_csv",
-						"type": "DataFlowReference",
-						"parameters": {
-							"customer": "'mct'"
-						}
+						"referenceName": "stack_confirmity_MCT_v2",
+						"type": "DataFlowReference"
 					},
 					"compute": {
 						"coreCount": 8,

@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 23",
+	"properties": {
+		"content": {
+			"query": "SELECT [Move_Primary_key]\n,[Unit_Nbr]\n,[Facility_Id]\n,[Complex_Id]\n,[Yard_Id]\n,[Carrier_Visit_Key]\n,[Event_Type_Id]\n,[Move_Kind]\n,[From_Location]\n,[To_Location]\n,[From_Position_Name]\n,[To_Position_Name]\n,[CHE_Operator_Id]\n,[CHE_Id]\n,[CHE_Kind]\n,[move_time]\n,[dist_carry]\n,[dist_start]\n,[Category_Id]\n,[Freight_Kind_Id]\n,[pow]\n,[ufv_gkey]\n,[Year]\n,[Month]\n,[Week]\n,[is_move_window_matched]\n FROM [dbo].[rtg_moves]\n WHERE CHE_Id = '303' AND\n move_time >=  '2026-01-15 04:26:23' AND move_time <='2026-01-15 06:47:57'",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "itapoa",
+				"poolName": "Built-in"
+			},
+			"resultLimit": -1
+		},
+		"type": "SqlQuery"
+	}
+}
