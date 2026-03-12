@@ -40,6 +40,13 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "itvprod"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "ProvisionalItvProd"
 				}
 			],
 			"transformations": [
@@ -111,6 +118,12 @@
 				},
 				{
 					"name": "aggregate5"
+				},
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "alterRow4"
 				}
 			],
 			"scriptLines": [
@@ -372,6 +385,12 @@
 				"          CHE_Id),",
 				"     Move_count_prov = countDistinct(Move_Primary_key),",
 				"          Twin_count_prov = sum(valid_twin_flag)) ~> aggregate5",
+				"aggregate4, aggregate5 lookup(Date == move_date",
+				"     && lower(toString(cheKind)) == lower(toString(CHE_Kind))",
+				"     && lower(toString(cheID)) == lower(toString(CHE_Id)),",
+				"     multiple: true,",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 alterRow(upsertIf(true())) ~> alterRow4",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -428,7 +447,26 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> itvprod"
+				"     skipDuplicateMapOutputs: true) ~> itvprod",
+				"alterRow4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: ($Customer),",
+				"     folderPath: 'gold/itv_productivity_prov',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Date','cheKind','cheID','cheName'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ProvisionalItvProd"
 			]
 		}
 	}
