@@ -261,7 +261,7 @@
 				}
 			},
 			{
-				"name": "mct_moves_time_delta1",
+				"name": "Moves_detail_MCT",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
@@ -281,7 +281,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "mct_moves_time_delta",
+						"referenceName": "Moves_detail_MCT",
 						"type": "DataFlowReference"
 					},
 					"compute": {
