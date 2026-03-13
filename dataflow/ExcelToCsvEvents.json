@@ -1,0 +1,94 @@
+{
+	"name": "ExcelToCsvEvents",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ecEventGkey as string,",
+				"          yardGkey as string,",
+				"          YardID as string,",
+				"          FcyID as string,",
+				"          cheKind as string,",
+				"          CHE_Name as string,",
+				"          CHE_ID as string,",
+				"          TimeStamp as string,",
+				"          eventType as string,",
+				"          eventSubType as string,",
+				"          eventTypeDescription as string,",
+				"          fromCheIdName as string,",
+				"          ToCheIdName as string,",
+				"          unit as string,",
+				"          pow as string,",
+				"          pool as string,",
+				"          workQueue as string,",
+				"          travelDistance as string,",
+				"          moveKind as string,",
+				"          isTwin as string,",
+				"          startDistance as string,",
+				"          workAssignment as string,",
+				"          unitRef as string,",
+				"          tran_ID as string,",
+				"          locType as string,",
+				"          locID as string,",
+				"          locSlot as string,",
+				"          opsPosID as string,",
+				"          unladenLoctype as string,",
+				"          unladenLocID as string,",
+				"          unladenLocSlot as string,",
+				"          ladenLoctype as string,",
+				"          ladenLocID as string,",
+				"          laden_LocSlot as string,",
+				"          lastEstMoveTime as string,",
+				"          operator_name as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'excel',",
+				"     fileSystem: 'apmt-salalah',",
+				"     folderPath: 'bronze/excels',",
+				"     sheetName: 'Sheet1',",
+				"     firstRowAsHeader: true) ~> source1",
+				"source1 alterRow(upsertIf(true())) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'apmt-salalah',",
+				"     folderPath: 'bronze/csvs',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
