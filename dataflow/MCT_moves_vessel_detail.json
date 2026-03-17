@@ -1,0 +1,57 @@
+{
+	"name": "MCT_moves_vessel_detail",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source1"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "AlterRow1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "select3"
+				}
+			],
+			"script": "source(output(\n\t\tmve_gkey as integer,\n\t\tUnit_Nbr as string,\n\t\tFacility_Id as string,\n\t\tComplex_Id as string,\n\t\tYard_Id as string,\n\t\tCarrier_Visit_Key as integer,\n\t\tEvent_Type_Id as string,\n\t\tMove_Kind as string,\n\t\tFrom_Location as string,\n\t\tTo_Location as string,\n\t\tFrom_Position_Name as string,\n\t\tTo_Position_Name as string,\n\t\tCarry_CHE_Operator_Id as string,\n\t\tFetch_CHE_Operator_Id as string,\n\t\tPut_CHE_Operator_Id as string,\n\t\tFetch_CHE_Id as long,\n\t\tFetch_CHE_Kind as string,\n\t\tCarry_CHE_Id as long,\n\t\tCarry_CHE_Kind as string,\n\t\tPut_CHE_Id as long,\n\t\tPut_CHE_Kind as string,\n\t\tQC_CHE_Id as long,\n\t\tQC_CHE_Kind as string,\n\t\tt_carry_complete as timestamp,\n\t\tt_put as timestamp,\n\t\tt_fetch as timestamp,\n\t\tt_dispatch as timestamp,\n\t\tt_discharge as timestamp,\n\t\tt_carry_dispatch as timestamp,\n\t\tt_carry_fetch_ready as timestamp,\n\t\tt_carry_put_ready as timestamp,\n\t\tdist_carry as short,\n\t\tdist_start as short,\n\t\tTwin_Fetch as boolean,\n\t\tTwin_Carry as boolean,\n\t\tTwin_Put as boolean,\n\t\tCategory_Id as string,\n\t\tFreight_Kind_Id as string,\n\t\tto_pos_gkey as integer,\n\t\tfm_pos_gkey as integer,\n\t\tRestow_Reason as string,\n\t\tContainer_Line_Id as string,\n\t\tContainer_Line_Role as string,\n\t\tpow as string,\n\t\tufv_gkey as integer,\n\t\tBerth_Id as string,\n\t\tGoods_And_Ctr_Wt_Kg as integer,\n\t\tactive_ufv as integer,\n\t\tRequires_Power_Flag as boolean,\n\t\tOOG_Flag as boolean,\n\t\tShipper_Id as string,\n\t\tConsignee_Id as string,\n\t\tCommodity_Id as string,\n\t\tATD as timestamp,\n\t\tRehandles as short,\n\t\tATA as timestamp,\n\t\tYear as integer,\n\t\tMonth as integer,\n\t\tWeek as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'delta',\n\tfileSystem: 'mct',\n\tfolderPath: 'silver/moves') ~> source1\nsource(output(\n\t\tCarrier_Visit_Key as integer,\n\t\tCarrier_Visit_Id as string,\n\t\tVessel_Id as string,\n\t\tComplex_Id as string,\n\t\tFacility_Id as string,\n\t\tPhase as string,\n\t\tVisit_Nbr as boolean,\n\t\tCarrier_Mode as string,\n\t\tATA as string,\n\t\tATD as string,\n\t\tETA as string,\n\t\tETD as string,\n\t\tOperator_Line_Id as string,\n\t\tOperator_Line_Role as string,\n\t\tOperator_Line_Name as string,\n\t\tTime_First_Availabilty as string,\n\t\tTime_Discharge_Complete as string,\n\t\tService_Id as string,\n\t\tService_Name as string,\n\t\tIB_VYG as string,\n\t\tOB_VYG as string,\n\t\tCarrier_Name as string,\n\t\tVessel_Class as string,\n\t\tPublished_ETA as string,\n\t\tPublished_ETD as string,\n\t\tStart_Work as string,\n\t\tEnd_Work as string,\n\t\tBegin_Receive_Date as string,\n\t\tCargo_Cutoff_Date as string,\n\t\tHazard_Cutoff_Date as string,\n\t\tReefer_Cutoff_Date as string,\n\t\tLabor_On_Board_Date as string,\n\t\tLabor_Off_Board_Date as string,\n\t\tOff_Port_Arrival_Date as string,\n\t\tOff_Port_Departure as string,\n\t\tPilot_On_Board_Date as string,\n\t\tPilot_Off_Board_Date as string,\n\t\tEst_BBK_Discharge as string,\n\t\tEst_BBK_Load as string,\n\t\tEst_Load as string,\n\t\tEst_Discharge as string,\n\t\tEst_Restow as string,\n\t\tEst_Shift as string,\n\t\tVessel_Classification as string,\n\t\tVessel_Class_Length_Overall_cm as integer,\n\t\tVessel_Class_Beam_cm as short,\n\t\tVessel_TEU_Capacity as short,\n\t\tLloyds_Code as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: true,\n\tformat: 'delta',\n\tfileSystem: 'mct',\n\tfolderPath: 'silver/vesselvisits') ~> source2\nsource1 filter(equals(Carry_CHE_Kind,'SC') && equals(isNull(Carry_CHE_Id),false()) && equals(isNull(t_carry_complete),false()) && equals(isNull(Move_Kind),false())) ~> filter1\nselect3 alterRow(upsertIf(true())) ~> AlterRow1\nfilter1 aggregate(groupBy(mve_gkey),\n\teach(match(name!='mve_gkey'), $$ = first($$))) ~> aggregate1\naggregate1 select(mapColumn(\n\t\tmve_gkey,\n\t\tUnit_Nbr,\n\t\tFacility_Id,\n\t\tComplex_Id,\n\t\tYard_Id,\n\t\tCarrier_Visit_Key,\n\t\tEvent_Type_Id,\n\t\tMove_Kind,\n\t\tFrom_Location,\n\t\tTo_Location,\n\t\tFrom_Position_Name,\n\t\tTo_Position_Name,\n\t\tFetch_CHE_Id,\n\t\tFetch_CHE_Kind,\n\t\tCarry_CHE_Id,\n\t\tCarry_CHE_Kind,\n\t\tPut_CHE_Id,\n\t\tPut_CHE_Kind,\n\t\tt_carry_complete,\n\t\tt_put,\n\t\tt_fetch,\n\t\tTwin_Carry,\n\t\tTwin_Put,\n\t\tTwin_Carry = Twin_Fetch,\n\t\tdist_carry,\n\t\tdist_start,\n\t\tCategory_Id,\n\t\tFreight_Kind_Id,\n\t\tpow,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select1\nsource2 select(mapColumn(\n\t\tCarrier_Visit_Key,\n\t\tCarrier_Visit_Id,\n\t\tVessel_Id,\n\t\tComplex_Id,\n\t\tFacility_Id,\n\t\tPhase,\n\t\tCarrier_Mode,\n\t\tOperator_Line_Id,\n\t\tOperator_Line_Role,\n\t\tOperator_Line_Name,\n\t\tService_Id,\n\t\tService_Name,\n\t\tCarrier_Name,\n\t\tVessel_Class,\n\t\tStart_Work,\n\t\tEnd_Work,\n\t\tVessel_Classification,\n\t\tVessel_Class_Length_Overall_cm,\n\t\tVessel_Class_Beam_cm,\n\t\tLloyds_Code\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select2\nselect1, select2 join(select1@Carrier_Visit_Key == select2@Carrier_Visit_Key,\n\tjoinType:'left',\n\tmatchType:'exact',\n\tignoreSpaces: false,\n\tbroadcast: 'auto')~> join1\njoin1 select(mapColumn(\n\t\tmve_gkey,\n\t\tUnit_Nbr,\n\t\tFacility_Id = select1@Facility_Id,\n\t\tComplex_Id = select1@Complex_Id,\n\t\tYard_Id,\n\t\tMoves_Carrier_Visit_Key = select1@Carrier_Visit_Key,\n\t\tEvent_Type_Id,\n\t\tMove_Kind,\n\t\tFrom_Location,\n\t\tTo_Location,\n\t\tFrom_Position_Name,\n\t\tTo_Position_Name,\n\t\tFetch_CHE_Id,\n\t\tFetch_CHE_Kind,\n\t\tCarry_CHE_Id,\n\t\tCarry_CHE_Kind,\n\t\tPut_CHE_Id,\n\t\tPut_CHE_Kind,\n\t\tt_carry_complete,\n\t\tt_put,\n\t\tt_fetch,\n\t\tTwin_Carry,\n\t\tTwin_Put,\n\t\tdist_carry,\n\t\tdist_start,\n\t\tCategory_Id,\n\t\tFreight_Kind_Id,\n\t\tpow,\n\t\tYear,\n\t\tMonth,\n\t\tWeek,\n\t\tVessel_Carrier_Visit_Key = select2@Carrier_Visit_Key,\n\t\tCarrier_Visit_Id,\n\t\tVessel_Id,\n\t\tPhase,\n\t\tCarrier_Mode,\n\t\tOperator_Line_Id,\n\t\tOperator_Line_Role,\n\t\tOperator_Line_Name,\n\t\tService_Id,\n\t\tService_Name,\n\t\tCarrier_Name,\n\t\tVessel_Class,\n\t\tStart_Work,\n\t\tEnd_Work,\n\t\tVessel_Classification,\n\t\tVessel_Class_Length_Overall_cm,\n\t\tVessel_Class_Beam_cm,\n\t\tLloyds_Code\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select3\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'mct',\n\tfolderPath: 'gold/moves_vessel_detail',\n\tmergeSchema: true,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['mve_gkey'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink1"
+		}
+	}
+}
