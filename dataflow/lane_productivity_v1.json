@@ -78,6 +78,9 @@
 				},
 				{
 					"name": "select5"
+				},
+				{
+					"name": "filter4"
 				}
 			],
 			"scriptLines": [
@@ -303,15 +306,16 @@
 				"aggregate3 derive(Worktime_Seconds = (toLong(LgOffTime) - toLong(LgonTime))/1000) ~> derivedColumn7",
 				"aggregate derive(move_date = toDate(move_time),",
 				"          move_hour = toInteger(split(toString(move_time,'HH:mm:ss'),\":\")[1]),",
-				"          Yard_Id = :position,",
-				"          Yard_Name = iif(toString(left(:position, 1))=='0', dropLeft(:position, 1), iif(lower(toString(left(:position, 1)))=='z', :position, :position)),",
+				"          Block_Id = :position,",
+				"          Block_Number = left(:position,2),",
+				"          Block_Letter = right(:position,1),",
 				"          position := left(split(Position_Name, \"-\")[3], 3)) ~> derivedColumn8",
 				"filter3 derive(mve_gkey = toString(mve_gkey)) ~> derivedColumn9",
-				"derivedColumn8 select(mapColumn(",
+				"filter4 select(mapColumn(",
 				"          Move_Primary_key,",
 				"          Unit_Nbr,",
 				"          Facility_Id,",
-				"          Yard_Id,",
+				"          Yard_Id = Block_Id,",
 				"          Carrier_Visit_Key,",
 				"          Event_Type_Id,",
 				"          Move_Kind,",
@@ -336,6 +340,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
+				"derivedColumn8 filter(ERROR_FUNCTION('iif(toInteger(left(Yard_Id,2))>=1 && toInteger(left(Yard_Id,2))<=6, , )')) ~> filter4",
 				"AlterRow3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
