@@ -92,6 +92,12 @@
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
+						"activity": "MoveSrc_apmt_salalah",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
 						"activity": "EcEvents_apmt_salalah",
 						"dependencyConditions": [
 							"Succeeded"
