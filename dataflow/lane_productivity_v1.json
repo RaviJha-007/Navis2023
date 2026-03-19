@@ -18,14 +18,10 @@
 						"referenceName": "linkedService1",
 						"type": "LinkedServiceReference"
 					},
-					"name": "rtgmove"
+					"name": "ActualRtgProd"
 				},
 				{
-					"linkedService": {
-						"referenceName": "linkedService1",
-						"type": "LinkedServiceReference"
-					},
-					"name": "ActualRtgProd"
+					"name": "sink1"
 				}
 			],
 			"transformations": [
@@ -69,12 +65,6 @@
 					"name": "aggregate"
 				},
 				{
-					"name": "alterRow2"
-				},
-				{
-					"name": "join1"
-				},
-				{
 					"name": "AlterRow3"
 				},
 				{
@@ -84,19 +74,16 @@
 					"name": "derivedColumn7"
 				},
 				{
-					"name": "select5"
-				},
-				{
-					"name": "select6"
-				},
-				{
-					"name": "aggregate5"
-				},
-				{
 					"name": "derivedColumn8"
 				},
 				{
 					"name": "derivedColumn9"
+				},
+				{
+					"name": "select5"
+				},
+				{
+					"name": "alterRow1"
 				}
 			],
 			"scriptLines": [
@@ -310,16 +297,6 @@
 				"select3, select4, select2, derivedColumn4, derivedColumn5 union(byName: true)~> union1",
 				"union1 aggregate(groupBy(Move_Primary_key),",
 				"     each(match(name!='Move_Primary_key'), $$ = first($$))) ~> aggregate",
-				"select6 alterRow(upsertIf(true())) ~> alterRow2",
-				"aggregate join(lower(CHE_Kind)==lower(cheKind) && toString(cheID)==toString(CHE_Id) && move_time>=LgonTime && move_time<=LgOffTime,",
-				"     joinType:'cross',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     partitionBy('key',",
-				"          0,",
-				"          CHE_Id",
-				"     ),",
-				"     broadcast: 'right')~> join1",
 				"derivedColumn7 alterRow(upsertIf(true())) ~> AlterRow3",
 				"select5 aggregate(groupBy(CHE_Kind,",
 				"          cheID,",
@@ -327,65 +304,13 @@
 				"          Year,",
 				"          Month,",
 				"          Week,",
-				"          Date,",
-				"          LgonTime,",
-				"          LgOffTime),",
+				"          Date),",
 				"     Move_count = countDistinct(Move_Primary_key)) ~> aggregate3",
 				"aggregate3 derive(Worktime_Seconds = (toLong(LgOffTime) - toLong(LgonTime))/1000) ~> derivedColumn7",
-				"join1 select(mapColumn(",
-				"          Move_Primary_key,",
-				"          Unit_Nbr,",
-				"          Facility_Id,",
-				"          Complex_Id,",
-				"          Yard_Id,",
-				"          Carrier_Visit_Key,",
-				"          Event_Type_Id,",
-				"          Move_Kind,",
-				"          From_Location,",
-				"          To_Location,",
-				"          From_Position_Name,",
-				"          To_Position_Name,",
-				"          CHE_Operator_Id,",
-				"          CHE_Id,",
-				"          CHE_Kind,",
-				"          move_time,",
-				"          dist_carry,",
-				"          dist_start,",
-				"          Category_Id,",
-				"          Freight_Kind_Id,",
-				"          pow,",
-				"          ufv_gkey,",
-				"          Year,",
-				"          Month,",
-				"          Week,",
-				"          ecEventGkey,",
-				"          yardGkey,",
-				"          YardID,",
-				"          FcyID,",
-				"          cheKind,",
-				"          cheName,",
-				"          cheID,",
-				"          typeDescription = typeDescriptionGlobalNext,",
-				"          travelDistance,",
-				"          isTwin,",
-				"          startDistance,",
-				"          locSlot,",
-				"          operatorName,",
-				"          customer,",
-				"          EcEventTime,",
-				"          Year = select1@Year,",
-				"          Month = select1@Month,",
-				"          Week = select1@Week,",
-				"          Date,",
-				"          typeDescription_next,",
-				"          typeDescription_prev,",
-				"          EcEventTime_next,",
-				"          LgonTime,",
-				"          LgOffTime",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select5",
-				"aggregate select(mapColumn(",
+				"aggregate derive(move_date = toDate(move_time),",
+				"          move_hour = toInteger(split(toString(move_time,'HH:mm:ss'),\":\")[1])) ~> derivedColumn8",
+				"filter3 derive(mve_gkey = toString(mve_gkey)) ~> derivedColumn9",
+				"derivedColumn8 select(mapColumn(",
 				"          Move_Primary_key,",
 				"          Unit_Nbr,",
 				"          Facility_Id,",
@@ -408,35 +333,13 @@
 				"          ufv_gkey,",
 				"          Year,",
 				"          Month,",
-				"          Week",
+				"          Week,",
+				"          move_date,",
+				"          move_hour",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select6",
-				"derivedColumn8 aggregate(groupBy(move_date,",
-				"          CHE_Kind,",
-				"          CHE_Id),",
-				"     Move_count_prov = countDistinct(Move_Primary_key)) ~> aggregate5",
-				"select6 derive(move_date = toDate(move_time)) ~> derivedColumn8",
-				"filter3 derive(mve_gkey = toString(mve_gkey)) ~> derivedColumn9",
-				"alterRow2 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'delta',",
-				"     fileSystem: ($Customer),",
-				"     folderPath: 'gold/rtg_moves',",
-				"     mergeSchema: false,",
-				"     autoCompact: false,",
-				"     optimizedWrite: false,",
-				"     vacuum: 0,",
-				"     deletable: false,",
-				"     insertable: false,",
-				"     updateable: false,",
-				"     upsertable: true,",
-				"     keys:['Move_Primary_key'],",
-				"     umask: 0022,",
-				"     preCommands: [],",
-				"     postCommands: [],",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> rtgmove",
+				"     skipDuplicateMapOutputs: true) ~> select5",
+				"select5 alterRow() ~> alterRow1",
 				"AlterRow3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -455,7 +358,11 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> ActualRtgProd"
+				"     skipDuplicateMapOutputs: true) ~> ActualRtgProd",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
