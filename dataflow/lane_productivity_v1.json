@@ -19,9 +19,6 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "ActualRtgProd"
-				},
-				{
-					"name": "sink1"
 				}
 			],
 			"transformations": [
@@ -81,9 +78,6 @@
 				},
 				{
 					"name": "select5"
-				},
-				{
-					"name": "alterRow1"
 				}
 			],
 			"scriptLines": [
@@ -339,7 +333,6 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
-				"select5 alterRow() ~> alterRow1",
 				"AlterRow3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -358,11 +351,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> ActualRtgProd",
-				"alterRow1 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true) ~> ActualRtgProd"
 			]
 		}
 	}
