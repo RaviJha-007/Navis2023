@@ -18,7 +18,7 @@
 						"referenceName": "linkedService1",
 						"type": "LinkedServiceReference"
 					},
-					"name": "ActualRtgProd"
+					"name": "LaneProd"
 				}
 			],
 			"transformations": [
@@ -84,6 +84,12 @@
 				},
 				{
 					"name": "derivedColumn10"
+				},
+				{
+					"name": "derivedColumn11"
+				},
+				{
+					"name": "derivedColumn12"
 				}
 			],
 			"scriptLines": [
@@ -298,7 +304,7 @@
 				"union1 aggregate(groupBy(Move_Primary_key),",
 				"     each(match(name!='Move_Primary_key'), $$ = first($$))) ~> aggregate",
 				"derivedColumn7 alterRow(upsertIf(true())) ~> AlterRow3",
-				"select5 aggregate(groupBy(Lane_Id,",
+				"derivedColumn11 aggregate(groupBy(Lane_Name,",
 				"          Year,",
 				"          Month,",
 				"          Week,",
@@ -319,7 +325,7 @@
 				"          Lane_Id = upper(right(:position,1)),",
 				"          position := left(split(Position_Name, \"-\")[3], 3)) ~> derivedColumn8",
 				"filter3 derive(mve_gkey = toString(mve_gkey)) ~> derivedColumn9",
-				"derivedColumn10 select(mapColumn(",
+				"derivedColumn12 select(mapColumn(",
 				"          Move_Primary_key,",
 				"          Unit_Nbr,",
 				"          Facility_Id,",
@@ -352,16 +358,17 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
-				"derivedColumn8 filter(\r",
-				"((Lane_Id >='A' && Lane_Id<='H') && in([\"01\",\"02\",\"03\",\"05\",\"06\",\"Z6\"], Lane_Number)) || in([\"03S\",\"03R\",\"04A\",\"04B\",\"04C\",\"04D\",\"04E\",\"04F\"],Block_Id)) ~> filter4",
+				"derivedColumn8 filter(((Lane_Id >='A' && Lane_Id<='H') && in([\"01\",\"02\",\"03\",\"05\",\"06\",\"Z6\"], Lane_Number)) || in([\"03S\",\"03R\",\"04A\",\"04B\",\"04C\",\"04D\",\"04E\",\"04F\"],Block_Id)) ~> filter4",
 				"filter4 derive(Block_Type = iif(in(:{7WideBlocks},Block_Id), \"7 Wide\", iif(in(:RSTBlocks,Block_Id), \"RST\", \"6 Wide\")),",
 				"          {7WideBlocks} := [\"01H\",\"02H\",\"03H\",\"01G\",\"02G\",\"03G\",\"01E\",\"02E\",\"03E\",\"04E\",\"01C\",\"02C\",\"03C\",\"04C\"],",
 				"          RSTBlocks := [\"03S\",\"03R\"]) ~> derivedColumn10",
+				"select5 derive(Lane_Name = iif(Block_Type==\"RST\", Block_Type, Lane_Id + \": \"+ Block_Type)) ~> derivedColumn11",
+				"derivedColumn10 derive(Lane_Name = iif(Block_Type==\"RST\", \"RST\", \"{Lane_Id}\"+':' +\" {Block_Type}\")) ~> derivedColumn12",
 				"AlterRow3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: ($Customer),",
-				"     folderPath: 'gold/rtg_productivity',",
+				"     folderPath: 'gold/lane_productivity',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
@@ -375,7 +382,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> ActualRtgProd"
+				"     skipDuplicateMapOutputs: true) ~> LaneProd"
 			]
 		}
 	}
