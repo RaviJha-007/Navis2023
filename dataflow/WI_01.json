@@ -12,10 +12,30 @@
 					"name": "CSV"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "WISink"
+				}
+			],
 			"transformations": [
 				{
-					"name": "DataTypeConversions"
+					"name": "ColumnNameStandardisation"
+				},
+				{
+					"name": "DateTimeDataTypeConversion"
+				},
+				{
+					"name": "AddingColumns"
+				},
+				{
+					"name": "Filter"
+				},
+				{
+					"name": "alterRow1"
 				}
 			],
 			"scriptLines": [
@@ -105,6 +125,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: true,",
+				"     rowUrlColumn: 'SourceFileName',",
 				"     format: 'delimited',",
 				"     fileSystem: ($p_FileSystem),",
 				"     columnDelimiter: ',',",
@@ -112,7 +133,59 @@
 				"     quoteChar: '\\\"',",
 				"     columnNamesAsHeader: true,",
 				"     wildcardPaths:[($p_SourcePath + 'workinstruction_*.csv')]) ~> CSV",
-				"CSV derive({WI Created} = ERROR_FUNCTION('')) ~> DataTypeConversions"
+				"CSV select(mapColumn(",
+				"          each(match(/* All input columns */ true()),",
+				"               trim(regexReplace($$, '[^a-zA-Z0-9_]', '_'), '_') = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ColumnNameStandardisation",
+				"ColumnNameStandardisation derive(each(match( in(['WI_Created', 'WI_Modified', 'Yard_Move_Deadline', 'mvhs_t_carry_complete', 'MVHS_Time_Fetch', 'MVHS_Pool_Time_Put', 'Est_Mv_Time', 'MVHS_Time_Carry_CHE_Dispatch'], name)), $$ = coalesce(\r",
+				"    toTimestamp($$, 'dd/MM/yyyy HH:mm:ss'),\r",
+				"    toTimestamp($$, 'dd/MM/yyyy H:mm:ss'),\r",
+				"    toTimestamp($$, 'dd/MM/yyyy HH:mm'),\r",
+				"    toTimestamp($$, 'dd/MM/yyyy H:mm')\r",
+				"))) ~> DateTimeDataTypeConversion",
+				"DateTimeDataTypeConversion derive(IntegrationKey = Unit_Nbr + '_' + toString(WI_Modified,'ddMMyyyyHHmmss'),",
+				"          ClientId = $p_ClientId,",
+				"          Load_TimeStamp = currentTimestamp(),",
+				"          SourceFileName = regexExtract(SourceFileName, '(\\\\d{8}_\\\\d{4})', 1),",
+				"          SourceFileName_Sort = toLong(     concat(         regexExtract(SourceFileName, '(\\\\d{2})(\\\\d{2})(\\\\d{4})_(\\\\d{4})', 3),         regexExtract(SourceFileName, '(\\\\d{2})(\\\\d{2})(\\\\d{4})_(\\\\d{4})', 2),         regexExtract(SourceFileName, '(\\\\d{2})(\\\\d{2})(\\\\d{4})_(\\\\d{4})', 1),         regexExtract(SourceFileName, '(\\\\d{2})(\\\\d{2})(\\\\d{4})_(\\\\d{4})', 4)     ) ),",
+				"          Unit_Position_1 = regexExtract(Unit_Position, '^.*-([A-Z0-9]+)\\\\s([A-Z0-9]+)\\\\s([A-Z0-9]+)$', 1),",
+				"          Unit_Position_2 = regexExtract(Unit_Position, '^.*-([A-Z0-9]+)\\\\s([A-Z0-9]+)\\\\s([A-Z0-9]+)$', 2),",
+				"          Unit_Position_3 = regexExtract(Unit_Position, '^.*-([A-Z0-9]+)\\\\s([A-Z0-9]+)\\\\s([A-Z0-9]+)$', 3),",
+				"          WI_Position_1 = regexExtract(WI_Position, '^.*-([A-Z0-9]+)\\\\s([A-Z0-9]+)\\\\s([A-Z0-9]+)$', 1),",
+				"          WI_Position_2 = regexExtract(WI_Position, '^.*-([A-Z0-9]+)\\\\s([A-Z0-9]+)\\\\s([A-Z0-9]+)$', 2),",
+				"          WI_Position_3 = regexExtract(WI_Position, '^.*-([A-Z0-9]+)\\\\s([A-Z0-9]+)\\\\s([A-Z0-9]+)$', 3),",
+				"          Year = year(WI_Created),",
+				"          Month = month(WI_Created),",
+				"          Week = weekOfYear(WI_Created)) ~> AddingColumns",
+				"AddingColumns filter(!isNull(IntegrationKey)) ~> Filter",
+				"Filter alterRow(upsertIf(true())) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: ($p_FileSystem),",
+				"     folderPath: '\\'silver/workinstruction/\\' ',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['IntegrationKey'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('key',",
+				"          1,",
+				"          Year,",
+				"          Month,",
+				"          Week",
+				"     )) ~> WISink"
 			]
 		}
 	}
