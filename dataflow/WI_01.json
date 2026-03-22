@@ -165,7 +165,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: ($p_FileSystem),",
-				"     folderPath: '\\'silver/workinstruction/\\' ',",
+				"     folderPath: 'silver/workinstruction/',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
