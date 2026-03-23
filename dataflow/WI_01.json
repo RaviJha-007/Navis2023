@@ -36,6 +36,12 @@
 				},
 				{
 					"name": "alterRow1"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "filter1"
 				}
 			],
 			"scriptLines": [
@@ -160,7 +166,11 @@
 				"          Month = month(WI_Modified),",
 				"          Week = weekOfYear(WI_Modified)) ~> AddingColumns",
 				"AddingColumns filter(!isNull(IntegrationKey)) ~> Filter",
-				"Filter alterRow(upsertIf(true())) ~> alterRow1",
+				"filter1 alterRow(upsertIf(true())) ~> alterRow1",
+				"Filter window(over(IntegrationKey),",
+				"     desc(SourceFileName_Sort, true),",
+				"     RowNumber = rowNumber()) ~> window1",
+				"window1 filter(RowNumber == 1) ~> filter1",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
