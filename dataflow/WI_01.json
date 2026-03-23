@@ -131,6 +131,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: true,",
+				"     moveFiles: [($p_SourcePath),'bronze/workinstruction/archive'],",
 				"     rowUrlColumn: 'SourceFileName',",
 				"     format: 'delimited',",
 				"     fileSystem: ($p_FileSystem),",
