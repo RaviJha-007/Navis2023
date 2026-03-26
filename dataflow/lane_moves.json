@@ -366,7 +366,7 @@
 				"     insertable: false,",
 				"     updateable: false,",
 				"     upsertable: true,",
-				"     keys:['Year','Month','Week','Date','cheID','cheName'],",
+				"     keys:['move_date','CHE_Kind','CHE_Id','Lane_Name'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
