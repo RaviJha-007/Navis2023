@@ -1,5 +1,5 @@
 {
-	"name": "lane_productivity_v2",
+	"name": "lane_moves",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
