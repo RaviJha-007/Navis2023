@@ -48,7 +48,7 @@
 				"parameters{",
 				"     p_SourcePath as string ('bronze/workinstruction/load/'),",
 				"     p_ClientId as string ('Malta'),",
-				"     p_FileSystem as string (@pipeline().parameters.p_TriggeredFileSystem)",
+				"     p_FileSystem as string ('malta')",
 				"}",
 				"source(output(",
 				"          {Unit V-State} as string,",

@@ -21,7 +21,10 @@
 						"parameters": {
 							"p_SourcePath": "'bronze/workinstruction/load/'",
 							"p_ClientId": "'Malta'",
-							"p_FileSystem": "'malta'"
+							"p_FileSystem": {
+								"value": "'@{pipeline().parameters.p_TriggeredFileSystem}'",
+								"type": "Expression"
+							}
 						}
 					},
 					"compute": {

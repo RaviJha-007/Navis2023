@@ -9,6 +9,9 @@
 				"pipelineReference": {
 					"referenceName": "WI_01",
 					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_TriggeredFileSystem": "'malta'"
 				}
 			}
 		],
