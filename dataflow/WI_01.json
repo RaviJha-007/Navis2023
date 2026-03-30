@@ -49,7 +49,7 @@
 				"     p_SourcePath as string ('bronze/workinstruction/load/'),",
 				"     p_ClientId as string ('Malta'),",
 				"     p_FileSystem as string ('malta'),",
-				"     p_TriggeredFileSystem as string",
+				"     p_TriggeredFileSystem as string ('malta')",
 				"}",
 				"source(output(",
 				"          {Unit V-State} as string,",
