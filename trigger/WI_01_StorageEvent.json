@@ -12,7 +12,7 @@
 				},
 				"parameters": {
 					"p_TriggeredFileSystem": "'malta'",
-					"P_TriggerClientId": "'Malta'"
+					"P_TriggerClientId": "'Malta_Test'"
 				}
 			}
 		],

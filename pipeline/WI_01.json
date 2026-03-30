@@ -20,7 +20,10 @@
 						"type": "DataFlowReference",
 						"parameters": {
 							"p_SourcePath": "'bronze/workinstruction/load/'",
-							"p_ClientId": "'Malta'",
+							"p_ClientId": {
+								"value": "'@{pipeline().parameters.P_TriggerClientId}'",
+								"type": "Expression"
+							},
 							"p_FileSystem": {
 								"value": "'@{pipeline().parameters.p_TriggeredFileSystem}'",
 								"type": "Expression"
