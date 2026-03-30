@@ -39,6 +39,10 @@
 			"p_TriggeredFileSystem": {
 				"type": "string",
 				"defaultValue": "'malta'"
+			},
+			"P_TriggerClientId": {
+				"type": "string",
+				"defaultValue": "'Malta'"
 			}
 		},
 		"annotations": []

@@ -11,7 +11,8 @@
 					"type": "PipelineReference"
 				},
 				"parameters": {
-					"p_TriggeredFileSystem": "'malta'"
+					"p_TriggeredFileSystem": "'malta'",
+					"P_TriggerClientId": "Malta"
 				}
 			}
 		],
