@@ -32,6 +32,12 @@
 				}
 			}
 		],
+		"parameters": {
+			"p_TriggeredFileSystem": {
+				"type": "string",
+				"defaultValue": "'malta'"
+			}
+		},
 		"annotations": []
 	}
 }
