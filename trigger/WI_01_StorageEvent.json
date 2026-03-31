@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "StorageEvent Trigger for WorkInstructions data",
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
