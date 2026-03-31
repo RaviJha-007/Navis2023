@@ -58,6 +58,9 @@
 				},
 				{
 					"name": "select2"
+				},
+				{
+					"name": "window2"
 				}
 			],
 			"scriptLines": [
@@ -130,7 +133,7 @@
 				"     escapeChar: '\\\\',",
 				"     quoteChar: '\\\"',",
 				"     columnNamesAsHeader: true) ~> xpseceuser",
-				"select2 filter(not(isNull(ecEventGkey)) && cheKind == \"ITV\" && (moveKind == \"DSCH\"|| moveKind == \"LOAD\")) ~> filter1",
+				"window2 filter(not(isNull(ecEventGkey)) && cheKind == \"ITV\" && (moveKind == \"DSCH\"|| moveKind == \"LOAD\") && RowNumber == 1) ~> filter1",
 				"filter1 window(over(cheID),",
 				"     asc(EcEventTime, true),",
 				"     asc(ecEventGkey, true),",
@@ -239,6 +242,9 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 window(over(ecEventGkey),",
+				"     desc(EcEventTime, true),",
+				"     RowNumber = rowNumber()) ~> window2",
 				"AlterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",

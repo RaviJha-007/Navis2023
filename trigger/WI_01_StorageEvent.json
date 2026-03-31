@@ -1,0 +1,30 @@
+{
+	"name": "WI_01_StorageEvent",
+	"properties": {
+		"description": "StorageEvent Trigger for WorkInstructions data",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "WI_01",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_TriggeredFileSystem": "malta",
+					"P_TriggerClientId": "Malta"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/malta/blobs/bronze/workinstruction/load/workinstruction_",
+			"blobPathEndsWith": ".csv",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}
