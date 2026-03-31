@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Data flow1",
+				"name": "WI_01",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -20,14 +20,8 @@
 						"type": "DataFlowReference",
 						"parameters": {
 							"p_SourcePath": "'bronze/workinstruction/load/'",
-							"p_ClientId": {
-								"value": "'@{pipeline().parameters.P_TriggerClientId}'",
-								"type": "Expression"
-							},
-							"p_FileSystem": {
-								"value": "'@{pipeline().parameters.p_TriggeredFileSystem}'",
-								"type": "Expression"
-							}
+							"p_ClientId": "'Malta'",
+							"p_FileSystem": "'malta'"
 						}
 					},
 					"compute": {
