@@ -83,9 +83,6 @@
 					"name": "derivedColumn10"
 				},
 				{
-					"name": "derivedColumn11"
-				},
-				{
 					"name": "derivedColumn12"
 				}
 			],
@@ -301,10 +298,11 @@
 				"union1 aggregate(groupBy(Move_Primary_key),",
 				"     each(match(name!='Move_Primary_key'), $$ = first($$))) ~> aggregate",
 				"aggregate3 alterRow(upsertIf(true())) ~> AlterRow3",
-				"derivedColumn11 aggregate(groupBy(Year,",
+				"select5 aggregate(groupBy(Year,",
 				"          Month,",
 				"          Week,",
 				"          move_date,",
+				"          move_hour,",
 				"          CHE_Kind,",
 				"          CHE_Id,",
 				"          Lane_Name),",
@@ -313,6 +311,7 @@
 				"          Block_Id = :position,",
 				"          Lane_Number = left(:position,2),",
 				"          Lane_Id = upper(right(:position,1)),",
+				"          move_hour = toInteger(split(toString(move_time,'HH:mm:ss'),\":\")[1]),",
 				"          position := left(split(Position_Name, \"-\")[3], 3)) ~> derivedColumn8",
 				"filter3 derive(mve_gkey = toString(mve_gkey)) ~> derivedColumn9",
 				"derivedColumn12 select(mapColumn(",
@@ -343,7 +342,9 @@
 				"          Block_Id,",
 				"          Lane_Number,",
 				"          Lane_Id,",
-				"          Block_Type",
+				"          move_hour,",
+				"          Block_Type,",
+				"          Lane_Name",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
@@ -351,8 +352,7 @@
 				"filter4 derive(Block_Type = iif(in(:{7WideBlocks},Block_Id), \"7 Wide\", iif(in(:RSTBlocks,Block_Id), \"RST\", \"6 Wide\")),",
 				"          {7WideBlocks} := [\"01H\",\"02H\",\"03H\",\"01G\",\"02G\",\"03G\",\"01E\",\"02E\",\"03E\",\"04E\",\"01C\",\"02C\",\"03C\",\"04C\"],",
 				"          RSTBlocks := [\"03S\",\"03R\"]) ~> derivedColumn10",
-				"select5 derive(Lane_Name = iif(Block_Type==\"RST\", Block_Type, Lane_Id + \": \"+ Block_Type)) ~> derivedColumn11",
-				"derivedColumn10 derive(Lane_Name = iif(Block_Type==\"RST\", \"RST\", \"{Lane_Id}\"+':' +\" {Block_Type}\")) ~> derivedColumn12",
+				"derivedColumn10 derive(Lane_Name = iif(Block_Type==\"RST\", Block_Type, Lane_Id + \": \"+ Block_Type)) ~> derivedColumn12",
 				"AlterRow3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
