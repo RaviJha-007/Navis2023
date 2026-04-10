@@ -404,7 +404,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'teagtl',",
-				"     folderPath: 'gold/rtg_violation',",
+				"     folderPath: 'gold/rtg_violation_2',",
 				"     mergeSchema: false,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
