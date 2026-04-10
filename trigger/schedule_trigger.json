@@ -43,12 +43,6 @@
 			},
 			{
 				"pipelineReference": {
-					"referenceName": "TEAGTL_moves",
-					"type": "PipelineReference"
-				}
-			},
-			{
-				"pipelineReference": {
 					"referenceName": "cmsa_moves",
 					"type": "PipelineReference"
 				}
