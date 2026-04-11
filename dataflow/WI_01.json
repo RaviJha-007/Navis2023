@@ -122,7 +122,7 @@
 				"          {MVHS Carry CHE Id} as string,",
 				"          {MVHS Put CHE Id} as string,",
 				"          {Est Mv Time} as string,",
-				"          STATUS as string,",
+				"          status as string,",
 				"          {Twin Fetch} as boolean,",
 				"          {Twin Carry} as boolean,",
 				"          {Twin Put} as boolean",
