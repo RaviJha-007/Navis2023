@@ -40,6 +40,13 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "rtgprod"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "RtgProdAgg"
 				}
 			],
 			"transformations": [
@@ -129,6 +136,18 @@
 				},
 				{
 					"name": "derivedColumn6"
+				},
+				{
+					"name": "derivedColumn7"
+				},
+				{
+					"name": "aggregate6"
+				},
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "alterRow4"
 				}
 			],
 			"scriptLines": [
@@ -257,12 +276,12 @@
 				"          CurrentDate := toDate(EcEventTime),",
 				"          NightShift := @(Name=\"Night\",",
 				"          Start=toTimestamp((toString(toDate(EcEventTime)) + \" \" + \"00:00:00\"), \"yyyy-MM-dd HH:mm:ss\"),",
-				"          End=toTimestamp((toString(toDate(EcEventTime)) + \" \" + \"07:59:59\"), \"yyyy-MM-dd HH:mm:ss\")),",
+				"          End=toTimestamp((toString(toDate(EcEventTime)) + \" \" + \"08:59:59\"), \"yyyy-MM-dd HH:mm:ss\")),",
 				"          MorningShift := @(Name=\"Morning\",",
 				"          Start=toTimestamp((toString(toDate(EcEventTime)) + \" \" + \"09:00:00\"), \"yyyy-MM-dd HH:mm:ss\"),",
-				"          End=toTimestamp((toString(toDate(EcEventTime)) + \" \" + \"15:59:59\"), \"yyyy-MM-dd HH:mm:ss\")),",
+				"          End=toTimestamp((toString(toDate(EcEventTime)) + \" \" + \"16:59:59\"), \"yyyy-MM-dd HH:mm:ss\")),",
 				"          EveningShift := @(Name=\"Evening\",",
-				"          Start=toTimestamp((toString(toDate(EcEventTime)) + \" \" + \"16:00:00\"), \"yyyy-MM-dd HH:mm:ss\"),",
+				"          Start=toTimestamp((toString(toDate(EcEventTime)) + \" \" + \"17:00:00\"), \"yyyy-MM-dd HH:mm:ss\"),",
 				"          End=toTimestamp((toString(toDate(EcEventTime)) + \" \" + \"23:59:59\"), \"yyyy-MM-dd HH:mm:ss\"))) ~> derivedColumn1",
 				"derivedColumn1 select(mapColumn(",
 				"          ecEventGkey,",
@@ -471,20 +490,20 @@
 				"select3, select4, select2, derivedColumn4, derivedColumn5 union(byName: true)~> union1",
 				"union1 aggregate(groupBy(Move_Primary_key),",
 				"     each(match(name!='Move_Primary_key'), $$ = first($$))) ~> aggregate3",
-				"aggregate3 alterRow(upsertIf(true())) ~> alterRow2",
-				"aggregate3, filter2 join(lower(CHE_Kind)==lower(cheKind) && toString(cheID)==toString(CHE_Id) && move_time>=LgonTime && move_time<=LgOffTime,",
+				"derivedColumn7 alterRow(upsertIf(true())) ~> alterRow2",
+				"derivedColumn7, filter2 join(lower(CHE_Kind)==lower(cheKind) && toString(cheID)==toString(CHE_Id) && move_time>=LgonTime && move_time<=LgOffTime,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'left')~> join1",
-				"join1 aggregate(groupBy(aggregate3@Year,",
-				"          aggregate3@Month,",
-				"          aggregate3@Week,",
+				"join1 aggregate(groupBy(select1@Year,",
+				"          select1@Month,",
+				"          select1@Week,",
 				"          Date,",
 				"          ShiftDateName,",
-				"          CHE_Kind,",
+				"          cheKind,",
 				"          cheName,",
-				"          CHE_Id,",
+				"          cheID,",
 				"          LgonTime,",
 				"          LgOffTime),",
 				"     move_count = countDistinct(Move_Primary_key)) ~> aggregate4",
@@ -500,6 +519,27 @@
 				"          cheName),",
 				"     WorkTime_seconds_agg = sum(WorktimeSeconds)) ~> aggregate5",
 				"aggregate4 derive(Worktime_Seconds_Final = (toLong(LgOffTime) - toLong(LgonTime))/1000) ~> derivedColumn6",
+				"aggregate3 derive(MoveShiftDateName = toString(toDate(move_time))+ \" \" + iif((move_time >= :NightShift.Start) && (move_time <= :NightShift.End), :NightShift.Name, iif((move_time >= :MorningShift.Start) && (move_time <= :MorningShift.End), :MorningShift.Name, iif((move_time >= :EveningShift.Start) && (move_time <= :EveningShift.End), :EveningShift.Name, \"\"))),",
+				"          move_date = toString(toDate(move_time)),",
+				"          NightShift := @(Name=\"Night\",",
+				"          Start=toTimestamp((toString(toDate(move_time)) + \" \" + \"00:00:00\"), \"yyyy-MM-dd HH:mm:ss\"),",
+				"          End=toTimestamp((toString(toDate(move_time)) + \" \" + \"07:59:59\"), \"yyyy-MM-dd HH:mm:ss\")),",
+				"          MorningShift := @(Name=\"Morning\",",
+				"          Start=toTimestamp((toString(toDate(move_time)) + \" \" + \"09:00:00\"), \"yyyy-MM-dd HH:mm:ss\"),",
+				"          End=toTimestamp((toString(toDate(move_time)) + \" \" + \"16:59:59\"), \"yyyy-MM-dd HH:mm:ss\")),",
+				"          EveningShift := @(Name=\"Evening\",",
+				"          Start=toTimestamp((toString(toDate(move_time)) + \" \" + \"00:00:00\"), \"yyyy-MM-dd HH:mm:ss\"),",
+				"          End=toTimestamp((toString(toDate(move_time)) + \" \" + \"07:59:59\"), \"yyyy-MM-dd HH:mm:ss\"))) ~> derivedColumn7",
+				"derivedColumn7 aggregate(groupBy(MoveShiftDateName,",
+				"          CHE_Kind,",
+				"          CHE_Id),",
+				"     Move_count_agg = countDistinct(Move_Primary_key)) ~> aggregate6",
+				"aggregate5, aggregate6 lookup(lower(toString(cheKind)) == lower(toString(CHE_Kind))",
+				"     && ShiftDateName == MoveShiftDateName",
+				"     && lower(toString(cheID)) == lower(toString(CHE_Id)),",
+				"     multiple: true,",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 alterRow(upsertIf(true())) ~> alterRow4",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -556,7 +596,26 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> rtgprod"
+				"     skipDuplicateMapOutputs: true) ~> rtgprod",
+				"alterRow4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: ($Customer),",
+				"     folderPath: 'gold/rtg_productivity_agg',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['ShiftDateName','cheKind','cheID','cheName'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> RtgProdAgg"
 			]
 		}
 	}
