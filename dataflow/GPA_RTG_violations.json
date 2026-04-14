@@ -357,7 +357,7 @@
 				"     skipDuplicateMapOutputs: true) ~> select6",
 				"select2 filter(not(isNull(gkey)) && (decking_Type == 'Bump Intruder' || decking_Type == 'Vessel Discharge' || decking_Type == 'Vessel Discharge - Twin' || decking_Type == 'XD Drop if Floating Refine' || decking_Type == 'XD Refine Request' || decking_Type == 'XD Rehandle Request')) ~> filter5",
 				"join6 derive(Block_To_Block_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 3) != substring(DH_To_Position_Name_Short_5, 1, 3), true(), false()),",
-				"          Same_Block_Violation = iif( (substring(MH_To_Position_Name_Short_5, 1, 3) == substring(DH_To_Position_Name_Short_5, 1, 3)) && (substring(MH_To_Position_Name_Short_5, 4, 5) != substring(DH_To_Position_Name_Short_5, 4, 5)), true(), false()),",
+				"          Same_Block_Violation = iif( (substring(MH_To_Position_Name_Short_5, 1, 3) == substring(DH_To_Position_Name_Short_5, 1, 3)) && (substring(MH_To_Position_Name_Short_5, 4, 4) != substring(DH_To_Position_Name_Short_5, 4, 4)), true(), false()),",
 				"          Stack_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 7) == substring(DH_To_Position_Name_Short_5, 1, 7) && substring(MH_To_Position_Name_Short_5, 8, 1) != substring(DH_To_Position_Name_Short_5, 8, 1), true(), false())) ~> derivedColumn6",
 				"XpsEcUser select(mapColumn(",
 				"          gkey = GKEY,",
