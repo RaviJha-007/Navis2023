@@ -27,7 +27,7 @@
 				}
 			},
 			{
-				"name": "truck_productivity",
+				"name": "truck_productivity_v1",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -40,11 +40,8 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "truck_productivity",
-						"type": "DataFlowReference",
-						"parameters": {
-							"Customer": "'itapoa'"
-						}
+						"referenceName": "truck_productivity_v1",
+						"type": "DataFlowReference"
 					},
 					"compute": {
 						"coreCount": 8,
