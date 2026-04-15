@@ -46,7 +46,7 @@
 						"referenceName": "linkedService1",
 						"type": "LinkedServiceReference"
 					},
-					"name": "ProvisionalItvProd"
+					"name": "ItvProdAgg"
 				}
 			],
 			"transformations": [
@@ -124,6 +124,9 @@
 				},
 				{
 					"name": "alterRow4"
+				},
+				{
+					"name": "derivedColumn13"
 				}
 			],
 			"scriptLines": [
@@ -366,7 +369,8 @@
 				"     Move_count = countDistinct(Move_Primary_key),",
 				"          Twin_count = sum(valid_twin_flag)) ~> aggregate3",
 				"filter3 derive(valid_twin_flag = iif(Twin_Carry==true(),1,0)) ~> derivedColumn9",
-				"aggregate3 derive(Worktime_seconds = (toLong(LgOffTime) - toLong(LgonTime))/1000) ~> derivedColumn10",
+				"aggregate3 derive(Worktime_seconds = (toLong(LgOffTime) - toLong(LgonTime))/1000,",
+				"          Move_count_total = Move_count - toInteger((Twin_count/2))) ~> derivedColumn10",
 				"join1 select(mapColumn(",
 				"          each(match(/* All input columns */true()),",
 				"               /* Input name */$$ = $$)",
@@ -384,19 +388,20 @@
 				"          cheKind,",
 				"          cheID,",
 				"          cheName),",
-				"     WorkTime_seconds_prov = sum(WorkTime_seconds)) ~> aggregate4",
+				"     WorkTime_seconds_agg = sum(WorkTime_seconds)) ~> aggregate4",
 				"select2 derive(move_date = toDate(move_time)) ~> derivedColumn12",
 				"derivedColumn12 aggregate(groupBy(move_date,",
 				"          CHE_Kind,",
 				"          CHE_Id),",
-				"     Move_count_prov = countDistinct(Move_Primary_key),",
-				"          Twin_count_prov = sum(valid_twin_flag)) ~> aggregate5",
+				"     Move_count_agg = countDistinct(Move_Primary_key),",
+				"          Twin_count_agg = sum(valid_twin_flag)) ~> aggregate5",
 				"aggregate4, aggregate5 lookup(Date == move_date",
 				"     && lower(toString(cheKind)) == lower(toString(CHE_Kind))",
 				"     && lower(toString(cheID)) == lower(toString(CHE_Id)),",
 				"     multiple: true,",
 				"     broadcast: 'auto')~> lookup1",
 				"lookup1 alterRow(upsertIf(true())) ~> alterRow4",
+				"aggregate5 derive(move_count_final_agg = Move_count_agg - toInteger((Twin_count_agg/2))) ~> derivedColumn13",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -458,7 +463,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: ($Customer),",
-				"     folderPath: 'gold/itv_productivity_prov',",
+				"     folderPath: 'gold/itv_productivity_agg',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
@@ -472,7 +477,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> ProvisionalItvProd"
+				"     skipDuplicateMapOutputs: true) ~> ItvProdAgg"
 			]
 		}
 	}
