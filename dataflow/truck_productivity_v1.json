@@ -131,7 +131,7 @@
 			],
 			"scriptLines": [
 				"parameters{",
-				"     Customer as string ('apmt-salalah')",
+				"     Customer as string ('yilport')",
 				"}",
 				"source(output(",
 				"          ecEventGkey as long,",
