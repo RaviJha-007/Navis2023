@@ -134,6 +134,7 @@
 				"     format: 'delta',",
 				"     fileSystem: 'mundra-ct02',",
 				"     folderPath: 'gold/laden_unladen',",
+				"     deltaTruncate: true,",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
