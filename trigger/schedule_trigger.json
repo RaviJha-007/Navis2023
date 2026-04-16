@@ -85,7 +85,11 @@
 			},
 			{
 				"pipelineReference": {
+<<<<<<< development
+					"referenceName": "GPA",
+=======
 					"referenceName": "TEAGTL",
+>>>>>>> main
 					"type": "PipelineReference"
 				}
 			}
