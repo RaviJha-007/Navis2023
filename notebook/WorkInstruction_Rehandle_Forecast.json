@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "ef3978e5-c798-4ef8-975e-bcb59232eddd"
+				"spark.autotune.trackingId": "e9661454-134c-4646-a76c-7a93f4f36cab"
 			}
 		},
 		"metadata": {
@@ -178,8 +178,8 @@
 					"    load_timestamp\n",
 					"FROM silver_wi\n",
 					"WHERE kind = 'LOAD'\n",
-					"  AND unit_position_2 IS NOT NULL \n",
-					"  AND unit_position_2 != ''\n",
+					"  AND unit_position_3 IS NOT NULL \n",
+					"  AND unit_position_3 != ''\n",
 					""
 				],
 				"execution_count": 26
@@ -206,17 +206,17 @@
 					"    *,\n",
 					"    \n",
 					"    -- Count occurrences for majority calculations\n",
-					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_2, crane) AS crane_count,\n",
-					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_2, unit_pod) AS pod_count,\n",
-					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_2, wi_position_1) AS bay_count,\n",
-					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_2, queue) AS queue_count,\n",
+					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_3, crane) AS crane_count,\n",
+					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_3, unit_pod) AS pod_count,\n",
+					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_3, wi_position_1) AS bay_count,\n",
+					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_3, queue) AS queue_count,\n",
 					"    \n",
 					"    -- Stack level aggregations\n",
-					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_2) AS units_in_stack,\n",
-					"    MAX(unit_tier_num) OVER (PARTITION BY source_file_name_sort, unit_position_2) AS max_tier_in_stack,\n",
-					"    MIN(unit_tier_num) OVER (PARTITION BY source_file_name_sort, unit_position_2) AS min_tier_in_stack,\n",
-					"    MIN(unit_vgm_kg) OVER (PARTITION BY source_file_name_sort, unit_position_2) AS min_weight_in_stack,\n",
-					"    MAX(unit_vgm_kg) OVER (PARTITION BY source_file_name_sort, unit_position_2) AS max_weight_in_stack\n",
+					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_3) AS units_in_stack,\n",
+					"    MAX(unit_tier_num) OVER (PARTITION BY source_file_name_sort, unit_position_3) AS max_tier_in_stack,\n",
+					"    MIN(unit_tier_num) OVER (PARTITION BY source_file_name_sort, unit_position_3) AS min_tier_in_stack,\n",
+					"    MIN(unit_vgm_kg) OVER (PARTITION BY source_file_name_sort, unit_position_3) AS min_weight_in_stack,\n",
+					"    MAX(unit_vgm_kg) OVER (PARTITION BY source_file_name_sort, unit_position_3) AS max_weight_in_stack\n",
 					"\n",
 					"FROM base_data\n",
 					"\n",
@@ -519,6 +519,12 @@
 			},
 			{
 				"cell_type": "code",
+				"metadata": {
+					"editable": false,
+					"run_control": {
+						"frozen": true
+					}
+				},
 				"source": [
 					"# ============================================================\n",
 					"# PREVIEW GOLD DATA\n",
@@ -646,7 +652,7 @@
 					"print(f\"\\n✅ Preview completed for {client_id}!\")\n",
 					""
 				],
-				"execution_count": 32
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
