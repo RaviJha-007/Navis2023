@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "2040fccc-c79a-42e7-a33d-da6993aa4ff3"
+				"spark.autotune.trackingId": "cc9a21c2-3d14-404c-911a-cb850b9f29b7"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"file_system = \"malta\"\n",
 					""
 				],
-				"execution_count": 34
+				"execution_count": 48
 			},
 			{
 				"cell_type": "code",
@@ -91,7 +91,7 @@
 					"print(f\"📂 Gold Path: {gold_path}\")\n",
 					""
 				],
-				"execution_count": 35
+				"execution_count": 49
 			},
 			{
 				"cell_type": "code",
@@ -127,7 +127,7 @@
 					"print(f\"✅ LOAD records: {load_records:,}\")\n",
 					""
 				],
-				"execution_count": 36
+				"execution_count": 50
 			},
 			{
 				"cell_type": "code",
@@ -148,6 +148,7 @@
 					"\n",
 					"SELECT\n",
 					"    client_id,\n",
+					"    client_key,\n",
 					"    source_file_name,\n",
 					"    source_file_name_sort,\n",
 					"    integration_key,\n",
@@ -183,7 +184,7 @@
 					"  AND unit_position_3 != ''\n",
 					""
 				],
-				"execution_count": 37
+				"execution_count": 51
 			},
 			{
 				"cell_type": "code",
@@ -223,7 +224,7 @@
 					"\n",
 					""
 				],
-				"execution_count": 38
+				"execution_count": 52
 			},
 			{
 				"cell_type": "code",
@@ -273,7 +274,7 @@
 					"FROM with_counts\n",
 					""
 				],
-				"execution_count": 39
+				"execution_count": 53
 			},
 			{
 				"cell_type": "code",
@@ -337,7 +338,7 @@
 					"FROM with_majorities\n",
 					""
 				],
-				"execution_count": 40
+				"execution_count": 54
 			},
 			{
 				"cell_type": "code",
@@ -388,7 +389,7 @@
 					"FROM with_sequences\n",
 					""
 				],
-				"execution_count": 41
+				"execution_count": 55
 			},
 			{
 				"cell_type": "code",
@@ -408,6 +409,7 @@
 					"    -- IDENTIFIERS & KEYS\n",
 					"    -- ============================================================\n",
 					"    client_id,\n",
+					"    client_key,\n",
 					"    source_file_name_sort,\n",
 					"    integration_key,\n",
 					"    \n",
@@ -457,6 +459,7 @@
 					"    -- Your existing query with all CASE statements\n",
 					"    SELECT\n",
 					"        client_id,\n",
+					"        client_key,\n",
 					"        source_file_name_sort,\n",
 					"        integration_key,\n",
 					"        unit_nbr,\n",
@@ -516,7 +519,7 @@
 					"ORDER BY source_file_name_sort, unit_position_stack, est_mv_time\n",
 					""
 				],
-				"execution_count": 42
+				"execution_count": 56
 			},
 			{
 				"cell_type": "code",
@@ -543,6 +546,7 @@
 					"print(\"\\n📋 Sample Data - Key Columns:\")\n",
 					"gold_df.select(\n",
 					"    \"unit_nbr\",\n",
+					"    \"client_key\",\n",
 					"    \"unit_position_stack\",\n",
 					"    \"unit_position_tier\",\n",
 					"    \"unit_tier_num\",\n",
@@ -653,7 +657,7 @@
 					"print(f\"\\n✅ Preview completed for {client_id}!\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 57
 			},
 			{
 				"cell_type": "code",
