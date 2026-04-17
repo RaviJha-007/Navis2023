@@ -30,6 +30,48 @@
 					},
 					"traceLevel": "Fine"
 				}
+			},
+			{
+				"name": "Rehandle_Forecast",
+				"type": "SynapseNotebook",
+				"dependsOn": [
+					{
+						"activity": "WI_01",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "WorkInstruction_Rehandle_Forecast",
+						"type": "NotebookReference"
+					},
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": "pbixpool",
+						"type": "BigDataPoolReference"
+					},
+					"executorSize": "Small",
+					"conf": {
+						"spark.dynamicAllocation.enabled": true,
+						"spark.dynamicAllocation.minExecutors": 1,
+						"spark.dynamicAllocation.maxExecutors": 3
+					},
+					"driverSize": "Small",
+					"numExecutors": 1,
+					"authentication": {
+						"type": "MSI"
+					}
+				}
 			}
 		],
 		"parameters": {
