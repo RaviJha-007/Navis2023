@@ -1,0 +1,89 @@
+{
+	"name": "wi_dim_client",
+	"properties": {
+		"description": "To add new clients to the client dimension table\n",
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "pbixpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "13bdaf11-a16b-41b2-a45a-976bc050763d"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Synapse/workspaces/navispowerbidata2/bigDataPools/pbixpool",
+				"name": "pbixpool",
+				"type": "Spark",
+				"endpoint": "https://navispowerbidata2.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pbixpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"automaticScaleJobs": true
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\n",
+					"CREATE TABLE IF NOT EXISTS delta.`abfss://workinstruction@navispowerbidatastorage2.dfs.core.windows.net/dimension/dim_client` (\n",
+					"    client_key      INT,\n",
+					"    client_id       STRING,\n",
+					"    created_date    TIMESTAMP,\n",
+					"    is_active       BOOLEAN\n",
+					")\n",
+					"USING DELTA;\n",
+					""
+				],
+				"execution_count": 46
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from delta.tables import DeltaTable\n",
+					"\n",
+					"# Write directly to the Delta location in your storage\n",
+					"spark.sql(\"\"\"\n",
+					"    INSERT INTO delta.`abfss://workinstruction@navispowerbidatastorage2.dfs.core.windows.net/dimension/dim_client`\n",
+					"    VALUES (101, 'Malta', current_timestamp(), true)\n",
+					"\"\"\")\n",
+					""
+				],
+				"execution_count": 47
+			}
+		]
+	}
+}
