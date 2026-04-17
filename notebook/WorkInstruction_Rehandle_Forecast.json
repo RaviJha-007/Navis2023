@@ -1,6 +1,7 @@
 {
 	"name": "WorkInstruction_Rehandle_Forecast",
 	"properties": {
+		"description": "This notebook creates the Gold Layer table 'wi_rehandle_forecast' for the pooling forecast dashboards.",
 		"nbformat": 4,
 		"nbformat_minor": 2,
 		"bigDataPool": {
@@ -17,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "4ba5db03-5da5-43d4-b2c4-98fd77501ed3"
+				"spark.autotune.trackingId": "2040fccc-c79a-42e7-a33d-da6993aa4ff3"
 			}
 		},
 		"metadata": {
