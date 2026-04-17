@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "e9661454-134c-4646-a76c-7a93f4f36cab"
+				"spark.autotune.trackingId": "4ba5db03-5da5-43d4-b2c4-98fd77501ed3"
 			}
 		},
 		"metadata": {
@@ -64,7 +64,7 @@
 					"file_system = \"malta\"\n",
 					""
 				],
-				"execution_count": 22
+				"execution_count": 34
 			},
 			{
 				"cell_type": "code",
@@ -90,7 +90,7 @@
 					"print(f\"📂 Gold Path: {gold_path}\")\n",
 					""
 				],
-				"execution_count": 23
+				"execution_count": 35
 			},
 			{
 				"cell_type": "code",
@@ -126,7 +126,7 @@
 					"print(f\"✅ LOAD records: {load_records:,}\")\n",
 					""
 				],
-				"execution_count": 24
+				"execution_count": 36
 			},
 			{
 				"cell_type": "code",
@@ -182,7 +182,7 @@
 					"  AND unit_position_3 != ''\n",
 					""
 				],
-				"execution_count": 26
+				"execution_count": 37
 			},
 			{
 				"cell_type": "code",
@@ -222,7 +222,7 @@
 					"\n",
 					""
 				],
-				"execution_count": 27
+				"execution_count": 38
 			},
 			{
 				"cell_type": "code",
@@ -272,7 +272,7 @@
 					"FROM with_counts\n",
 					""
 				],
-				"execution_count": 28
+				"execution_count": 39
 			},
 			{
 				"cell_type": "code",
@@ -336,7 +336,7 @@
 					"FROM with_majorities\n",
 					""
 				],
-				"execution_count": 29
+				"execution_count": 40
 			},
 			{
 				"cell_type": "code",
@@ -387,7 +387,7 @@
 					"FROM with_sequences\n",
 					""
 				],
-				"execution_count": 30
+				"execution_count": 41
 			},
 			{
 				"cell_type": "code",
@@ -515,7 +515,7 @@
 					"ORDER BY source_file_name_sort, unit_position_stack, est_mv_time\n",
 					""
 				],
-				"execution_count": 31
+				"execution_count": 42
 			},
 			{
 				"cell_type": "code",
@@ -706,7 +706,7 @@
 					"    raise\n",
 					""
 				],
-				"execution_count": 33
+				"execution_count": 43
 			}
 		]
 	}
