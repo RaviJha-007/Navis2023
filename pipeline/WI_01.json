@@ -40,6 +40,10 @@
 			"P_TriggerClientId": {
 				"type": "string",
 				"defaultValue": "Malta"
+			},
+			"p_TriggerClientKey": {
+				"type": "int",
+				"defaultValue": 101
 			}
 		},
 		"annotations": []
