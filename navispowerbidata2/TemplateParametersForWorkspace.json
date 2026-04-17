@@ -44,6 +44,9 @@
 		"WI_01_StorageEvent_properties_WI_01_parameters_P_TriggerClientId": {
 			"value": "Malta"
 		},
+		"WI_01_StorageEvent_properties_WI_01_parameters_p_TriggerClientKey": {
+			"value": 101
+		},
 		"WI_01_StorageEvent_properties_typeProperties_scope": {
 			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
