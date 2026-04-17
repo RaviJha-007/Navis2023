@@ -1,0 +1,17 @@
+{
+	"name": "Table Schema Query",
+	"properties": {
+		"content": {
+			"query": "\n\n\n\nEXEC sp_describe_first_result_set N'\nSELECT TOP 1 *\nFROM OPENROWSET(\n    BULK ''https://navispowerbidatastorage2.blob.core.windows.net/malta/silver/workinstruction/*.parquet'',\n    FORMAT = ''PARQUET''\n) AS result\n';\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "malta",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
