@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "280e301a-63bf-41d8-90c7-bd6d77a5eae2"
+				"spark.autotune.trackingId": "f3ce6b7f-0c56-4a49-8ea8-7c4c1d5449a7"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"file_system = \"malta\"\n",
 					""
 				],
-				"execution_count": 12
+				"execution_count": 23
 			},
 			{
 				"cell_type": "code",
@@ -91,7 +91,7 @@
 					"print(f\"📂 Gold Path: {gold_path}\")\n",
 					""
 				],
-				"execution_count": 13
+				"execution_count": 24
 			},
 			{
 				"cell_type": "code",
@@ -127,7 +127,7 @@
 					"print(f\"✅ LOAD records: {load_records:,}\")\n",
 					""
 				],
-				"execution_count": 14
+				"execution_count": 25
 			},
 			{
 				"cell_type": "code",
@@ -184,7 +184,7 @@
 					"  AND unit_position_3 != ''\n",
 					""
 				],
-				"execution_count": 15
+				"execution_count": 26
 			},
 			{
 				"cell_type": "code",
@@ -224,7 +224,7 @@
 					"\n",
 					""
 				],
-				"execution_count": 16
+				"execution_count": 27
 			},
 			{
 				"cell_type": "code",
@@ -274,7 +274,7 @@
 					"FROM with_counts\n",
 					""
 				],
-				"execution_count": 17
+				"execution_count": 28
 			},
 			{
 				"cell_type": "code",
@@ -338,7 +338,7 @@
 					"FROM with_majorities\n",
 					""
 				],
-				"execution_count": 18
+				"execution_count": 29
 			},
 			{
 				"cell_type": "code",
@@ -435,7 +435,7 @@
 					"    AND b.integration_key = c3.integration_key\n",
 					""
 				],
-				"execution_count": 19
+				"execution_count": 30
 			},
 			{
 				"cell_type": "code",
@@ -502,7 +502,7 @@
 					"ORDER BY source_file_name_sort, unit_position_3, est_mv_time\n",
 					""
 				],
-				"execution_count": 20
+				"execution_count": 31
 			},
 			{
 				"cell_type": "code",
@@ -640,7 +640,7 @@
 					"print(f\"\\n✅ Preview completed for {client_id}!\")\n",
 					""
 				],
-				"execution_count": 11
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -694,7 +694,7 @@
 					"    raise\n",
 					""
 				],
-				"execution_count": 21
+				"execution_count": 32
 			}
 		]
 	}
