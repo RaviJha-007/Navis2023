@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 24",
+	"properties": {
+		"content": {
+			"query": "--CREATE VIEW [rehandle_forecast]\n\t\n\n as select * FROM OPENROWSET( BULK 'gold/wi_rehandle_forecast', data_source = 'workinstruction', FORMAT = 'DELTA' ) AS [rehandle_forecast]\n\n\nselect * FROM OPENROWSET( BULK 'silver/workinstruction', data_source = 'malta', FORMAT = 'DELTA' ) AS [rehandle_forecast]\n\nselect max\n\nCREATE OR ALTER VIEW [rehandle_forecast] as \nselect * FROM OPENROWSET( BULK 'gold/wi_rehandle_forecast', data_source = 'workinstruction', FORMAT = 'DELTA' ) AS [rehandle_forecast]\n\nselect * from dbo.WI_Moves_Distribution\n\n\nCREATE  or ALTER VIEW rehandle_forecast AS \nSELECT * FROM OPENROWSET( \n    BULK 'gold/wi_rehandle_forecast', \n    data_source = 'workinstruction', \n    FORMAT = 'DELTA' \n) AS [Main]\nWHERE source_file_name_sort = (\n    SELECT MAX(source_file_name_sort) \n    FROM OPENROWSET( \n        BULK 'gold/wi_rehandle_forecast', \n        data_source = 'workinstruction', \n        FORMAT = 'DELTA' \n    ) AS [Sub] \n);\n\n\nSELECT definition \nFROM sys.sql_modules \nWHERE object_id = OBJECT_ID('dbo.rehandle_forecast');",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "workinstruction",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
