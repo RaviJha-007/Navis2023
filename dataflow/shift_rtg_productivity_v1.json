@@ -152,7 +152,7 @@
 			],
 			"scriptLines": [
 				"parameters{",
-				"     Customer as string ('yilport')",
+				"     Customer as string ('yilport-gebze')",
 				"}",
 				"source(output(",
 				"          ecEventGkey as long,",
