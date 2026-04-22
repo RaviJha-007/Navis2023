@@ -1,10 +1,9 @@
 {
-	"name": "mnhpi_moves",
+	"name": "TIL_Cristo",
 	"properties": {
-		"description": "Manila North Harbor Port Inc",
 		"activities": [
 			{
-				"name": "MoveSrc_mnhpi",
+				"name": "Moves",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -17,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "MoveSrc_mnhpi",
+						"referenceName": "MoveSrc_TIL_Cristo",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -28,100 +27,7 @@
 				}
 			},
 			{
-				"name": "TT_Productivity_mnhpi",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "MoveSrc_mnhpi",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "TT_Productivity_mnhpi",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "Rehandle_new_mnhpi",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "MoveSrc_mnhpi",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "Rehandle_new_mnhpi",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "violations_mnhpi",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "MoveSrc_mnhpi",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "violations_mnhpi",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "EcEvents_mnhpi",
+				"name": "Decking",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -134,7 +40,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "EcEvents_mnhpi",
+						"referenceName": "Decking_TIL_Cristo",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -145,11 +51,11 @@
 				}
 			},
 			{
-				"name": "MNHPI_jobstep_Missed",
+				"name": "Rehandles",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "EcEvents_mnhpi",
+						"activity": "Moves",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -165,7 +71,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "MNHPI_jobstep_Missed",
+						"referenceName": "Rehandle_TIL_Cristo",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -176,11 +82,11 @@
 				}
 			},
 			{
-				"name": "Job Execution",
+				"name": "FLD",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "MoveSrc_mnhpi",
+						"activity": "Decking",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -196,7 +102,44 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "mnhpi_moves_time_delta",
+						"referenceName": "FLD_TIL_Cristo",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "Violation",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "Moves",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Decking",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "TIL_Cristo_RTG_violations",
 						"type": "DataFlowReference"
 					},
 					"compute": {
