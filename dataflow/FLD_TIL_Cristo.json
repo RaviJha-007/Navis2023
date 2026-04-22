@@ -106,7 +106,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
-				"select2 filter((decking_type == 'Bump Intruder' || decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin' || decking_type == 'Gate Receival Assign Position') && to_pos_slot=='FLD') ~> filter1",
+				"select2 filter((decking_type == 'Bump Intruder' || decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin' || decking_type == 'User <Shft><Ctrl>-A' || decking_type == 'User <Ctrl>-A' ||decking_type == 'Gate Receival Assign Position') && to_pos_slot=='FLD') ~> filter1",
 				"filter1 derive(Decking_Type_Actual = iif((decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin'), 'Vessel Discharge',decking_type),",
 				"          Year_Week = (Year * 100) + Week,",
 				"          Year_Month = (Year * 100) + Month,",
