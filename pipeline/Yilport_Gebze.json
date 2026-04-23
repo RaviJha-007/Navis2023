@@ -7,7 +7,7 @@
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "MoveSrc_yilport",
+						"activity": "MoveSrc_yilport_gebze",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -34,7 +34,7 @@
 				}
 			},
 			{
-				"name": "EcEvents_yilport",
+				"name": "MoveSrc_yilport_gebze",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -47,7 +47,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "EcEvents_yilport",
+						"referenceName": "MoveSrc_yilport_gebze",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -58,7 +58,7 @@
 				}
 			},
 			{
-				"name": "MoveSrc_yilport",
+				"name": "EcEvents_yilport_gebze",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -71,7 +71,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "MoveSrc_yilport",
+						"referenceName": "EcEvents_yilport_gebze",
 						"type": "DataFlowReference"
 					},
 					"compute": {
