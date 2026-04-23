@@ -115,7 +115,7 @@
 				"     ignoreNoFilesFound: true,",
 				"     format: 'delta',",
 				"     fileSystem: 'mnhpi',",
-				"     folderPath: 'silver/moves') ~> mnhpi",
+				"     folderPath: 'silver/moves_new') ~> mnhpi",
 				"filter1 derive(exec_delta_16 = iif(:exec_time > 16, true(), false()),",
 				"          t_execution_delta = :exec_time,",
 				"          t_execution_secs = (toLong(t_carry_complete) - toLong(t_fetch))/1000,",
