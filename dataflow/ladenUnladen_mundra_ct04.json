@@ -82,7 +82,7 @@
 				"     format: 'delta',",
 				"     fileSystem: 'mundra-ct04',",
 				"     folderPath: 'silver/ecevents') ~> ecevents",
-				"ecevents filter(cheKind == 'ITV' && (moveKind == 'DSCH' || moveKind == 'LOAD') && (eventTypeDescription == 'TVCO' || eventTypeDescription == 'TYCO')) ~> filter1",
+				"ecevents filter(cheKind == 'ITV' && (moveKind == 'DSCH' || moveKind == 'LOAD') && (eventTypeDescription == 'TYDR' || eventTypeDescription == 'TYCO')) ~> filter1",
 				"filter1 derive(Date = toDate(EcEventTime),",
 				"          Day_of_Week = dayOfWeek(EcEventTime)) ~> derivedColumn1",
 				"derivedColumn1 select(mapColumn(",
