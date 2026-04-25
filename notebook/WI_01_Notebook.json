@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "28bba6ce-9caa-4fc1-8a45-e8f74d5930a0"
+				"spark.autotune.trackingId": "4a88d71b-dec3-40d4-8568-a252d8d6406a"
 			}
 		},
 		"metadata": {
@@ -736,7 +736,7 @@
 					"        twin_put,\n",
 					"        \n",
 					"        -- Derived columns\n",
-					"        source_file_name_full AS sourcefilename,\n",
+					"        --source_file_name_full AS sourcefilename,\n",
 					"        integration_key,\n",
 					"        client_id,\n",
 					"        client_key,\n",
@@ -895,7 +895,7 @@
 					"    print(f\"⚠️ Warning: Failed to archive files: {str(e)}\")\n",
 					"    # Don't fail the pipeline if archiving fails"
 				],
-				"execution_count": null
+				"execution_count": 16
 			}
 		]
 	}
