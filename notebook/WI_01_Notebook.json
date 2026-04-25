@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "b52d0c58-4418-4ebe-9fb6-29968c0f98b7"
+				"spark.autotune.trackingId": "28bba6ce-9caa-4fc1-8a45-e8f74d5930a0"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"file_system = \"malta\"\n",
 					""
 				],
-				"execution_count": 166
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -173,7 +173,7 @@
 					"print(f\"   • Vessel Tier Type: {config['vessel_position']['tier_type']}\")\n",
 					"print(f\"🔑 Client Key: {client_key}\")  "
 				],
-				"execution_count": 167
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
@@ -215,7 +215,7 @@
 					"\n",
 					"bronze_df.createOrReplaceTempView(\"bronze_wi\")"
 				],
-				"execution_count": 168
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -311,7 +311,7 @@
 					"    source_file_name_full\n",
 					"FROM bronze_wi"
 				],
-				"execution_count": 169
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -358,7 +358,7 @@
 					"print(f\"✅ Applied {len(datetime_formats)} datetime format(s) for {len(datetime_columns)} columns\")\n",
 					""
 				],
-				"execution_count": 170
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
@@ -370,7 +370,7 @@
 					"\n",
 					"from pyspark.sql.functions import (\n",
 					"    expr, when, col, substring, length, \n",
-					"    regexp_extract, trim\n",
+					"    regexp_extract, trim, concat, lit\n",
 					")\n",
 					"\n",
 					"# Get position configuration\n",
@@ -381,25 +381,21 @@
 					"position_df = spark.sql(\"SELECT * FROM parsed_dates\")\n",
 					"\n",
 					"# ============================================================\n",
-					"# Pre-build regex patterns for position_3 (avoid backslash in f-string)\n",
+					"# Define regex patterns based on configuration\n",
 					"# ============================================================\n",
 					"\n",
 					"yard_regex_full = yard_config['regex_full']\n",
 					"yard_regex_short = yard_config['regex_short']\n",
 					"vessel_regex = vessel_config['regex']\n",
 					"\n",
-					"# Build regex for 2-part and 3-part extraction\n",
-					"yard_regex_2parts = yard_regex_full.replace('([A-Z0-9]+)\\\\s([A-Z0-9]+)\\\\s([A-Z0-9]+)', r'([A-Z0-9]+\\s[A-Z0-9]+)')\n",
-					"yard_regex_3parts = yard_regex_full.replace('([A-Z0-9]+)', r'([A-Z0-9]+\\s[A-Z0-9]+\\s[A-Z0-9]+)')\n",
-					"\n",
 					"# ============================================================\n",
 					"# UNIT POSITION PARSING\n",
 					"# ============================================================\n",
 					"\n",
-					"# Position Type\n",
+					"# Position Type (first character)\n",
 					"position_df = position_df.withColumn(\n",
 					"    \"unit_position_type\",\n",
-					"    substring(trim(col(\"unit_position\")), 1, 1)  # First character\n",
+					"    substring(trim(col(\"unit_position\")), 1, 1)\n",
 					")\n",
 					"\n",
 					"# Position 1: Block (Yard) or Bay (Vessel)\n",
@@ -419,72 +415,67 @@
 					"    ).otherwise('')\n",
 					")\n",
 					"\n",
-					"# Position 2: Block+Stack (Yard) or Full Slot (Vessel)\n",
+					"# Position 2: Block + Stack (Yard) or Full Slot (Vessel)\n",
 					"position_df = position_df.withColumn(\n",
 					"    \"unit_position_2\",\n",
 					"    when(\n",
 					"        (trim(col(\"unit_position\")).startswith(yard_config['prefix'])) & \n",
 					"        (expr(\"locate(' ', trim(unit_position))\") > 0),\n",
-					"        regexp_extract(trim(col(\"unit_position\")), yard_regex_2parts, 1)\n",
+					"        concat(\n",
+					"            regexp_extract(trim(col(\"unit_position\")), yard_regex_full, 1),\n",
+					"            lit(' '),\n",
+					"            regexp_extract(trim(col(\"unit_position\")), yard_regex_full, 2)\n",
+					"        )\n",
 					"    ).when(\n",
 					"        trim(col(\"unit_position\")).startswith(vessel_config['prefix']),\n",
 					"        regexp_extract(trim(col(\"unit_position\")), vessel_regex, 1)\n",
 					"    ).otherwise('')\n",
 					")\n",
 					"\n",
-					"# Position 3: Slot without tier\n",
+					"# Position 3: Block + Stack + Slot (without tier)\n",
 					"position_df = position_df.withColumn(\n",
 					"    \"unit_position_3\",\n",
 					"    when(\n",
 					"        (trim(col(\"unit_position\")).startswith(yard_config['prefix'])) & \n",
 					"        (expr(\"locate(' ', trim(unit_position))\") > 0),\n",
-					"        expr(f\"substring(regexp_extract(trim(unit_position), '{yard_regex_3parts}', 1), 1, length(regexp_extract(trim(unit_position), '{yard_regex_3parts}', 1)) - 1)\")\n",
+					"        concat(\n",
+					"            regexp_extract(trim(col(\"unit_position\")), yard_regex_full, 1),\n",
+					"            lit(' '),\n",
+					"            regexp_extract(trim(col(\"unit_position\")), yard_regex_full, 2),\n",
+					"            lit(' '),\n",
+					"            regexp_extract(trim(col(\"unit_position\")), yard_regex_full, 3)\n",
+					"        )\n",
 					"    ).when(\n",
 					"        trim(col(\"unit_position\")).startswith(vessel_config['prefix']),\n",
 					"        substring(regexp_extract(trim(col(\"unit_position\")), vessel_regex, 1), 1, 4)\n",
 					"    ).otherwise('')\n",
 					")\n",
 					"\n",
-					"# Position 4: Tier (last character)\n",
+					"# Position 4: Tier only\n",
 					"position_df = position_df.withColumn(\n",
 					"    \"unit_position_4\",\n",
 					"    when(\n",
 					"        (trim(col(\"unit_position\")).startswith(yard_config['prefix'])) & \n",
 					"        (expr(\"locate(' ', trim(unit_position))\") > 0),\n",
-					"        expr(\"substring(trim(unit_position), -1, 1)\")  # Last character\n",
+					"        regexp_extract(trim(col(\"unit_position\")), yard_regex_full, 4)\n",
 					"    ).when(\n",
 					"        trim(col(\"unit_position\")).startswith(vessel_config['prefix']),\n",
-					"        expr(f\"substring(regexp_extract(trim(unit_position), '{vessel_regex}', 1), -2, 2)\")  # Last 2 chars\n",
+					"        expr(f\"right(regexp_extract(trim(unit_position), '{vessel_regex}', 1), 2)\")\n",
 					"    ).otherwise('')\n",
 					")\n",
 					"\n",
-					"# Tier Number\n",
-					"if yard_config['tier_type'] == 'letter':\n",
-					"    # Letter tiers: A=1, B=2, C=3\n",
-					"    position_df = position_df.withColumn(\n",
-					"        \"unit_tier_num\",\n",
-					"        when(\n",
-					"            (trim(col(\"unit_position\")).startswith(yard_config['prefix'])) & \n",
-					"            (expr(\"locate(' ', trim(unit_position))\") > 0),\n",
-					"            expr(\"ascii(substring(trim(unit_position), -1, 1)) - ascii('A') + 1\")\n",
-					"        ).when(\n",
-					"            trim(col(\"unit_position\")).startswith(vessel_config['prefix']),\n",
-					"            expr(f\"cast(substring(regexp_extract(trim(unit_position), '{vessel_regex}', 1), -2, 2) as int)\")\n",
-					"        ).otherwise(0)\n",
-					"    )\n",
-					"else:\n",
-					"    # Number tiers\n",
-					"    position_df = position_df.withColumn(\n",
-					"        \"unit_tier_num\",\n",
-					"        when(\n",
-					"            (trim(col(\"unit_position\")).startswith(yard_config['prefix'])) & \n",
-					"            (expr(\"locate(' ', trim(unit_position))\") > 0),\n",
-					"            expr(\"cast(substring(trim(unit_position), -1, 1) as int)\")\n",
-					"        ).when(\n",
-					"            trim(col(\"unit_position\")).startswith(vessel_config['prefix']),\n",
-					"            expr(f\"cast(substring(regexp_extract(trim(unit_position), '{vessel_regex}', 1), -2, 2) as int)\")\n",
-					"        ).otherwise(0)\n",
-					"    )\n",
+					"# Tier Number (use already extracted position_4)\n",
+					"position_df = position_df.withColumn(\n",
+					"    \"unit_tier_num\",\n",
+					"    when(\n",
+					"        (col(\"unit_position_type\") == yard_config['prefix']) & (col(\"unit_position_4\") != ''),\n",
+					"        expr(\"ascii(unit_position_4) - ascii('A') + 1\") if yard_config['tier_type'] == 'letter' \n",
+					"        else expr(\"cast(unit_position_4 as int)\")\n",
+					"    ).when(\n",
+					"        (col(\"unit_position_type\") == vessel_config['prefix']) & (col(\"unit_position_4\") != ''),\n",
+					"        expr(\"cast(unit_position_4 as int)\")\n",
+					"    ).otherwise(0)\n",
+					")\n",
 					"\n",
 					"# ============================================================\n",
 					"# WI POSITION PARSING (Same logic)\n",
@@ -518,7 +509,11 @@
 					"    when(\n",
 					"        (trim(col(\"wi_position\")).startswith(yard_config['prefix'])) & \n",
 					"        (expr(\"locate(' ', trim(wi_position))\") > 0),\n",
-					"        regexp_extract(trim(col(\"wi_position\")), yard_regex_2parts, 1)\n",
+					"        concat(\n",
+					"            regexp_extract(trim(col(\"wi_position\")), yard_regex_full, 1),\n",
+					"            lit(' '),\n",
+					"            regexp_extract(trim(col(\"wi_position\")), yard_regex_full, 2)\n",
+					"        )\n",
 					"    ).when(\n",
 					"        trim(col(\"wi_position\")).startswith(vessel_config['prefix']),\n",
 					"        regexp_extract(trim(col(\"wi_position\")), vessel_regex, 1)\n",
@@ -531,7 +526,13 @@
 					"    when(\n",
 					"        (trim(col(\"wi_position\")).startswith(yard_config['prefix'])) & \n",
 					"        (expr(\"locate(' ', trim(wi_position))\") > 0),\n",
-					"        expr(f\"substring(regexp_extract(trim(wi_position), '{yard_regex_3parts}', 1), 1, length(regexp_extract(trim(wi_position), '{yard_regex_3parts}', 1)) - 1)\")\n",
+					"        concat(\n",
+					"            regexp_extract(trim(col(\"wi_position\")), yard_regex_full, 1),\n",
+					"            lit(' '),\n",
+					"            regexp_extract(trim(col(\"wi_position\")), yard_regex_full, 2),\n",
+					"            lit(' '),\n",
+					"            regexp_extract(trim(col(\"wi_position\")), yard_regex_full, 3)\n",
+					"        )\n",
 					"    ).when(\n",
 					"        trim(col(\"wi_position\")).startswith(vessel_config['prefix']),\n",
 					"        substring(regexp_extract(trim(col(\"wi_position\")), vessel_regex, 1), 1, 4)\n",
@@ -544,48 +545,32 @@
 					"    when(\n",
 					"        (trim(col(\"wi_position\")).startswith(yard_config['prefix'])) & \n",
 					"        (expr(\"locate(' ', trim(wi_position))\") > 0),\n",
-					"        expr(\"substring(trim(wi_position), -1, 1)\")\n",
+					"        regexp_extract(trim(col(\"wi_position\")), yard_regex_full, 4)\n",
 					"    ).when(\n",
 					"        trim(col(\"wi_position\")).startswith(vessel_config['prefix']),\n",
-					"        expr(f\"substring(regexp_extract(trim(wi_position), '{vessel_regex}', 1), -2, 2)\")\n",
+					"        expr(f\"right(regexp_extract(trim(wi_position), '{vessel_regex}', 1), 2)\")\n",
 					"    ).otherwise('')\n",
 					")\n",
 					"\n",
-					"# wi_tier_num\n",
-					"if yard_config['tier_type'] == 'letter':\n",
-					"    position_df = position_df.withColumn(\n",
-					"        \"wi_tier_num\",\n",
-					"        when(\n",
-					"            (trim(col(\"wi_position\")).startswith(yard_config['prefix'])) & \n",
-					"            (expr(\"locate(' ', trim(wi_position))\") > 0),\n",
-					"            expr(\"ascii(substring(trim(wi_position), -1, 1)) - ascii('A') + 1\")\n",
-					"        ).when(\n",
-					"            trim(col(\"wi_position\")).startswith(vessel_config['prefix']),\n",
-					"            expr(f\"cast(substring(regexp_extract(trim(wi_position), '{vessel_regex}', 1), -2, 2) as int)\")\n",
-					"        ).otherwise(0)\n",
-					"    )\n",
-					"else:\n",
-					"    position_df = position_df.withColumn(\n",
-					"        \"wi_tier_num\",\n",
-					"        when(\n",
-					"            (trim(col(\"wi_position\")).startswith(yard_config['prefix'])) & \n",
-					"            (expr(\"locate(' ', trim(wi_position))\") > 0),\n",
-					"            expr(\"cast(substring(trim(wi_position), -1, 1) as int)\")\n",
-					"        ).when(\n",
-					"            trim(col(\"wi_position\")).startswith(vessel_config['prefix']),\n",
-					"            expr(f\"cast(substring(regexp_extract(trim(wi_position), '{vessel_regex}', 1), -2, 2) as int)\")\n",
-					"        ).otherwise(0)\n",
-					"    )\n",
+					"# wi_tier_num (use already extracted wi_position_4)\n",
+					"position_df = position_df.withColumn(\n",
+					"    \"wi_tier_num\",\n",
+					"    when(\n",
+					"        (col(\"wi_position_type\") == yard_config['prefix']) & (col(\"wi_position_4\") != ''),\n",
+					"        expr(\"ascii(wi_position_4) - ascii('A') + 1\") if yard_config['tier_type'] == 'letter' \n",
+					"        else expr(\"cast(wi_position_4 as int)\")\n",
+					"    ).when(\n",
+					"        (col(\"wi_position_type\") == vessel_config['prefix']) & (col(\"wi_position_4\") != ''),\n",
+					"        expr(\"cast(wi_position_4 as int)\")\n",
+					"    ).otherwise(0)\n",
+					")\n",
 					"\n",
 					"position_df.createOrReplaceTempView(\"with_positions\")\n",
 					"\n",
-					"print(f\"✅ Applied position parsing for terminal: {client_id}\")\n",
-					"print(f\"   • Yard pattern: {yard_config['pattern']}\")\n",
-					"print(f\"   • Yard tier type: {yard_config['tier_type']}\")\n",
-					"print(f\"   • Vessel tier type: {vessel_config['tier_type']}\")\n",
+					"print(f\"✅ Position parsing completed for terminal: {client_id}\")\n",
 					""
 				],
-				"execution_count": 171
+				"execution_count": 10
 			},
 			{
 				"cell_type": "code",
@@ -634,7 +619,7 @@
 					"print(f\"   • client_key: {client_key}\")\n",
 					""
 				],
-				"execution_count": 172
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
@@ -662,7 +647,7 @@
 					"FROM with_derived\n",
 					"WHERE integration_key IS NOT NULL"
 				],
-				"execution_count": 173
+				"execution_count": 12
 			},
 			{
 				"cell_type": "code",
@@ -781,7 +766,7 @@
 					"final_count = silver_df.count()\n",
 					"print(f\"✅ Final Silver records (after deduplication): {final_count:,}\")"
 				],
-				"execution_count": 174
+				"execution_count": 13
 			},
 			{
 				"cell_type": "code",
@@ -816,7 +801,7 @@
 					"    print(f\"❌ Failed to write to Silver: {str(e)}\")\n",
 					"    raise"
 				],
-				"execution_count": 175
+				"execution_count": 14
 			},
 			{
 				"cell_type": "code",
@@ -881,7 +866,7 @@
 					"    raise\n",
 					""
 				],
-				"execution_count": 176
+				"execution_count": 15
 			},
 			{
 				"cell_type": "code",
@@ -910,7 +895,7 @@
 					"    print(f\"⚠️ Warning: Failed to archive files: {str(e)}\")\n",
 					"    # Don't fail the pipeline if archiving fails"
 				],
-				"execution_count": 177
+				"execution_count": null
 			}
 		]
 	}
