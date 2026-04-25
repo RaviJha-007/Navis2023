@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "084bc210-2c85-4308-9b0b-9b5f53e1c931"
+				"spark.autotune.trackingId": "9b06df18-9f5c-42ad-a899-84573f3b55e5"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"file_system = \"malta\"\n",
 					""
 				],
-				"execution_count": 134
+				"execution_count": 141
 			},
 			{
 				"cell_type": "code",
@@ -171,7 +171,7 @@
 					"print(f\"   • Vessel Tier Type: {config['vessel_position']['tier_type']}\")\n",
 					"print(f\"🔑 Client Key: {client_key}\")  "
 				],
-				"execution_count": 135
+				"execution_count": 142
 			},
 			{
 				"cell_type": "code",
@@ -213,7 +213,7 @@
 					"\n",
 					"bronze_df.createOrReplaceTempView(\"bronze_wi\")"
 				],
-				"execution_count": 136
+				"execution_count": 143
 			},
 			{
 				"cell_type": "code",
@@ -309,7 +309,7 @@
 					"    source_file_name_full\n",
 					"FROM bronze_wi"
 				],
-				"execution_count": 137
+				"execution_count": 144
 			},
 			{
 				"cell_type": "code",
@@ -356,7 +356,95 @@
 					"print(f\"✅ Applied {len(datetime_formats)} datetime format(s) for {len(datetime_columns)} columns\")\n",
 					""
 				],
-				"execution_count": 138
+				"execution_count": 145
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ============================================================\n",
+					"# DEBUG: Verify DateTime Parsing Success\n",
+					"# ============================================================\n",
+					"\n",
+					"from pyspark.sql.functions import col\n",
+					"\n",
+					"# Define the datetime columns (without _str suffix)\n",
+					"datetime_columns_parsed = [\n",
+					"    'wi_created',\n",
+					"    'wi_modified',\n",
+					"    'yard_move_deadline',\n",
+					"    'mvhs_t_carry_complete',\n",
+					"    'mvhs_time_fetch',\n",
+					"    'mvhs_pool_time_put',\n",
+					"    'est_mv_time',\n",
+					"    'mvhs_time_carry_che_dispatch'\n",
+					"]\n",
+					"\n",
+					"# Get dataframe\n",
+					"parsed_df_debug = spark.table(\"parsed_dates\")\n",
+					"\n",
+					"# Get total row count\n",
+					"total_rows = parsed_df_debug.count()\n",
+					"\n",
+					"print(f\"📊 Total rows in parsed_dates: {total_rows:,}\\n\")\n",
+					"\n",
+					"# Count nulls for each datetime column\n",
+					"print(\"=\" * 80)\n",
+					"print(\"NULL COUNT ANALYSIS\")\n",
+					"print(\"=\" * 80)\n",
+					"\n",
+					"null_counts = {}\n",
+					"for dt_col in datetime_columns_parsed:\n",
+					"    null_count = parsed_df_debug.filter(col(dt_col).isNull()).count()\n",
+					"    \n",
+					"    null_pct = (null_count / total_rows * 100) if total_rows > 0 else 0\n",
+					"    status = \"✅\" if null_count == 0 else (\"⚠️\" if null_pct < 50 else \"❌\")\n",
+					"    \n",
+					"    null_counts[dt_col] = null_count\n",
+					"    print(f\"{status} {dt_col:35} | Nulls: {null_count:6,} ({null_pct:5.1f}%)\")\n",
+					"\n",
+					"print(\"=\" * 80)\n",
+					"\n",
+					"# Show sample of 5 rows with original vs parsed\n",
+					"print(\"\\n📋 SAMPLE DATA (Original vs Parsed)\")\n",
+					"print(\"=\" * 80)\n",
+					"\n",
+					"spark.sql(\"\"\"\n",
+					"    SELECT \n",
+					"        wi_created_str,\n",
+					"        wi_created,\n",
+					"        wi_modified_str,\n",
+					"        wi_modified,\n",
+					"        yard_move_deadline_str,\n",
+					"        yard_move_deadline\n",
+					"    FROM parsed_dates \n",
+					"    LIMIT 5\n",
+					"\"\"\").show(truncate=False, vertical=True)\n",
+					"\n",
+					"# Summary\n",
+					"print(\"\\n\" + \"=\" * 80)\n",
+					"print(\"SUMMARY\")\n",
+					"print(\"=\" * 80)\n",
+					"\n",
+					"failed_columns = [col_name for col_name, count_val in null_counts.items() if count_val == total_rows]\n",
+					"partial_columns = [col_name for col_name, count_val in null_counts.items() if 0 < count_val < total_rows]\n",
+					"success_columns = [col_name for col_name, count_val in null_counts.items() if count_val == 0]\n",
+					"\n",
+					"if failed_columns:\n",
+					"    print(f\"❌ Completely failed to parse ({len(failed_columns)}): {', '.join(failed_columns)}\")\n",
+					"    \n",
+					"if partial_columns:\n",
+					"    print(f\"⚠️  Partially parsed - has nulls ({len(partial_columns)}): {', '.join(partial_columns)}\")\n",
+					"    \n",
+					"if success_columns:\n",
+					"    print(f\"✅ Fully parsed - no nulls ({len(success_columns)}): {', '.join(success_columns)}\")\n",
+					"\n",
+					"if not success_columns and not partial_columns:\n",
+					"    print(\"❌ ALL PARSING FAILED - No columns were parsed successfully\")\n",
+					"\n",
+					"print(\"=\" * 80)\n",
+					""
+				],
+				"execution_count": 152
 			},
 			{
 				"cell_type": "code",
@@ -583,7 +671,7 @@
 					"print(f\"   • Vessel tier type: {vessel_config['tier_type']}\")\n",
 					""
 				],
-				"execution_count": 125
+				"execution_count": 146
 			},
 			{
 				"cell_type": "code",
@@ -632,7 +720,7 @@
 					"print(f\"   • client_key: {client_key}\")\n",
 					""
 				],
-				"execution_count": 126
+				"execution_count": 147
 			},
 			{
 				"cell_type": "code",
@@ -660,32 +748,7 @@
 					"FROM with_derived\n",
 					"WHERE integration_key IS NOT NULL"
 				],
-				"execution_count": 127
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					"spark.sql(\"\"\"\n",
-					"    SELECT \n",
-					"        wi_created_str as original_string,\n",
-					"        wi_created as parsed_timestamp,\n",
-					"        typeof(wi_created) as data_type\n",
-					"    FROM parsed_dates \n",
-					"    LIMIT 5\n",
-					"\"\"\").show(truncate=False)\n",
-					""
-				],
-				"execution_count": 139
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					"# First, verify the deduplicated view exists and check its columns\n",
-					"spark.sql(\"SELECT * FROM with_derived LIMIT 5\").show()\n",
-					"spark.sql(\"DESCRIBE with_derived\").show()\n",
-					""
-				],
-				"execution_count": 130
+				"execution_count": 148
 			},
 			{
 				"cell_type": "code",
@@ -804,7 +867,7 @@
 					"final_count = silver_df.count()\n",
 					"print(f\"✅ Final Silver records (after deduplication): {final_count:,}\")"
 				],
-				"execution_count": 93
+				"execution_count": 149
 			},
 			{
 				"cell_type": "code",
