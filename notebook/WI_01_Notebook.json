@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "59772e3a-c73c-4402-aa73-6c8d163bbc21"
+				"spark.autotune.trackingId": "2e005561-0a28-4b27-a322-30bd9f30b8b2"
 			}
 		},
 		"metadata": {
@@ -885,7 +885,7 @@
 					"    *,\n",
 					"    ROW_NUMBER() OVER (\n",
 					"        PARTITION BY integration_key \n",
-					"        ORDER BY source_file_name_sort DESC\n",
+					"        ORDER BY source_file_name_sort DESC, wi_modified DESC\n",
 					"    ) AS row_number\n",
 					"FROM with_derived\n",
 					"WHERE integration_key IS NOT NULL"
