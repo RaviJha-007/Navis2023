@@ -82,11 +82,11 @@
 				}
 			},
 			{
-				"name": "ladenUnladen_mundra_ct03",
+				"name": "LadenUnladen_TimeDistance_DualyCycle_CT03",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "EcEvents_mundra_ct03",
+						"activity": "MoveSrc_mundra_ct03",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -102,7 +102,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "ladenUnladen_mundra_ct03",
+						"referenceName": "LadenUnladen_TimeDistance_DualyCycle_CT03",
 						"type": "DataFlowReference"
 					},
 					"compute": {
