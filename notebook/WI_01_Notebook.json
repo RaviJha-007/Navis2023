@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "2e005561-0a28-4b27-a322-30bd9f30b8b2"
+				"spark.autotune.trackingId": "61deece8-530e-4a85-b82d-9586895569c1"
 			}
 		},
 		"metadata": {
@@ -61,11 +61,11 @@
 					"# PARAMETERS\n",
 					"# ============================================================\n",
 					"\n",
-					"client_id = \"GPA\"\n",
-					"file_system = \"gpa\"\n",
+					"client_id = \"Malta\"\n",
+					"file_system = \"malta\"\n",
 					""
 				],
-				"execution_count": 81
+				"execution_count": 102
 			},
 			{
 				"cell_type": "code",
@@ -184,7 +184,7 @@
 					"print(f\"   • Hazardous Column: {hazardous_col}\")\n",
 					"print(f\"🔑 Client Key: {client_key}\")  "
 				],
-				"execution_count": 82
+				"execution_count": 103
 			},
 			{
 				"cell_type": "code",
@@ -226,7 +226,7 @@
 					"\n",
 					"bronze_df.createOrReplaceTempView(\"bronze_wi\")"
 				],
-				"execution_count": 83
+				"execution_count": 104
 			},
 			{
 				"cell_type": "code",
@@ -320,7 +320,7 @@
 					"print(\"✅ standardized_wi view created\")\n",
 					""
 				],
-				"execution_count": 84
+				"execution_count": 105
 			},
 			{
 				"cell_type": "code",
@@ -404,7 +404,7 @@
 					"print(f\"✅ Applied {len(datetime_formats)} datetime format(s) for {len(datetime_columns)} columns\")\n",
 					""
 				],
-				"execution_count": 85
+				"execution_count": 106
 			},
 			{
 				"cell_type": "code",
@@ -440,13 +440,13 @@
 					"    yard_regex_short = next((p['regex'] for p in yard_patterns if p['name'] == 'simple_location'), yard_patterns[-1]['regex'])\n",
 					"    # For multi-pattern, skip first group (terminal code)\n",
 					"    skip_terminal_code = True\n",
-					"    group_offset = 1  # Groups start at 2 instead of 1\n",
+					"    group_offset = 1  # Groups start at 2 \n",
 					"else:\n",
 					"    # Single pattern config (Malta style)\n",
 					"    yard_regex_full = yard_config['regex_full']\n",
 					"    yard_regex_short = yard_config['regex_short']\n",
 					"    skip_terminal_code = False\n",
-					"    group_offset = 0  # Groups start at 1\n",
+					"    group_offset = 1  # Groups start at 2\n",
 					"\n",
 					"vessel_regex = vessel_config['regex']\n",
 					"truck_regex = truck_config.get('regex', '') if truck_config else ''\n",
@@ -478,7 +478,7 @@
 					"    regexp_extract(trim(col(\"unit_position\")), yard_regex_short, 1 + group_offset)\n",
 					").when(\n",
 					"    trim(col(\"unit_position\")).startswith(vessel_config['prefix']),\n",
-					"    substring(regexp_extract(trim(col(\"unit_position\")), vessel_regex, 1), 1, 2)\n",
+					"    substring(regexp_extract(trim(col(\"unit_position\")), vessel_regex, 2), 1, 2)\n",
 					")\n",
 					"\n",
 					"if truck_regex:\n",
@@ -512,7 +512,7 @@
 					"    regexp_extract(trim(col(\"unit_position\")), yard_regex_short, 1 + group_offset)\n",
 					").when(\n",
 					"    trim(col(\"unit_position\")).startswith(vessel_config['prefix']),\n",
-					"    regexp_extract(trim(col(\"unit_position\")), vessel_regex, 1)\n",
+					"    regexp_extract(trim(col(\"unit_position\")), vessel_regex, 2)\n",
 					")\n",
 					"\n",
 					"if truck_regex:\n",
@@ -552,7 +552,7 @@
 					"    )\n",
 					").when(\n",
 					"    trim(col(\"unit_position\")).startswith(vessel_config['prefix']),\n",
-					"    substring(regexp_extract(trim(col(\"unit_position\")), vessel_regex, 1), 1, 4)\n",
+					"    substring(regexp_extract(trim(col(\"unit_position\")), vessel_regex, 2), 1, 4)\n",
 					")\n",
 					"\n",
 					"if truck_regex:\n",
@@ -578,7 +578,7 @@
 					"    regexp_extract(trim(col(\"unit_position\")), yard_regex_full, 4 + group_offset)\n",
 					").when(\n",
 					"    trim(col(\"unit_position\")).startswith(vessel_config['prefix']),\n",
-					"    expr(f\"right(regexp_extract(trim(unit_position), '{vessel_regex}', 1), 2)\")\n",
+					"    expr(f\"right(regexp_extract(trim(unit_position), '{vessel_regex}', 2), 2)\")\n",
 					")\n",
 					"\n",
 					"if truck_regex:\n",
@@ -641,7 +641,7 @@
 					"    regexp_extract(trim(col(\"wi_position\")), yard_regex_short, 1 + group_offset)\n",
 					").when(\n",
 					"    trim(col(\"wi_position\")).startswith(vessel_config['prefix']),\n",
-					"    substring(regexp_extract(trim(col(\"wi_position\")), vessel_regex, 1), 1, 2)\n",
+					"    substring(regexp_extract(trim(col(\"wi_position\")), vessel_regex, 2), 1, 2)\n",
 					")\n",
 					"\n",
 					"if truck_regex:\n",
@@ -673,7 +673,7 @@
 					"    regexp_extract(trim(col(\"wi_position\")), yard_regex_short, 1 + group_offset)\n",
 					").when(\n",
 					"    trim(col(\"wi_position\")).startswith(vessel_config['prefix']),\n",
-					"    regexp_extract(trim(col(\"wi_position\")), vessel_regex, 1)\n",
+					"    regexp_extract(trim(col(\"wi_position\")), vessel_regex, 2)\n",
 					")\n",
 					"\n",
 					"if truck_regex:\n",
@@ -711,7 +711,7 @@
 					"    )\n",
 					").when(\n",
 					"    trim(col(\"wi_position\")).startswith(vessel_config['prefix']),\n",
-					"    substring(regexp_extract(trim(col(\"wi_position\")), vessel_regex, 1), 1, 4)\n",
+					"    substring(regexp_extract(trim(col(\"wi_position\")), vessel_regex, 2), 1, 4)\n",
 					")\n",
 					"\n",
 					"if truck_regex:\n",
@@ -735,7 +735,7 @@
 					"    regexp_extract(trim(col(\"wi_position\")), yard_regex_full, 4 + group_offset)\n",
 					").when(\n",
 					"    trim(col(\"wi_position\")).startswith(vessel_config['prefix']),\n",
-					"    expr(f\"right(regexp_extract(trim(wi_position), '{vessel_regex}', 1), 2)\")\n",
+					"    expr(f\"right(regexp_extract(trim(wi_position), '{vessel_regex}', 2), 2)\")\n",
 					")\n",
 					"\n",
 					"if truck_regex:\n",
@@ -791,7 +791,7 @@
 					"print(f\"   Separator: '{separator}'\")\n",
 					""
 				],
-				"execution_count": 86
+				"execution_count": 107
 			},
 			{
 				"cell_type": "code",
@@ -840,7 +840,7 @@
 					"print(f\"   • client_key: {client_key}\")\n",
 					""
 				],
-				"execution_count": 87
+				"execution_count": 108
 			},
 			{
 				"cell_type": "code",
@@ -890,7 +890,7 @@
 					"FROM with_derived\n",
 					"WHERE integration_key IS NOT NULL"
 				],
-				"execution_count": 89
+				"execution_count": 109
 			},
 			{
 				"cell_type": "code",
@@ -1009,7 +1009,7 @@
 					"final_count = silver_df.count()\n",
 					"print(f\"✅ Final Silver records (after deduplication): {final_count:,}\")"
 				],
-				"execution_count": 90
+				"execution_count": 110
 			},
 			{
 				"cell_type": "code",
@@ -1044,7 +1044,7 @@
 					"    print(f\"❌ Failed to write to Silver: {str(e)}\")\n",
 					"    raise"
 				],
-				"execution_count": 91
+				"execution_count": 111
 			},
 			{
 				"cell_type": "code",
