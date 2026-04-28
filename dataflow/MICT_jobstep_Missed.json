@@ -239,6 +239,7 @@
 				"     format: 'delta',",
 				"     fileSystem: 'mict',",
 				"     folderPath: 'gold/jobstep_missed',",
+				"     deltaTruncate: true,",
 				"     mergeSchema: true,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
