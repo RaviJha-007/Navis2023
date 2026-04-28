@@ -19,6 +19,13 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "rtgmove"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
 				}
 			],
 			"transformations": [
@@ -87,6 +94,9 @@
 				},
 				{
 					"name": "aggregate4"
+				},
+				{
+					"name": "alterRow3"
 				}
 			],
 			"scriptLines": [
@@ -342,6 +352,7 @@
 				"          CHE_Id),",
 				"     Total_Moves = sum(moves_count),",
 				"          Total_Work_Seconds = sum(Worktime_Seconds)) ~> aggregate4",
+				"aggregate4 alterRow(upsertIf(true())) ~> alterRow3",
 				"alterRow2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -360,7 +371,26 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> rtgmove"
+				"     skipDuplicateMapOutputs: true) ~> rtgmove",
+				"alterRow3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: ($Customer),",
+				"     folderPath: 'gold/rtg_session_productivity',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['move_date','CHE_Id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
