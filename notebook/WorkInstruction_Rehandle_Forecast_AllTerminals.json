@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "030c5876-f01d-439c-9734-c885b165030c"
+				"spark.autotune.trackingId": "a8ec5782-15c6-4a23-a1f8-0c669c2adaee"
 			}
 		},
 		"metadata": {
@@ -61,8 +61,8 @@
 					"# PARAMETERS\n",
 					"# ============================================================\n",
 					"\n",
-					"client_id = \"GPA\"\n",
-					"file_system = \"gpa\"\n",
+					"client_id = \"Malta\"\n",
+					"file_system = \"malta\"\n",
 					""
 				],
 				"execution_count": 11
@@ -209,6 +209,7 @@
 					"    \n",
 					"    -- Count occurrences for majority calculations\n",
 					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_3, crane) AS crane_count,\n",
+					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_3, carrier) AS carrier_count,\n",
 					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_3, unit_pod) AS pod_count,\n",
 					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_3, wi_position_1) AS bay_count,\n",
 					"    COUNT(*) OVER (PARTITION BY source_file_name_sort, unit_position_3, queue) AS queue_count,\n",
@@ -252,6 +253,11 @@
 					"        PARTITION BY source_file_name_sort, unit_position_3 \n",
 					"        ORDER BY crane_count DESC, crane\n",
 					"    ) AS majority_crane,\n",
+					"\n",
+					"     FIRST_VALUE(carrier) OVER (\n",
+					"        PARTITION BY source_file_name_sort, unit_position_3 \n",
+					"        ORDER BY carrier_count DESC, carrier\n",
+					"    ) AS majority_carrier,\n",
 					"    \n",
 					"    -- Majority POD (most frequent POD in stack)\n",
 					"    FIRST_VALUE(unit_pod) OVER (\n",
@@ -469,6 +475,7 @@
 					"    -- Quality Checks\n",
 					"    CASE WHEN load_sequence_in_queue = expected_queue_position THEN 'Y' ELSE 'N' END AS queue_in_order,\n",
 					"    CASE WHEN unit_pod = majority_pod THEN 'Y' ELSE 'N' END AS pod_same_in_stack,\n",
+					"    CASE WHEN carrier = majority_carrier THEN 'Y' ELSE 'N' END as carrier_same_in_stack,\n",
 					"    CASE WHEN crane = majority_crane THEN 'Y' ELSE 'N' END AS crane_same_in_stack,\n",
 					"    CASE WHEN queue = majority_queue THEN 'Y' ELSE 'N' END AS queue_same_in_stack,\n",
 					"    CASE WHEN prev_weight IS NULL OR ABS(unit_vgm_kg - prev_weight) <= 3000 THEN 'Y' ELSE 'N' END AS weight_within_3t_of_prev,\n",
@@ -478,6 +485,7 @@
 					"        WHEN load_sequence_in_queue = expected_queue_position\n",
 					"             AND unit_pod = majority_pod\n",
 					"             AND crane = majority_crane\n",
+					"             AND carrier = majority_carrier\n",
 					"             AND queue = majority_queue\n",
 					"             AND (prev_weight IS NULL OR ABS(unit_vgm_kg - prev_weight) <= 3000)\n",
 					"             AND wi_position_1 = majority_bay\n",
