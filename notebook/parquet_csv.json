@@ -1,0 +1,180 @@
+{
+	"name": "parquet_csv",
+	"properties": {
+		"description": "parquet to csv conversion.",
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "pbixpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 1,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "3",
+				"spark.autotune.trackingId": "9954b0b5-b824-4d5e-a9d9-6b89a848118f"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Synapse/workspaces/navispowerbidata2/bigDataPools/pbixpool",
+				"name": "pbixpool",
+				"type": "Spark",
+				"endpoint": "https://navispowerbidata2.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pbixpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"automaticScaleJobs": true
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"# Parquet to CSV Converter - Creates Single CSV Files\n",
+					"\n",
+					"input_folder = \"abfss://vict@navispowerbidatastorage2.dfs.core.windows.net/parquet_csv\"\n",
+					"output_folder = \"abfss://vict@navispowerbidatastorage2.dfs.core.windows.net/parquet_csv/output\"\n",
+					"\n",
+					"from notebookutils import mssparkutils\n",
+					"\n",
+					"print(f\"Scanning folder: {input_folder}\\n\")\n",
+					"\n",
+					"files_list = mssparkutils.fs.ls(input_folder)\n",
+					"parquet_files = [(f.name, f.path) for f in files_list if f.name.endswith('.parquet')]\n",
+					"\n",
+					"print(f\"Found {len(parquet_files)} parquet files\\n\")\n",
+					"\n",
+					"for file_name, file_path in parquet_files:\n",
+					"    try:\n",
+					"        csv_name = file_name.replace('.parquet', '.csv')\n",
+					"        temp_output_path = f\"{output_folder}/{file_name.replace('.parquet', '_temp')}\"\n",
+					"        final_csv_path = f\"{output_folder}/{csv_name}\"\n",
+					"        \n",
+					"        print(f\"Processing: {file_name}\")\n",
+					"        \n",
+					"        # Read parquet\n",
+					"        df = spark.read.parquet(file_path)\n",
+					"        \n",
+					"        # Write to temporary folder\n",
+					"        df.coalesce(1).write.mode(\"overwrite\").option(\"header\", \"true\").csv(temp_output_path)\n",
+					"        \n",
+					"        # Find the actual CSV part file\n",
+					"        temp_files = mssparkutils.fs.ls(temp_output_path)\n",
+					"        csv_part_file = [f.path for f in temp_files if f.name.startswith(\"part-\") and f.name.endswith(\".csv\")][0]\n",
+					"        \n",
+					"        # Move the part file to final location with proper name\n",
+					"        mssparkutils.fs.mv(csv_part_file, final_csv_path, True)\n",
+					"        \n",
+					"        # Delete the temporary folder\n",
+					"        mssparkutils.fs.rm(temp_output_path, True)\n",
+					"        \n",
+					"        print(f\"  ✓ Created: {csv_name}\\n\")\n",
+					"        \n",
+					"    except Exception as e:\n",
+					"        print(f\"  ✗ Error: {str(e)}\\n\")\n",
+					"\n",
+					"print(\"Done! CSV files are in the output folder.\")\n",
+					""
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# Parquet to CSV - Using Synapse Local Temp Storage\n",
+					"\n",
+					"import pandas as pd\n",
+					"from notebookutils import mssparkutils\n",
+					"import os\n",
+					"\n",
+					"problem_files = [\n",
+					"    'ECEvents_08042026.parquet',\n",
+					"    'vesselvisits_08042026.parquet', \n",
+					"    'work_instruction_08042026.parquet'\n",
+					"]\n",
+					"\n",
+					"input_folder = \"abfss://vict@navispowerbidatastorage2.dfs.core.windows.net/parquet_csv\"\n",
+					"output_folder = \"abfss://vict@navispowerbidatastorage2.dfs.core.windows.net/parquet_csv/output\"\n",
+					"\n",
+					"# Create temp directory\n",
+					"temp_dir = \"/tmp/parquet_csv_conversion\"\n",
+					"os.makedirs(temp_dir, exist_ok=True)\n",
+					"\n",
+					"for file_name in problem_files:\n",
+					"    try:\n",
+					"        input_path = f\"{input_folder}/{file_name}\"\n",
+					"        csv_name = file_name.replace('.parquet', '.csv')\n",
+					"        output_path = f\"{output_folder}/{csv_name}\"\n",
+					"        \n",
+					"        local_parquet = f\"{temp_dir}/{file_name}\"\n",
+					"        local_csv = f\"{temp_dir}/{csv_name}\"\n",
+					"        \n",
+					"        print(f\"Processing: {file_name}\")\n",
+					"        \n",
+					"        # Copy parquet from blob to local temp\n",
+					"        print(\"  Downloading parquet...\")\n",
+					"        mssparkutils.fs.cp(input_path, f\"file://{local_parquet}\", True)\n",
+					"        \n",
+					"        # Read with pandas\n",
+					"        print(\"  Converting to CSV...\")\n",
+					"        df = pd.read_parquet(local_parquet, engine='pyarrow')\n",
+					"        \n",
+					"        # Write CSV locally\n",
+					"        df.to_csv(local_csv, index=False)\n",
+					"        \n",
+					"        # Upload CSV to blob\n",
+					"        print(\"  Uploading CSV...\")\n",
+					"        mssparkutils.fs.cp(f\"file://{local_csv}\", output_path, True)\n",
+					"        \n",
+					"        # Cleanup\n",
+					"        os.remove(local_parquet)\n",
+					"        os.remove(local_csv)\n",
+					"        \n",
+					"        print(f\"  ✓ Success: {csv_name} ({len(df)} rows)\\n\")\n",
+					"        \n",
+					"    except Exception as e:\n",
+					"        print(f\"  ✗ Failed: {str(e)}\\n\")\n",
+					"\n",
+					"print(\"Done!\")\n",
+					""
+				],
+				"execution_count": 14
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			}
+		]
+	}
+}

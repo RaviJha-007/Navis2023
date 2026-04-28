@@ -1,19 +1,18 @@
 {
-	"name": "WI_01_StorageEvent",
+	"name": "WI_Malta_ST",
 	"properties": {
-		"description": "StorageEvent Trigger for WorkInstructions data",
+		"description": "Work instruction storage event trigger for malta",
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "WI_01",
+					"referenceName": "WI_01_Rehandles",
 					"type": "PipelineReference"
 				},
 				"parameters": {
-					"p_TriggeredFileSystem": "malta",
-					"P_TriggerClientId": "Malta",
-					"p_TriggerClientKey": 101
+					"client_id": "Malta",
+					"file_system": "malta"
 				}
 			}
 		],
