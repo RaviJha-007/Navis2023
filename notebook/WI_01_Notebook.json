@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "e92362c0-1006-446d-b163-6b301808ed3f"
+				"spark.autotune.trackingId": "2a1cf7f2-6aa5-49b0-a1da-c2b9798afdcf"
 			}
 		},
 		"metadata": {
@@ -166,8 +166,8 @@
 					"\n",
 					"\n",
 					"# Paths\n",
-					"bronze_path = f\"abfss://{file_system}@{storage_account}.dfs.core.windows.net/bronze/workinstruction_test/load/\"\n",
-					"bronze_archive_path = f\"abfss://{file_system}@{storage_account}.dfs.core.windows.net/bronze/workinstruction_test/archive/\"\n",
+					"bronze_path = f\"abfss://{file_system}@{storage_account}.dfs.core.windows.net/bronze/workinstruction/load/\"\n",
+					"bronze_archive_path = f\"abfss://{file_system}@{storage_account}.dfs.core.windows.net/bronze/workinstruction/archive/\"\n",
 					"silver_path = f\"abfss://workinstruction@{storage_account}.dfs.core.windows.net/silver/{terminal_folder}/\"\n",
 					"gold_path = f\"abfss://workinstruction@{storage_account}.dfs.core.windows.net/gold/WI_AllTerminals/\"\n",
 					"\n",
