@@ -357,7 +357,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: ($Customer),",
-				"     folderPath: 'gold/rtg_moves',",
+				"     folderPath: 'gold/rtg_session_moves',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
