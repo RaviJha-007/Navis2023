@@ -66,6 +66,27 @@
 				},
 				{
 					"name": "derivedColumn8"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "derivedColumn9"
+				},
+				{
+					"name": "derivedColumn10"
+				},
+				{
+					"name": "window2"
+				},
+				{
+					"name": "aggregate3"
+				},
+				{
+					"name": "derivedColumn11"
+				},
+				{
+					"name": "aggregate4"
 				}
 			],
 			"scriptLines": [
@@ -301,6 +322,26 @@
 				"     each(match(name!='Move_Primary_key'), $$ = first($$))) ~> aggregate",
 				"derivedColumn8 alterRow(upsertIf(true())) ~> alterRow2",
 				"aggregate derive(move_date = toDate(move_time)) ~> derivedColumn8",
+				"derivedColumn8 window(over(CHE_Id),",
+				"     asc(move_time, true),",
+				"     prev_move_time = lag(move_time,1)) ~> window1",
+				"window1 derive(moves_gap_seconds = (toLong(move_time) - toLong(prev_move_time))/1000) ~> derivedColumn9",
+				"derivedColumn9 derive(new_move_session_flag = iif(isNull(prev_move_time) || moves_gap_seconds > 10800,     1,     0 )) ~> derivedColumn10",
+				"derivedColumn10 window(over(CHE_Id),",
+				"     asc(move_time, true),",
+				"     moves_session_id = sum(new_move_session_flag)) ~> window2",
+				"window2 aggregate(groupBy(CHE_Id,",
+				"          moves_session_id),",
+				"     first_lift = min(move_time),",
+				"          last_lift = max(move_time),",
+				"          moves_count = countDistinct(Move_Primary_key)) ~> aggregate3",
+				"aggregate3 derive(Worktime_Seconds = \r",
+				"iif(moves_count == 1, toLong(3600), (toLong(last_lift) - toLong(first_lift))/1000),",
+				"          move_date = toDate(first_lift)) ~> derivedColumn11",
+				"derivedColumn11 aggregate(groupBy(move_date,",
+				"          CHE_Id),",
+				"     Total_Moves = sum(moves_count),",
+				"          Total_Work_Seconds = sum(Worktime_Seconds)) ~> aggregate4",
 				"alterRow2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
