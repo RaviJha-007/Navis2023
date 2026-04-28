@@ -15,6 +15,16 @@
 					"P_TriggerClientId": "Malta",
 					"p_TriggerClientKey": 101
 				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "WI_01_Rehandles",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"client_id": "Malta",
+					"file_system": "malta"
+				}
 			}
 		],
 		"type": "BlobEventsTrigger",

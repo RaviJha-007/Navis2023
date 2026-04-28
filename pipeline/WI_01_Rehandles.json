@@ -1,0 +1,124 @@
+{
+	"name": "WI_01_Rehandles",
+	"properties": {
+		"description": "This pipeline runs the bronze to Silver layer data loading and Rehandles Logic",
+		"activities": [
+			{
+				"name": "WI01",
+				"type": "SynapseNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "WI_01_Notebook",
+						"type": "NotebookReference"
+					},
+					"parameters": {
+						"client_id": {
+							"value": {
+								"value": "@pipeline().parameters.client_id",
+								"type": "Expression"
+							},
+							"type": "string"
+						},
+						"file_system": {
+							"value": {
+								"value": "@pipeline().parameters.file_system",
+								"type": "Expression"
+							},
+							"type": "string"
+						}
+					},
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": "pbixpool",
+						"type": "BigDataPoolReference"
+					},
+					"executorSize": "Small",
+					"conf": {
+						"spark.dynamicAllocation.enabled": true,
+						"spark.dynamicAllocation.minExecutors": 1,
+						"spark.dynamicAllocation.maxExecutors": 3
+					},
+					"driverSize": "Small",
+					"numExecutors": 1,
+					"authentication": {
+						"type": "MSI"
+					}
+				}
+			},
+			{
+				"name": "Rehandles_Forecast_AllTerminals",
+				"type": "SynapseNotebook",
+				"dependsOn": [
+					{
+						"activity": "WI01",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "WorkInstruction_Rehandle_Forecast_AllTerminals",
+						"type": "NotebookReference"
+					},
+					"parameters": {
+						"client_id": {
+							"value": "@pipeline().parameters.client_id",
+							"type": "string"
+						},
+						"file_system": {
+							"value": {
+								"value": "@pipeline().parameters.file_system",
+								"type": "Expression"
+							},
+							"type": "string"
+						}
+					},
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": "pbixpool",
+						"type": "BigDataPoolReference"
+					},
+					"executorSize": "Small",
+					"conf": {
+						"spark.dynamicAllocation.enabled": true,
+						"spark.dynamicAllocation.minExecutors": 1,
+						"spark.dynamicAllocation.maxExecutors": 3
+					},
+					"driverSize": "Small",
+					"numExecutors": 1,
+					"authentication": {
+						"type": "MSI"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"client_id": {
+				"type": "string",
+				"defaultValue": "Malta"
+			},
+			"file_system": {
+				"type": "string",
+				"defaultValue": "malta"
+			}
+		},
+		"annotations": []
+	}
+}
