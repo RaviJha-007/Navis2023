@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 25",
+	"properties": {
+		"content": {
+			"query": "SELECT definition \nFROM sys.sql_modules \nWHERE object_id = OBJECT_ID('dbo.wi_allterminals');",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "workinstruction",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
