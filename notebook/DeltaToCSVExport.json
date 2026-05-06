@@ -1,0 +1,151 @@
+{
+	"name": "DeltaToCSVExport",
+	"properties": {
+		"description": "Delta file to CSV export to Container.",
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "pbixpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 1,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "3",
+				"spark.autotune.trackingId": "6a50d6cb-14ea-4bb5-a983-b91dcd0a9139"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Synapse/workspaces/navispowerbidata2/bigDataPools/pbixpool",
+				"name": "pbixpool",
+				"type": "Spark",
+				"endpoint": "https://navispowerbidata2.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pbixpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"automaticScaleJobs": true
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"# ============================================================\n",
+					"# Cell 1 — Configuration\n",
+					"# ============================================================\n",
+					"\n",
+					"storage_account = \"navispowerbidatastorage2\"       # e.g. \"mictadls\"\n",
+					"container       = \"mict\"             # e.g. \"mictdata\"\n",
+					"output_file     = \"mict_Moves_3Months.csv\"\n",
+					"\n",
+					"base_path    = f\"abfss://{container}@{storage_account}.dfs.core.windows.net\"\n",
+					"delta_path   = f\"{base_path}/silver/moves\"\n",
+					"staging_path = f\"{base_path}/export/moves_staging/\"    # Temp folder for coalesce output\n",
+					"final_path   = f\"{base_path}/export/moves_result/\"     # Final destination\n",
+					""
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ============================================================\n",
+					"# Cell 2 — Read Delta Table & Apply Filters\n",
+					"# ============================================================\n",
+					"\n",
+					"df = spark.read.format(\"delta\").load(delta_path)\n",
+					"\n",
+					"df_filtered = df.filter(\n",
+					"    \n",
+					"    ((df[\"Year\"] == 2026) & (df[\"month\"] >= 2))\n",
+					")\n",
+					"\n",
+					"print(f\"Total records: {df_filtered.count()}\")\n",
+					"df_filtered.printSchema()\n",
+					""
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ============================================================\n",
+					"# Cell 3 — Write as Single CSV to Staging Folder\n",
+					"# ============================================================\n",
+					"\n",
+					"df_filtered.coalesce(1).write \\\n",
+					"    .mode(\"overwrite\") \\\n",
+					"    .option(\"header\", \"true\") \\\n",
+					"    .csv(staging_path)\n",
+					"\n",
+					"print(\"✅ Written to staging folder.\")\n",
+					""
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ============================================================\n",
+					"# Cell 4 — Rename the Part File to a Clean CSV Name\n",
+					"# ============================================================\n",
+					"\n",
+					"from notebookutils import mssparkutils\n",
+					"\n",
+					"# Find the part-*.csv file in the staging folder\n",
+					"files = mssparkutils.fs.ls(staging_path)\n",
+					"part_file = [f.path for f in files if f.name.startswith(\"part-\") and f.name.endswith(\".csv\")][0]\n",
+					"\n",
+					"# Move & rename to final destination\n",
+					"dest = f\"{final_path}{output_file}\"\n",
+					"mssparkutils.fs.cp(part_file, dest, recurse=False)\n",
+					"\n",
+					"# Clean up staging folder\n",
+					"mssparkutils.fs.rm(staging_path, recurse=True)\n",
+					"\n",
+					"print(f\"✅ Final CSV saved to: {dest}\")\n",
+					""
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ============================================================\n",
+					"# Cell 5 — Verify Output\n",
+					"# ============================================================\n",
+					"\n",
+					"df_verify = spark.read.option(\"header\", \"true\").csv(dest)\n",
+					"\n",
+					"print(f\"Row count  : {df_verify.count()}\")\n",
+					"print(f\"Column count: {len(df_verify.columns)}\")\n",
+					"df_verify.show(5)\n",
+					""
+				],
+				"execution_count": 10
+			}
+		]
+	}
+}
