@@ -1,0 +1,101 @@
+{
+	"name": "ITV_Wait_Idle_Time",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "ITVWaitTime"
+				}
+			],
+			"transformations": [
+				{
+					"name": "window1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "AlterRow1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "filter2"
+				},
+				{
+					"name": "aggregate2"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "split1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "derivedColumn4"
+				},
+				{
+					"name": "derivedColumn5"
+				},
+				{
+					"name": "derivedColumn6"
+				},
+				{
+					"name": "derivedColumn7"
+				},
+				{
+					"name": "derivedColumn8"
+				},
+				{
+					"name": "derivedColumn9"
+				},
+				{
+					"name": "derivedColumn10"
+				},
+				{
+					"name": "derivedColumn11"
+				},
+				{
+					"name": "union2"
+				},
+				{
+					"name": "derivedColumn12"
+				},
+				{
+					"name": "derivedColumn13"
+				},
+				{
+					"name": "select3"
+				}
+			],
+			"script": "parameters{\n\tp_LadenSpeed_Kmph as integer (10),\n\tp_UnladenSpeed_Kmph as integer (20)\n}\nsource(output(\n\t\tmve_gkey as long,\n\t\tUnit_Nbr as string,\n\t\tFacility_Id as string,\n\t\tYard_Id as string,\n\t\tCarrier_Visit_Key as long,\n\t\tEvent_Type_Id as string,\n\t\tMove_Kind as string,\n\t\tFrom_Location as string,\n\t\tTo_Location as string,\n\t\tFrom_Position_Name as string,\n\t\tTo_Position_Name as string,\n\t\tCarry_CHE_Operator_Id as string,\n\t\tFetch_CHE_Operator_Id as string,\n\t\tPut_CHE_Operator_Id as string,\n\t\tFetch_CHE_Id as long,\n\t\tFetch_CHE_Kind as string,\n\t\tCarry_CHE_Id as long,\n\t\tCarry_CHE_Kind as string,\n\t\tPut_CHE_Id as long,\n\t\tPut_CHE_Kind as string,\n\t\tQC_CHE_Id as long,\n\t\tQC_CHE_Kind as string,\n\t\tt_carry_complete as timestamp,\n\t\tt_put as timestamp,\n\t\tt_fetch as timestamp,\n\t\tt_dispatch as timestamp,\n\t\tt_discharge as timestamp,\n\t\tt_carry_dispatch as timestamp,\n\t\tt_carry_fetch_ready as timestamp,\n\t\tt_carry_put_ready as timestamp,\n\t\tdist_carry as integer,\n\t\tdist_start as integer,\n\t\tTwin_Fetch as boolean,\n\t\tTwin_Carry as boolean,\n\t\tTwin_Put as boolean,\n\t\tCategory_Id as string,\n\t\tFreight_Kind_Id as string,\n\t\tRestow_Reason as string,\n\t\tPOW as string,\n\t\tufv_gkey as long,\n\t\tGoods_And_Ctr_Wt_Kg as integer,\n\t\tRequires_Power_Flag as boolean,\n\t\tOOG_Flag as boolean,\n\t\tATA as timestamp,\n\t\tATD as timestamp,\n\t\tRehandles as short,\n\t\tYear as integer,\n\t\tMonth as integer,\n\t\tWeek as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: true,\n\tformat: 'delta',\n\tfileSystem: 'apmt-salalah',\n\tfolderPath: 'silver/moves') ~> source1\naggregate1 window(over(Carry_CHE_Id),\n\tasc(t_carry_complete, true),\n\tstartRowOffset: -1L,\n\tendRowOffset: -1L,\n\tCarry_CHE_Id_PREV = lag(Carry_CHE_Id),\n\t\tEvent_Type_Id_PREV = lag(Event_Type_Id),\n\t\tt_carry_complete_PREV = lag(t_carry_complete),\n\t\tt_put_PREV = lag(t_put),\n\t\tt_fetch_PREV = lag(t_fetch)) ~> window1\njoin1 derive(Effective_Unladen_Distance = iif(\r\n    isNull(dist_start)\r\n    || toDouble(dist_start) <= 0,\r\n\r\n    dist_start_AVG,\r\n\r\n    toDouble(dist_start)\r\n),\n\t\tEffective_Laden_Distance = iif(\r\n    isNull(dist_carry)\r\n    || toDouble(dist_carry) <= 0,\r\n\r\n    dist_carry_AVG,\r\n\r\n    toDouble(dist_carry)\r\n)) ~> derivedColumn1\nselect3 alterRow(upsertIf(true())) ~> AlterRow1\nderivedColumn2 aggregate(groupBy(mve_gkey),\n\teach(match(name!='mve_gkey'), $$ = first($$))) ~> aggregate1\nsource1 filter(equals(Carry_CHE_Kind,'ITV') && equals(isNull(Carry_CHE_Id),false()) && equals(isNull(t_carry_complete),false())) ~> filter1\nwindow1 filter((Event_Type_Id=='UNIT_LOAD' || Event_Type_Id=='UNIT_DISCH')) ~> filter2\nfilter2 aggregate(groupBy(Carry_CHE_Id,\n\t\tmove_date,\n\t\tEvent_Type_Id),\n\tdist_carry_AVG = avg(dist_carry),\n\t\tdist_start_AVG = avg(dist_start)) ~> aggregate2\nfilter1 derive(move_date = toDate(t_put),\n\t\tdist_carry = iif(dist_carry==100000000,0,dist_carry),\n\t\tdist_start = iif(dist_start==100000000,0,dist_start)) ~> derivedColumn2\nfilter2, aggregate2 join(aggregate1@move_date == aggregate2@move_date\n\t&& aggregate1@Carry_CHE_Id == aggregate2@Carry_CHE_Id\n\t&& aggregate1@Event_Type_Id == aggregate2@Event_Type_Id,\n\tjoinType:'left',\n\tmatchType:'exact',\n\tignoreSpaces: false,\n\tbroadcast: 'auto')~> join1\nderivedColumn1 derive(Estimated_Unladen_Travel_Sec = (Effective_Unladen_Distance / 1000.0) / $p_UnladenSpeed_Kmph * 3600,\n\t\tEstimated_Laden_Travel_Sec = (Effective_Laden_Distance / 1000.0)\r\n/\r\n$p_LadenSpeed_Kmph\r\n* 3600) ~> derivedColumn3\nselect2 split(Event_Type_Id==\"UNIT_LOAD\",\n\tEvent_Type_Id==\"UNIT_DISCH\",\n\tdisjoint: true) ~> split1@(Load, Dsch)\nderivedColumn3 select(mapColumn(\n\t\tmve_gkey,\n\t\tUnit_Nbr,\n\t\tFacility_Id,\n\t\tYard_Id,\n\t\tCarrier_Visit_Key,\n\t\tEvent_Type_Id = aggregate1@Event_Type_Id,\n\t\tMove_Kind,\n\t\tFrom_Location,\n\t\tTo_Location,\n\t\tFrom_Position_Name,\n\t\tTo_Position_Name,\n\t\tCarry_CHE_Operator_Id,\n\t\tFetch_CHE_Operator_Id,\n\t\tPut_CHE_Operator_Id,\n\t\tFetch_CHE_Id,\n\t\tFetch_CHE_Kind,\n\t\tCarry_CHE_Id = aggregate1@Carry_CHE_Id,\n\t\tCarry_CHE_Kind,\n\t\tPut_CHE_Id,\n\t\tPut_CHE_Kind,\n\t\tQC_CHE_Id,\n\t\tQC_CHE_Kind,\n\t\tt_carry_complete,\n\t\tt_put,\n\t\tt_fetch,\n\t\tt_dispatch,\n\t\tt_discharge,\n\t\tt_carry_dispatch,\n\t\tt_carry_fetch_ready,\n\t\tt_carry_put_ready,\n\t\tdist_carry,\n\t\tdist_start,\n\t\tTwin_Fetch,\n\t\tTwin_Carry,\n\t\tTwin_Put,\n\t\tCategory_Id,\n\t\tFreight_Kind_Id,\n\t\tRestow_Reason,\n\t\tPOW,\n\t\tufv_gkey,\n\t\tGoods_And_Ctr_Wt_Kg,\n\t\tRequires_Power_Flag,\n\t\tOOG_Flag,\n\t\tATA,\n\t\tATD,\n\t\tRehandles,\n\t\tYear,\n\t\tMonth,\n\t\tWeek,\n\t\tmove_date = aggregate1@move_date,\n\t\tCarry_CHE_Id_PREV,\n\t\tEvent_Type_Id_PREV,\n\t\tt_carry_complete_PREV,\n\t\tt_put_PREV,\n\t\tt_fetch_PREV,\n\t\tdist_carry_AVG,\n\t\tdist_start_AVG,\n\t\tEffective_Unladen_Distance,\n\t\tEffective_Laden_Distance,\n\t\tEstimated_Unladen_Travel_Sec,\n\t\tEstimated_Laden_Travel_Sec\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select2\nsplit1@Load derive(Direct_RTG_Wait_Sec = iif(\r\n    !isNull(t_carry_fetch_ready)\r\n    && !isNull(t_fetch),\r\n\r\n    (toLong(t_fetch) - toLong(t_carry_fetch_ready)) / 1000,\r\n\r\n    toLong(null())\r\n)) ~> derivedColumn4\nsplit1@Dsch derive(Direct_RTG_Wait_Sec = iif(\r\n    !isNull(t_carry_put_ready)\r\n    && !isNull(t_put),\r\n\r\n    (toLong(t_put) - toLong(t_carry_put_ready)) / 1000,\r\n\r\n    toLong(null())\r\n)) ~> derivedColumn5\nderivedColumn5 derive(Fallback_Wait = iif(\r\n    isNull(Direct_RTG_Wait_Sec)\r\n    && !isNull(t_put)\r\n    && !isNull(t_carry_dispatch),\r\n\r\n    (\r\n        (toLong(t_put) - toLong(t_carry_dispatch))/1000\r\n    )\r\n    -\r\n    (\r\n        Estimated_Unladen_Travel_Sec\r\n        +\r\n        Estimated_Laden_Travel_Sec\r\n    ),\r\n\r\n    toDouble(null())\r\n)) ~> derivedColumn6\nderivedColumn4 derive(Fallback_Wait = iif(\r\n    isNull(Direct_RTG_Wait_Sec)\r\n    && !isNull(t_fetch)\r\n    && !isNull(t_carry_dispatch),\r\n\r\n    (\r\n        (toLong(t_fetch) - toLong(t_carry_dispatch))/1000\r\n    )\r\n    -\r\n    (\r\n        Estimated_Unladen_Travel_Sec\r\n    ),\r\n\r\n    toDouble(null())\r\n)) ~> derivedColumn7\nderivedColumn6 derive(prev_fallback = iif(\r\n    isNull(Direct_RTG_Wait_Sec)\r\n    && isNull(Fallback_Wait)\r\n    && !isNull(t_carry_complete_PREV)\r\n    && !isNull(t_put),\r\n\r\n    (\r\n        (toLong(t_put) - toLong(t_carry_complete_PREV))/1000\r\n    )\r\n    -\r\n    (\r\n        Estimated_Unladen_Travel_Sec\r\n        +\r\n        Estimated_Laden_Travel_Sec\r\n    ),\r\n\r\n    toDouble(null())\r\n)) ~> derivedColumn8\nderivedColumn7 derive(prev_fallback = iif(\r\n    isNull(Direct_RTG_Wait_Sec)\r\n    && isNull(Fallback_Wait)\r\n    && !isNull(t_carry_complete_PREV)\r\n    && !isNull(t_fetch),\r\n\r\n    (\r\n        (toLong(t_fetch) - toLong(t_carry_complete_PREV))/1000\r\n    )\r\n    -\r\n    Estimated_Unladen_Travel_Sec,\r\n\r\n    toDouble(null())\r\n)) ~> derivedColumn9\nderivedColumn9 derive(Wait_Time_Sec = coalesce(\r\n    Direct_RTG_Wait_Sec,\r\n    Fallback_Wait,\r\n    prev_fallback\r\n)) ~> derivedColumn10\nderivedColumn8 derive(Wait_Time_Sec = coalesce(\r\n    Direct_RTG_Wait_Sec,\r\n    Fallback_Wait,\r\n    prev_fallback\r\n)) ~> derivedColumn11\nderivedColumn10, derivedColumn11 union(byName: true)~> union2\nunion2 derive(Idle_Time_Sec = iif(\r\n    !isNull(t_carry_complete_PREV)\r\n    &&\r\n    toLong(t_carry_dispatch) >= toLong(t_carry_complete_PREV),\r\n\r\n    (\r\n        toLong(t_carry_dispatch)\r\n        -\r\n        toLong(t_carry_complete_PREV)\r\n    ) / 1000,\r\n\r\n    toLong(null())\r\n)) ~> derivedColumn12\nderivedColumn12 derive(Wait_Time_Sec = iif(\r\n    Wait_Time_Sec < 0\r\n    || Wait_Time_Sec > 7200,\r\n\r\n    toLong(null()),\r\n\r\n    toLong(Wait_Time_Sec)\r\n),\n\t\tIdle_Time_Sec = iif(\r\n    Idle_Time_Sec < 0\r\n    || Idle_Time_Sec > 14400,\r\n\r\n    toLong(null()),\r\n\r\n    toLong(Idle_Time_Sec)\r\n)) ~> derivedColumn13\nderivedColumn13 select(mapColumn(\n\t\tmve_gkey,\n\t\tUnit_Nbr,\n\t\tFacility_Id,\n\t\tYard_Id,\n\t\tCarrier_Visit_Key,\n\t\tEvent_Type_Id,\n\t\tMove_Kind,\n\t\tFrom_Location,\n\t\tTo_Location,\n\t\tFrom_Position_Name,\n\t\tTo_Position_Name,\n\t\tCarry_CHE_Operator_Id,\n\t\tFetch_CHE_Operator_Id,\n\t\tPut_CHE_Operator_Id,\n\t\tFetch_CHE_Id,\n\t\tFetch_CHE_Kind,\n\t\tCarry_CHE_Id,\n\t\tCarry_CHE_Kind,\n\t\tPut_CHE_Id,\n\t\tPut_CHE_Kind,\n\t\tQC_CHE_Id,\n\t\tQC_CHE_Kind,\n\t\tt_carry_complete,\n\t\tt_put,\n\t\tt_fetch,\n\t\tt_dispatch,\n\t\tt_discharge,\n\t\tt_carry_dispatch,\n\t\tt_carry_fetch_ready,\n\t\tt_carry_put_ready,\n\t\tdist_carry,\n\t\tdist_start,\n\t\tTwin_Fetch,\n\t\tTwin_Carry,\n\t\tTwin_Put,\n\t\tCategory_Id,\n\t\tFreight_Kind_Id,\n\t\tRestow_Reason,\n\t\tPOW,\n\t\tufv_gkey,\n\t\tGoods_And_Ctr_Wt_Kg,\n\t\tRequires_Power_Flag,\n\t\tOOG_Flag,\n\t\tATA,\n\t\tATD,\n\t\tRehandles,\n\t\tYear,\n\t\tMonth,\n\t\tWeek,\n\t\tmove_date,\n\t\tCarry_CHE_Id_PREV,\n\t\tEvent_Type_Id_PREV,\n\t\tt_carry_complete_PREV,\n\t\tt_put_PREV,\n\t\tt_fetch_PREV,\n\t\tdist_carry_AVG,\n\t\tdist_start_AVG,\n\t\tEffective_Unladen_Distance,\n\t\tEffective_Laden_Distance,\n\t\tEstimated_Unladen_Travel_Sec,\n\t\tEstimated_Laden_Travel_Sec,\n\t\tDirect_RTG_Wait_Sec,\n\t\tFallback_Wait,\n\t\tprev_fallback,\n\t\tWait_Time_Sec,\n\t\tIdle_Time_Sec\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select3\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tmve_gkey as string,\n\t\tUnit_Nbr as string,\n\t\tFacility_Id as string,\n\t\tEvent_Type_Id as string,\n\t\tMove_Kind as string,\n\t\tt_carry_complete as timestamp,\n\t\tt_put as timestamp,\n\t\tt_fetch as timestamp,\n\t\tt_dispatch as timestamp,\n\t\tt_discharge as timestamp,\n\t\tt_carry_dispatch as timestamp,\n\t\tt_carry_fetch_ready as timestamp,\n\t\tt_carry_put_ready as timestamp,\n\t\tdist_carry as string,\n\t\tdist_start as string,\n\t\tPreviousJobCompletion as timestamp,\n\t\tDSCH_Laden_Duration_Sec as double,\n\t\tDSCH_UnLaden_Duration_Sec01 as double,\n\t\tDSCH_Cycle_Duration_Sec as double,\n\t\tLaden_Travel_Service_Sec as double,\n\t\tLoad_Unladen_Duration_Sec as double,\n\t\tLoad_Laden_Duration_Sec as double,\n\t\tLoad_Cycle_Duration_Sec as double,\n\t\tUnladen_Travel_Service_Sec as double,\n\t\tDsch_Unladen_Duration_Sec as double,\n\t\tYear as integer,\n\t\tMonth as integer,\n\t\tWeek as integer,\n\t\tLoad_UnladenWait_ToLoad as double,\n\t\tCategory_Id as string,\n\t\tFreight_Kind_Id as string,\n\t\tOOG_Flag as string,\n\t\tpow as string\n\t),\n\tformat: 'delta',\n\tfileSystem: 'apmt-salalah',\n\tfolderPath: 'gold/itv_wait_idle_time',\n\tmergeSchema: true,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['mve_gkey'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> ITVWaitTime"
+		}
+	}
+}
