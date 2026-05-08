@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "7aeab7bd-965d-42de-b4f0-1940d1a55112"
+				"spark.autotune.trackingId": "e0674e0b-d80c-4956-aa7e-d46ac0f92ab9"
 			}
 		},
 		"metadata": {
@@ -68,7 +68,7 @@
 					"OUTPUT_DELTA = f\"{BASE_PATH}/{OUTPUT_PATH}\"\n",
 					""
 				],
-				"execution_count": 70
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -93,7 +93,7 @@
 					"print(f\"   Position Format : {TERMINAL_POSITION_EXAMPLES[TERMINAL_FORMAT]}\")\n",
 					""
 				],
-				"execution_count": 71
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -208,7 +208,7 @@
 					"    print(f\"  {mk:8s} → is_shift={is_shift_move(mk)}, is_load={is_target_move(mk)}\")\n",
 					""
 				],
-				"execution_count": 72
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
@@ -224,7 +224,7 @@
 					"print(f\"✅ Records loaded: {df_moves.count():,}\")\n",
 					""
 				],
-				"execution_count": 73
+				"execution_count": 10
 			},
 			{
 				"cell_type": "code",
@@ -304,7 +304,7 @@
 					").show(5, truncate=False)\n",
 					""
 				],
-				"execution_count": 75
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
@@ -360,6 +360,7 @@
 					"\n",
 					"\n",
 					"    # ─── Categorize ──────────────────────────────────────────\n",
+					"    shift_tier = shift[\"tier\"]\n",
 					"    ca = shift[\"Carrier_Visit_Key\"]\n",
 					"    cb = target_load[\"Carrier_Visit_Key\"]\n",
 					"    wa = shift[\"Goods_And_Ctr_Wt_Kg\"]\n",
@@ -405,7 +406,7 @@
 					"print(f\"✅ Housekeeping     : {total_housekeeping:,}\")\n",
 					""
 				],
-				"execution_count": 76
+				"execution_count": 12
 			},
 			{
 				"cell_type": "code",
@@ -471,7 +472,7 @@
 					"    raise\n",
 					""
 				],
-				"execution_count": 80
+				"execution_count": 13
 			},
 			{
 				"cell_type": "code",
