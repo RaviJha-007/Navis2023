@@ -32,6 +32,15 @@
 					"name": "select1"
 				},
 				{
+					"name": "addRowNumber"
+				},
+				{
+					"name": "keepLatest"
+				},
+				{
+					"name": "removeRankColumn"
+				},
+				{
 					"name": "alterRow1"
 				}
 			],
@@ -127,7 +136,16 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 alterRow(upsertIf(true())) ~> alterRow1",
+				"select1 window(over(ecEventGkey),",
+				"     asc(EcEventTime, true),",
+				"     rank = rowNumber()) ~> addRowNumber",
+				"addRowNumber filter(rank == 1) ~> keepLatest",
+				"keepLatest select(mapColumn(",
+				"          each(match(name!='rank'))",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> removeRankColumn",
+				"removeRankColumn alterRow(upsertIf(true())) ~> alterRow1",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
