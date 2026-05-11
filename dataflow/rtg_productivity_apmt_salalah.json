@@ -100,6 +100,12 @@
 				},
 				{
 					"name": "filter6"
+				},
+				{
+					"name": "derivedColumn12"
+				},
+				{
+					"name": "derivedColumn13"
 				}
 			],
 			"scriptLines": [
@@ -270,7 +276,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select4",
-				"split2@YSNE select(mapColumn(",
+				"derivedColumn13 select(mapColumn(",
 				"          Move_Primary_key = mve_gkey,",
 				"          Unit_Nbr,",
 				"          Facility_Id,",
@@ -299,7 +305,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select6Put",
-				"split2@YSNE select(mapColumn(",
+				"derivedColumn12 select(mapColumn(",
 				"          Move_Primary_key = mve_gkey,",
 				"          Unit_Nbr,",
 				"          Facility_Id,",
@@ -355,7 +361,9 @@
 				"     Total_Moves = sum(moves_count),",
 				"          Total_Work_Seconds = sum(Worktime_Seconds)) ~> aggregate4",
 				"aggregate4 alterRow(upsertIf(true())) ~> alterRow3",
-				"aggregate filter(CHE_Kind==\"RTG\" && not(isNull(CHE_Id)) && not(isNull(CHE_Kind))) ~> filter6",
+				"aggregate filter(CHE_Kind==\"RTG\" && not(isNull(CHE_Id)) && not(isNull(CHE_Kind)) && not(isNull(move_time))) ~> filter6",
+				"split2@YSNE derive(t_fetch = iif((Move_Kind=='YARD' && not(isNull(Fetch_CHE_Id)) && Fetch_CHE_Kind==\"RTG\" && isNull(t_fetch)), t_dispatch, t_fetch)) ~> derivedColumn12",
+				"split2@YSNE derive(t_put = iif((Move_Kind=='YARD' && not(isNull(Put_CHE_Id)) && Put_CHE_Kind==\"RTG\" && isNull(t_put)), t_carry_complete, t_put)) ~> derivedColumn13",
 				"alterRow2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
