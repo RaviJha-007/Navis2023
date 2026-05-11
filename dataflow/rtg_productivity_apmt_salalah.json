@@ -178,7 +178,7 @@
 				"aggregate2 filter(not(isNull(mve_gkey))) ~> filter3",
 				"filter3 split(in([\"DLVR\",\"LOAD\"], Move_Kind) && Fetch_CHE_Kind==\"RTG\" && not(isNull(Fetch_CHE_Id)),",
 				"     in([\"DSCH\",\"RECV\"], Move_Kind) && Put_CHE_Kind==\"RTG\"  && not(isNull(Put_CHE_Id)),",
-				"     Move_Kind==\"YARD\" && Move_Kind==\"SHFT\",",
+				"     Move_Kind==\"YARD\" || Move_Kind==\"SHFT\",",
 				"     disjoint: true) ~> split1@(LSD, RD, Y)",
 				"split1@Y split((Fetch_CHE_Kind==\"RTG\" || Put_CHE_Kind==\"RTG\") && Fetch_CHE_Id==Put_CHE_Id && not(isNull(Put_CHE_Id)),",
 				"     (Fetch_CHE_Kind==\"RTG\" || Put_CHE_Kind==\"RTG\") && Fetch_CHE_Id!=Put_CHE_Id && not(isNull(Fetch_CHE_Id)) && not(isNull(Put_CHE_Id)),",
