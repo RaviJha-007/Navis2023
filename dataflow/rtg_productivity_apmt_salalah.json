@@ -97,6 +97,12 @@
 				},
 				{
 					"name": "alterRow3"
+				},
+				{
+					"name": "filter4"
+				},
+				{
+					"name": "filter5"
 				}
 			],
 			"scriptLines": [
@@ -173,9 +179,9 @@
 				"moves aggregate(groupBy(mve_gkey),",
 				"     each(match(name!='mve_gkey'), $$ = first($$))) ~> aggregate2",
 				"aggregate2 filter(not(isNull(mve_gkey))) ~> filter3",
-				"filter3 split(in([\"DLVR\",\"LOAD\",\"SHFT\"], Move_Kind) && Fetch_CHE_Kind==\"RTG\" && not(isNull(Fetch_CHE_Id)),",
+				"filter3 split(in([\"DLVR\",\"LOAD\"], Move_Kind) && Fetch_CHE_Kind==\"RTG\" && not(isNull(Fetch_CHE_Id)),",
 				"     in([\"DSCH\",\"RECV\"], Move_Kind) && Put_CHE_Kind==\"RTG\"  && not(isNull(Put_CHE_Id)),",
-				"     Move_Kind==\"YARD\",",
+				"     Move_Kind==\"YARD\" && Move_Kind==\"SHFT\",",
 				"     disjoint: true) ~> split1@(LSD, RD, Y)",
 				"split1@Y split((Fetch_CHE_Kind==\"RTG\" || Put_CHE_Kind==\"RTG\") && Fetch_CHE_Id==Put_CHE_Id && not(isNull(Put_CHE_Id)),",
 				"     (Fetch_CHE_Kind==\"RTG\" || Put_CHE_Kind==\"RTG\") && Fetch_CHE_Id!=Put_CHE_Id && not(isNull(Fetch_CHE_Id)) && not(isNull(Put_CHE_Id)),",
@@ -345,14 +351,15 @@
 				"     first_lift = min(move_time),",
 				"          last_lift = max(move_time),",
 				"          moves_count = countDistinct(Move_Primary_key)) ~> aggregate3",
-				"aggregate3 derive(Worktime_Seconds = \r",
-				"iif(moves_count == 1, toLong(3600), (toLong(last_lift) - toLong(first_lift))/1000),",
+				"aggregate3 derive(Worktime_Seconds = iif(moves_count == 1, toLong(3600), (toLong(last_lift) - toLong(first_lift))/1000),",
 				"          move_date = toDate(first_lift)) ~> derivedColumn11",
 				"derivedColumn11 aggregate(groupBy(move_date,",
 				"          CHE_Id),",
 				"     Total_Moves = sum(moves_count),",
 				"          Total_Work_Seconds = sum(Worktime_Seconds)) ~> aggregate4",
 				"aggregate4 alterRow(upsertIf(true())) ~> alterRow3",
+				"derivedColumn4 filter(CHE_Kind==\"RTG\") ~> filter4",
+				"derivedColumn5 filter(CHE_Kind==\"RTG\") ~> filter5",
 				"alterRow2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
