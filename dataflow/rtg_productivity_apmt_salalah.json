@@ -99,10 +99,7 @@
 					"name": "alterRow3"
 				},
 				{
-					"name": "filter4"
-				},
-				{
-					"name": "filter5"
+					"name": "filter6"
 				}
 			],
 			"scriptLines": [
@@ -337,7 +334,7 @@
 				"union1 aggregate(groupBy(Move_Primary_key),",
 				"     each(match(name!='Move_Primary_key'), $$ = first($$))) ~> aggregate",
 				"derivedColumn8 alterRow(upsertIf(true())) ~> alterRow2",
-				"aggregate derive(move_date = toDate(move_time)) ~> derivedColumn8",
+				"filter6 derive(move_date = toDate(move_time)) ~> derivedColumn8",
 				"derivedColumn8 window(over(CHE_Id),",
 				"     asc(move_time, true),",
 				"     prev_move_time = lag(move_time,1)) ~> window1",
@@ -358,8 +355,7 @@
 				"     Total_Moves = sum(moves_count),",
 				"          Total_Work_Seconds = sum(Worktime_Seconds)) ~> aggregate4",
 				"aggregate4 alterRow(upsertIf(true())) ~> alterRow3",
-				"derivedColumn4 filter(CHE_Kind==\"RTG\") ~> filter4",
-				"derivedColumn5 filter(CHE_Kind==\"RTG\") ~> filter5",
+				"aggregate filter(CHE_Kind==\"RTG\") ~> filter6",
 				"alterRow2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
