@@ -25,7 +25,14 @@
 						"referenceName": "linkedService1",
 						"type": "LinkedServiceReference"
 					},
-					"name": "sink1"
+					"name": "rtgProductivity"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "RtgWorkhours"
 				}
 			],
 			"transformations": [
@@ -106,6 +113,15 @@
 				},
 				{
 					"name": "derivedColumn13"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "select5"
+				},
+				{
+					"name": "alterRow4"
 				}
 			],
 			"scriptLines": [
@@ -364,6 +380,52 @@
 				"aggregate filter(CHE_Kind==\"RTG\" && not(isNull(CHE_Id)) && not(isNull(CHE_Kind)) && not(isNull(move_time))) ~> filter6",
 				"split2@YSNE derive(t_fetch = iif((Move_Kind=='YARD' && not(isNull(Fetch_CHE_Id)) && Fetch_CHE_Kind==\"RTG\" && isNull(t_fetch)), t_dispatch, t_fetch)) ~> derivedColumn12",
 				"split2@YSNE derive(t_put = iif((Move_Kind=='YARD' && not(isNull(Put_CHE_Id)) && Put_CHE_Kind==\"RTG\" && isNull(t_put)), t_carry_complete, t_put)) ~> derivedColumn13",
+				"derivedColumn11, window2 join(derivedColumn11@move_date == derivedColumn8@move_date",
+				"     && aggregate3@CHE_Id == aggregate@CHE_Id",
+				"     && aggregate3@moves_session_id == window2@moves_session_id,",
+				"     joinType:'right',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 select(mapColumn(",
+				"          first_lift,",
+				"          last_lift,",
+				"          moves_count,",
+				"          Worktime_Seconds,",
+				"          Move_Primary_key,",
+				"          Unit_Nbr,",
+				"          Facility_Id,",
+				"          Complex_Id,",
+				"          Yard_Id,",
+				"          Carrier_Visit_Key,",
+				"          Event_Type_Id,",
+				"          Move_Kind,",
+				"          From_Location,",
+				"          To_Location,",
+				"          From_Position_Name,",
+				"          To_Position_Name,",
+				"          CHE_Operator_Id,",
+				"          CHE_Id = aggregate@CHE_Id,",
+				"          CHE_Kind,",
+				"          move_time,",
+				"          dist_carry,",
+				"          dist_start,",
+				"          Category_Id,",
+				"          Freight_Kind_Id,",
+				"          pow,",
+				"          ufv_gkey,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          move_date = derivedColumn8@move_date,",
+				"          prev_move_time,",
+				"          moves_gap_seconds,",
+				"          new_move_session_flag,",
+				"          moves_session_id = window2@moves_session_id",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select5",
+				"select5 alterRow() ~> alterRow4",
 				"alterRow2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -401,7 +463,26 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true) ~> rtgProductivity",
+				"alterRow4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: ($Customer),",
+				"     folderPath: 'gold/rtg_session_workhours',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Move_Primary_key'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> RtgWorkhours"
 			]
 		}
 	}
