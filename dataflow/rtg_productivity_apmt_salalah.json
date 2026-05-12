@@ -425,7 +425,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
-				"select5 alterRow() ~> alterRow4",
+				"select5 alterRow(upsertIf(true())) ~> alterRow4",
 				"alterRow2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
