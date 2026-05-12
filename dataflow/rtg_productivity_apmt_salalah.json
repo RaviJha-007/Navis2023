@@ -110,6 +110,9 @@
 				},
 				{
 					"name": "alterRow4"
+				},
+				{
+					"name": "select5"
 				}
 			],
 			"scriptLines": [
@@ -359,7 +362,28 @@
 				"aggregate filter(CHE_Kind==\"RTG\" && not(isNull(CHE_Id)) && not(isNull(CHE_Kind)) && not(isNull(move_time))) ~> filter6",
 				"split2@YSNE derive(t_fetch = iif((Move_Kind=='YARD' && not(isNull(Fetch_CHE_Id)) && Fetch_CHE_Kind==\"RTG\" && isNull(t_fetch)), t_dispatch, t_fetch)) ~> derivedColumn12",
 				"split2@YSNE derive(t_put = iif((Move_Kind=='YARD' && not(isNull(Put_CHE_Id)) && Put_CHE_Kind==\"RTG\" && isNull(t_put)), t_carry_complete, t_put)) ~> derivedColumn13",
-				"derivedColumn11 alterRow(upsertIf(true())) ~> alterRow4",
+				"select5 alterRow(upsertIf(true())) ~> alterRow4",
+				"derivedColumn11 select(mapColumn(",
+				"          Move_Primary_key,",
+				"          Unit_Nbr,",
+				"          Event_Type_Id,",
+				"          Move_Kind,",
+				"          CHE_Id,",
+				"          CHE_Kind,",
+				"          move_time,",
+				"          Category_Id,",
+				"          Freight_Kind_Id,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          move_date,",
+				"          prev_move_time,",
+				"          moves_gap_seconds,",
+				"          new_move_session_flag,",
+				"          Worktime_Seconds",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select5",
 				"alterRow2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
