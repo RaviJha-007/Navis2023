@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "2a1cf7f2-6aa5-49b0-a1da-c2b9798afdcf"
+				"spark.autotune.trackingId": "229e2d46-0b21-4f48-bcf3-ba3399fe87bd"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"file_system = \"malta\"\n",
 					""
 				],
-				"execution_count": 145
+				"execution_count": 70
 			},
 			{
 				"cell_type": "code",
@@ -103,7 +103,20 @@
 					"            \"regex\": r\"^V-([0-9]+)-([0-9]+)$\",\n",
 					"            \"slot_length\": 6,\n",
 					"            \"tier_type\": \"number\"\n",
-					"        }\n",
+					"        },\n",
+					"         \"weight_class_thresholds\": [\n",
+					"            (0,     \"WC1\"),\n",
+					"            (10000, \"WC2\"),\n",
+					"            (15000, \"WC3\"),\n",
+					"            (20000, \"WC4\"),\n",
+					"            (25000, \"WC5\"),\n",
+					"        ],\n",
+					"         \"equip_class_map\": {\"2200\":\"2200\",\"2210\":\"2200\",\"2270\":\"2270\",\"4260\":\"4260\",\"4400\":\"4500\",\"4500\":\"4500\",\n",
+					"         \"4510\":\"4500\",\"4530\":\"4530\",\"22G0\":\"2200\",\"22G1\":\"2200\",\"22G2\":\"2200\",\"22P3\":\"2260\",\"22R1\":\"2230\",\"22T0\":\"2270\",\n",
+					"         \"22T6\":\"2270\",\"22U0\":\"2250\",\"22U1\":\"2250\",\"22V0\":\"2200\",\"25G1\":\"2500\",\"42G0\":\"4200\",\"42G1\":\"4200\",\"42P0\":\"4260\",\n",
+					"         \"42P2\":\"4260\",\"42P3\":\"4260\",\"42U0\":\"4250\",\"42U1\":\"4250\",\"42U5\":\"4250\",\"45G0\":\"4500\",\"45G1\":\"4500\",\"45P3\":\"4560\",\n",
+					"         \"45R0\":\"4530\",\"45R1\":\"4530\",\"45R4\":\"4530\",\"45U0\":\"4550\",\"45U1\":\"4520\",\"4EG1\":\"4550\",\"L5G0\":\"9500\",\"L5G1\":\"9500\",\"LEG0\":\"9500\",\"LEG1\":\"9500\"},\n",
+					"\n",
 					"    },\n",
 					"    \n",
 					"    \"GPA\": {\n",
@@ -147,7 +160,19 @@
 					"        \"rail_position\": {\n",
 					"            \"prefix\": \"R\",\n",
 					"            \"regex\": r\"^R-([A-Z0-9]+)-([A-Z]+[0-9]+)$\"\n",
-					"        }\n",
+					"        },\n",
+					"        \"weight_class_thresholds\": [\n",
+					"            (0,     \"WC1\"),\n",
+					"            (10000, \"WC2\"),\n",
+					"            (15000, \"WC3\"),\n",
+					"            (20000, \"WC4\"),\n",
+					"            (25000, \"WC5\"),\n",
+					"        ],\n",
+					"         \"equip_class_map\": {\"2200\":\"2200\",\"2210\":\"2200\",\"2270\":\"2270\",\"4260\":\"4260\",\"4400\":\"4500\",\"4500\":\"4500\",\n",
+					"         \"4510\":\"4500\",\"4530\":\"4530\",\"22G0\":\"2200\",\"22G1\":\"2200\",\"22G2\":\"2200\",\"22P3\":\"2260\",\"22R1\":\"2230\",\"22T0\":\"2270\",\n",
+					"         \"22T6\":\"2270\",\"22U0\":\"2250\",\"22U1\":\"2250\",\"22V0\":\"2200\",\"25G1\":\"2500\",\"42G0\":\"4200\",\"42G1\":\"4200\",\"42P0\":\"4260\",\n",
+					"         \"42P2\":\"4260\",\"42P3\":\"4260\",\"42U0\":\"4250\",\"42U1\":\"4250\",\"42U5\":\"4250\",\"45G0\":\"4500\",\"45G1\":\"4500\",\"45P3\":\"4560\",\n",
+					"         \"45R0\":\"4530\",\"45R1\":\"4530\",\"45R4\":\"4530\",\"45U0\":\"4550\",\"45U1\":\"4520\",\"4EG1\":\"4550\",\"L5G0\":\"9500\",\"L5G1\":\"9500\",\"LEG0\":\"9500\",\"LEG1\":\"9500\"}\n",
 					"    }\n",
 					"}\n",
 					"\n",
@@ -158,9 +183,14 @@
 					"config = TERMINAL_CONFIG[client_id]\n",
 					"client_key = config['client_key']\n",
 					"\n",
-					"# Extract column mappings\n",
+					"# Extract column mappings \n",
 					"column_mappings = config.get('column_mappings', {})\n",
-					"hazardous_col = column_mappings.get('unit_hazardous','Unit Hazardous:0')\n",
+					"hazardous_col = column_mappings.get('unit_hazardous', 'Unit Hazardous:0')\n",
+					"\n",
+					"# Extract lookup configs ───────────────────────────────────────────\n",
+					"weight_class_thresholds = config.get('weight_class_thresholds', [])\n",
+					"equip_class_map         = config.get('equip_class_map', {})\n",
+					"\n",
 					"\n",
 					"\n",
 					"\n",
@@ -184,7 +214,33 @@
 					"print(f\"   • Hazardous Column: {hazardous_col}\")\n",
 					"print(f\"🔑 Client Key: {client_key}\")  "
 				],
-				"execution_count": 146
+				"execution_count": 71
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ============================================================\n",
+					"# REGISTER LOOKUP TABLES FROM CONFIG\n",
+					"# ============================================================\n",
+					"from pyspark.sql import Row\n",
+					"\n",
+					"# Weight class lookup table\n",
+					"wc_rows = [Row(min_kg=float(t[0]), weight_class=t[1]) \n",
+					"           for t in weight_class_thresholds]\n",
+					"wc_df = spark.createDataFrame(wc_rows)\n",
+					"wc_df.createOrReplaceTempView(\"weight_class_lookup\")\n",
+					"\n",
+					"# Equipment class lookup table\n",
+					"ec_rows = [Row(unit_type_iso=k, equip_class=v) \n",
+					"           for k, v in equip_class_map.items()]\n",
+					"ec_df = spark.createDataFrame(ec_rows)\n",
+					"ec_df.createOrReplaceTempView(\"equip_class_lookup\")\n",
+					"\n",
+					"print(f\"✅ Registered weight_class_lookup: {len(wc_rows)} brackets\")\n",
+					"print(f\"✅ Registered equip_class_lookup:  {len(ec_rows)} ISO codes\")\n",
+					""
+				],
+				"execution_count": 72
 			},
 			{
 				"cell_type": "code",
@@ -226,7 +282,7 @@
 					"\n",
 					"bronze_df.createOrReplaceTempView(\"bronze_wi\")"
 				],
-				"execution_count": 147
+				"execution_count": 62
 			},
 			{
 				"cell_type": "code",
@@ -320,7 +376,7 @@
 					"print(\"✅ standardized_wi view created\")\n",
 					""
 				],
-				"execution_count": 148
+				"execution_count": 63
 			},
 			{
 				"cell_type": "code",
@@ -404,7 +460,7 @@
 					"print(f\"✅ Applied {len(datetime_formats)} datetime format(s) for {len(datetime_columns)} columns\")\n",
 					""
 				],
-				"execution_count": 149
+				"execution_count": 64
 			},
 			{
 				"cell_type": "code",
@@ -791,7 +847,82 @@
 					"print(f\"   Separator: '{separator}'\")\n",
 					""
 				],
-				"execution_count": 150
+				"execution_count": 65
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
+				"source": [
+					"# ============================================================\n",
+					"# ADD STOW FACTOR (PySpark - using config lookups)\n",
+					"# ============================================================\n",
+					"\n",
+					"from pyspark.sql.functions import (\n",
+					"    col, when, lit, coalesce, concat_ws, cast, trim\n",
+					")\n",
+					"\n",
+					"# Read current state\n",
+					"stow_df = spark.sql(\"SELECT * FROM with_positions\")\n",
+					"\n",
+					"# ── Equipment Class Lookup (from config) ─────────────────────────────────\n",
+					"equip_class_map = config.get('equip_class_map', {})\n",
+					"\n",
+					"equip_class_expr = coalesce(\n",
+					"    *[when(trim(col(\"unit_type_iso\")) == k, lit(v)) for k, v in equip_class_map.items()],\n",
+					"    col(\"unit_type_iso\")  # fallback to original if no match\n",
+					")\n",
+					"\n",
+					"stow_df = stow_df.withColumn(\"equip_class\", equip_class_expr)\n",
+					"\n",
+					"# ── Weight Class Lookup (from config) ────────────────────────────────────\n",
+					"weight_class_thresholds = config.get('weight_class_thresholds', [])\n",
+					"\n",
+					"# Sort descending so first match wins (highest bracket)\n",
+					"weight_class_expr = lit(None).cast(\"string\")\n",
+					"for min_kg, wc_label in sorted(weight_class_thresholds, key=lambda x: x[0]):\n",
+					"    weight_class_expr = when(\n",
+					"        col(\"unit_vgm__kg\").cast(\"double\") >= min_kg,\n",
+					"        lit(wc_label)\n",
+					"    ).otherwise(weight_class_expr)\n",
+					"\n",
+					"stow_df = stow_df.withColumn(\"weight_class\", weight_class_expr)\n",
+					"\n",
+					"# ── Stow Factor ───────────────────────────────────────────────────────────\n",
+					"stow_df = stow_df.withColumn(\n",
+					"    \"stow_factor\",\n",
+					"    concat_ws(\"-\",\n",
+					"        col(\"unit_o_b_actual_visit\"),\n",
+					"        col(\"unit_pod\"),\n",
+					"        col(\"unit_category\"),\n",
+					"        col(\"status\"),\n",
+					"        col(\"equip_class\"),\n",
+					"        col(\"weight_class\")\n",
+					"    )\n",
+					")\n",
+					"\n",
+					"# Drop intermediate columns - not needed in output\n",
+					"stow_df = stow_df.drop(\"equip_class\", \"weight_class\")\n",
+					"\n",
+					"# Register for next cell\n",
+					"stow_df.createOrReplaceTempView(\"with_positions\")\n",
+					"\n",
+					"#   print(f\"✅ Stow factor computed\")\n",
+					"\n",
+					"# ── DEBUG: Remove before production ──────────────────────────────────────\n",
+					"# ── DEBUG: Remove before production ──────────────────────────────────────\n",
+					"# display(\n",
+					"#     stow_df.select(\n",
+					"#         \"unit_nbr\", \"unit_type_iso\", \"unit_vgm__kg\",\n",
+					"#         \"unit_o_b_actual_visit\", \"unit_pod\", \"unit_category\",\n",
+					"#         \"status\", \"stow_factor\"\n",
+					"#     ).limit(100)\n",
+					"# )\n",
+					"\n",
+					""
+				],
+				"execution_count": 66
 			},
 			{
 				"cell_type": "code",
@@ -831,6 +962,7 @@
 					"    YEAR(wi_modified) AS year,\n",
 					"    MONTH(wi_modified) AS month,\n",
 					"    WEEKOFYEAR(wi_modified) AS week\n",
+					"     \n",
 					"    \n",
 					"FROM with_positions\n",
 					"\"\"\")\n",
@@ -838,9 +970,11 @@
 					"print(f\"✅ Derived columns added\")\n",
 					"print(f\"   • client_id: {client_id}\")\n",
 					"print(f\"   • client_key: {client_key}\")\n",
+					"\n",
+					"\n",
 					""
 				],
-				"execution_count": 151
+				"execution_count": 67
 			},
 			{
 				"cell_type": "code",
@@ -1000,7 +1134,8 @@
 					"        wi_tier_num,\n",
 					"        year,\n",
 					"        month,\n",
-					"        week\n",
+					"        week,\n",
+					"        stow_factor\n",
 					"        \n",
 					"    FROM deduplicated\n",
 					"    WHERE row_number = 1\n",
