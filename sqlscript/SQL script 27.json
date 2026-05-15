@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 27",
+	"properties": {
+		"content": {
+			"query": "CREATE  or ALTER VIEW wi_allterminals AS \nSELECT * \nFROM OPENROWSET( \n    BULK 'gold/WI_AllTerminals', \n    data_source = 'workinstruction', \n    FORMAT = 'DELTA' \n) AS Main\n\n\nGO\n\n\nCREATE  or ALTER  VIEW rehandle_forecast_allTerminal AS \nSELECT Main.* \nFROM OPENROWSET( \n    BULK 'gold/wi_rehandle_forecast_test', \n    data_source = 'workinstruction', \n    FORMAT = 'DELTA' \n) AS Main\nINNER JOIN (\n    SELECT \n        client_id,\n        MAX(source_file_name_sort) AS max_file_sort\n    FROM OPENROWSET( \n        BULK 'gold/wi_rehandle_forecast_test', \n        data_source = 'workinstruction', \n        FORMAT = 'DELTA' \n    ) AS Sub\n    GROUP BY client_id\n) AS LatestFiles\nON Main.client_id = LatestFiles.client_id \nAND Main.source_file_name_sort = LatestFiles.max_file_sort;\n\n\n\n\n-- Check what file_sort values exist per client\n\n\n\n\n-- Check what file_sort values exist per client",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "workinstruction",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
