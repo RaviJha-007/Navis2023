@@ -168,37 +168,6 @@
 				}
 			},
 			{
-				"name": "Violations",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "MoveSrc",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "violations_CMATK",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
 				"name": "renomination_CMATK",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
@@ -305,6 +274,37 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "LadenUnladen_DualCycle_CMATK",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "JobExecution",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "MoveSrc",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "cmatk_moves_time_delta",
 						"type": "DataFlowReference"
 					},
 					"compute": {
