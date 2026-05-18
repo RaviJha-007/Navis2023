@@ -2,7 +2,7 @@
 	"name": "SQL script 26",
 	"properties": {
 		"content": {
-			"query": "SELECT [Move_Primary_key]\n,[Unit_Nbr]\n,[Event_Type_Id]\n,[Move_Kind]\n,[From_Location]\n,[To_Location]\n,[From_Position_Name]\n,[To_Position_Name]\n,[CHE_Operator_Id]\n,[CHE_Id]\n,[CHE_Kind]\n,[move_time]\n,[Freight_Kind_Id]\n,[Year]\n,[Month]\n,[Week]\n,[move_date]\nSELECT COUNT(*)\n FROM [dbo].[rtg_session_moves]\n WHERE \n DATEPART(\"day\",move_time) = 14 And Year= 2026 and Month = 2 \n\n SELECT SUM(Total_Moves) from [dbo].[rtg_session_productivity]\n WHERE \n move_date='2026-02-14'",
+			"query": "SELECT sum(Worktime_Seconds)/3600\nFROM [dbo].[rtg_session_workhours]\n WHERE \n move_date='2026-02-14';\n\n\nSELECT COUNT(*)\n FROM [dbo].[rtg_session_moves]\n WHERE \n move_date='2026-02-14';\n\nSELECT *, (RTG.Total_Moves/RTG.Total_Work_Hours) as Productivity FROM \n (SELECT SUM(Total_Moves) as Total_Moves, \n SUM(Total_Work_Seconds)/3600 as Total_Work_Hours\n from [dbo].[rtg_session_productivity]\n WHERE \n move_date='2026-02-14') as RTG;",
 			"metadata": {
 				"language": "sql"
 			},
