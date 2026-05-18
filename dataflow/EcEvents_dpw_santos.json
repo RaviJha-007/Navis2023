@@ -1,0 +1,47 @@
+{
+	"name": "EcEvents_dpw_santos",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "CSV"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "DataTypeConversion"
+				},
+				{
+					"name": "AlterRow1"
+				},
+				{
+					"name": "Filter1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "select3"
+				}
+			],
+			"script": "source(output(\n\t\tECEVENTGKEY as long,\n\t\tYARDGKEY as integer,\n\t\tYARDID as string,\n\t\tFCYID as string,\n\t\tCHEKIND as string,\n\t\tCHE_NAME as string,\n\t\tCHE_ID as short,\n\t\tTIMESTAMP as string,\n\t\tEVENTTYPE as short,\n\t\tEVENTSUBTYPE as short,\n\t\tEVENTTYPEDESCRIPTION as string,\n\t\tFROMCHEIDNAME as boolean,\n\t\tTOCHEIDNAME as boolean,\n\t\tUNIT as string,\n\t\tPOW as string,\n\t\tPOOL as string,\n\t\tWORKQUEUE as string,\n\t\tTRAVELDISTANCE as short,\n\t\tMOVEKIND as string,\n\t\tISTWIN as boolean,\n\t\tSTARTDISTANCE as short,\n\t\tWORKASSIGNMENT as long,\n\t\tUNITREF as string,\n\t\tTRAN_ID as string,\n\t\tLOCTYPE as string,\n\t\tLOCID as string,\n\t\tLOCSLOT as string,\n\t\tOPSPOSID as string,\n\t\tUNLADENLOCTYPE as string,\n\t\tUNLADENLOCID as string,\n\t\tUNLADENLOCSLOT as string,\n\t\tLADENLOCTYPE as string,\n\t\tLADENLOCID as string,\n\t\tLADEN_LOCSLOT as string,\n\t\tLASTESTMOVETIME as string,\n\t\tOPERATOR_NAME as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: false,\n\tvalidateSchema: true,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/ecevents/load','bronze/ecevents/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'dpw-santos',\n\tfolderPath: 'bronze/ecevents/load',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\'']) ~> CSV\nselect2 derive(EcEventTime = coalesce(toTimestamp(timestamp,'MM/dd/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yy HH:mm:ss'),toTimestamp(timestamp,'dd/MM/yy HH:mm'),toTimestamp(timestamp,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(timestamp,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(timestamp,'dd/MM/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yyyy HH:mm:ss')),\n\t\tYear = iifNull(year(coalesce(toTimestamp(timestamp,'MM/dd/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yy HH:mm:ss'),toTimestamp(timestamp,'dd/MM/yy HH:mm'),toTimestamp(timestamp,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(timestamp,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(timestamp,'dd/MM/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yyyy HH:mm:ss')))),\n\t\tMonth = iifNull(month(coalesce(toTimestamp(timestamp,'MM/dd/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yy HH:mm:ss'),toTimestamp(timestamp,'dd/MM/yy HH:mm'),toTimestamp(timestamp,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(timestamp,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(timestamp,'dd/MM/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yyyy HH:mm:ss')))),\n\t\tWeek = iifNull(weekOfYear(coalesce(toTimestamp(timestamp,'MM/dd/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yy HH:mm:ss'),toTimestamp(timestamp,'dd/MM/yy HH:mm'),toTimestamp(timestamp,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(timestamp,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(timestamp,'dd/MM/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yyyy HH:mm:ss')))),\n\t\tecEventGkey = toLong(eceventgkey)) ~> DataTypeConversion\naggregate1 alterRow(upsertIf(true())) ~> AlterRow1\nDataTypeConversion filter(not(isNull(DataTypeConversion@ecEventGkey))) ~> Filter1\nselect3 aggregate(groupBy(ecEventGkey),\n\teach(match(name!=\"ecEventGkey\"), $$ = first($$))) ~> aggregate1\nCSV select(mapColumn(\n\t\teach(match(true()),\n\t\t\tlower($$) = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select2\nFilter1 select(mapColumn(\n\t\tecEventGkey = DataTypeConversion@ecEventGkey,\n\t\tyardgkey,\n\t\tyardid,\n\t\tfcyid,\n\t\tchekind,\n\t\tche_name,\n\t\tche_id,\n\t\ttimestamp,\n\t\teventtype,\n\t\teventsubtype,\n\t\teventtypedescription,\n\t\tfromcheidname,\n\t\ttocheidname,\n\t\tunit,\n\t\tpow,\n\t\tpool,\n\t\tworkqueue,\n\t\ttraveldistance,\n\t\tmovekind,\n\t\tistwin,\n\t\tstartdistance,\n\t\tworkassignment,\n\t\tunitref,\n\t\ttran_id,\n\t\tloctype,\n\t\tlocid,\n\t\tlocslot,\n\t\topsposid,\n\t\tunladenloctype,\n\t\tunladenlocid,\n\t\tunladenlocslot,\n\t\tladenloctype,\n\t\tladenlocid,\n\t\tladen_locslot,\n\t\tlastestmovetime,\n\t\toperator_name,\n\t\tEcEventTime,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select3\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'dpw-santos',\n\tfolderPath: 'silver/ecevents',\n\tmergeSchema: true,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['ecEventGkey'],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink1"
+		}
+	}
+}
