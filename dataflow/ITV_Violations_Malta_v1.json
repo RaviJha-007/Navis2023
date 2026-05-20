@@ -1,5 +1,5 @@
 {
-	"name": "ITV_Violations_Malta",
+	"name": "ITV_Violations_Malta_v1",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
