@@ -195,7 +195,10 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "rtg_productivity_ptp",
-						"type": "DataFlowReference"
+						"type": "DataFlowReference",
+						"parameters": {
+							"Customer": "'ptp'"
+						}
 					},
 					"compute": {
 						"coreCount": 8,
