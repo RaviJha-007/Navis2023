@@ -1,0 +1,30 @@
+{
+	"name": "WI_MICT_ST",
+	"properties": {
+		"description": "MICT storage Event Trigger for WI pipeline",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "WI_01_Rehandles",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"client_id": "MICT",
+					"file_system": "mict"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/mict/blobs/bronze/workinstruction/load/",
+			"blobPathEndsWith": ".csv",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}
