@@ -90,7 +90,7 @@
 									"type": "IntegrationRuntimeReference"
 								},
 								"body": {
-									"value": "@concat('{\"containerName\":\"', pipeline().parameters.containerName,'\"}')",
+									"value": "@concat('{\"containerName\":\"',pipeline().parameters.containerName,'\",\"fileType\":\"',pipeline().parameters.fileType,'\"}')",
 									"type": "Expression"
 								}
 							}
