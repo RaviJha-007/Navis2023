@@ -20,7 +20,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": "@concat('bronze/',dataset().fileType,'/load')",
+				"folderPath": {
+					"value": "@concat('bronze/',dataset().fileType)",
+					"type": "Expression"
+				},
 				"container": {
 					"value": "@dataset().containerName",
 					"type": "Expression"
