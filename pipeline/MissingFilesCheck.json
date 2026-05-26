@@ -54,7 +54,7 @@
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "GM_CheckFiles",
+						"activity": "Filter1",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -63,7 +63,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@greater(length(activity('GM_CheckFiles').output.childItems),0)",
+						"value": "@greater(length(activity('Filter1').output.value),0)",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
@@ -124,6 +124,29 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Filter1",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "GM_CheckFiles",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GM_CheckFiles').output.childItems",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(item().type,'File')",
+						"type": "Expression"
+					}
 				}
 			}
 		],
