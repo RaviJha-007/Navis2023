@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "6a50d6cb-14ea-4bb5-a983-b91dcd0a9139"
+				"spark.autotune.trackingId": "40c479ab-3791-4ab0-a939-e5cc32e351eb"
 			}
 		},
 		"metadata": {
@@ -57,16 +57,16 @@
 					"# ============================================================\n",
 					"\n",
 					"storage_account = \"navispowerbidatastorage2\"       # e.g. \"mictadls\"\n",
-					"container       = \"mict\"             # e.g. \"mictdata\"\n",
-					"output_file     = \"mict_Moves_3Months.csv\"\n",
+					"container       = \"mundra-ct03\"             # e.g. \"mictdata\"\n",
+					"output_file     = \"CT03_ecevents_6Months_28052026.csv\"\n",
 					"\n",
 					"base_path    = f\"abfss://{container}@{storage_account}.dfs.core.windows.net\"\n",
-					"delta_path   = f\"{base_path}/silver/moves\"\n",
-					"staging_path = f\"{base_path}/export/moves_staging/\"    # Temp folder for coalesce output\n",
-					"final_path   = f\"{base_path}/export/moves_result/\"     # Final destination\n",
+					"delta_path   = f\"{base_path}/silver/ecevents\"\n",
+					"staging_path = f\"{base_path}/export/ecevents_staging/\"    # Temp folder for coalesce output\n",
+					"final_path   = f\"{base_path}/export/\"     # Final destination\n",
 					""
 				],
-				"execution_count": 6
+				"execution_count": 12
 			},
 			{
 				"cell_type": "code",
@@ -79,14 +79,14 @@
 					"\n",
 					"df_filtered = df.filter(\n",
 					"    \n",
-					"    ((df[\"Year\"] == 2026) & (df[\"month\"] >= 2))\n",
+					"    ((df[\"Year\"] == 2026) | (df[\"Year\"] == 2025) & (df[\"month\"] >= 12))\n",
 					")\n",
 					"\n",
 					"print(f\"Total records: {df_filtered.count()}\")\n",
 					"df_filtered.printSchema()\n",
 					""
 				],
-				"execution_count": 7
+				"execution_count": 13
 			},
 			{
 				"cell_type": "code",
@@ -103,7 +103,7 @@
 					"print(\"✅ Written to staging folder.\")\n",
 					""
 				],
-				"execution_count": 8
+				"execution_count": 14
 			},
 			{
 				"cell_type": "code",
@@ -128,7 +128,7 @@
 					"print(f\"✅ Final CSV saved to: {dest}\")\n",
 					""
 				],
-				"execution_count": 9
+				"execution_count": 15
 			},
 			{
 				"cell_type": "code",
@@ -144,7 +144,7 @@
 					"df_verify.show(5)\n",
 					""
 				],
-				"execution_count": 10
+				"execution_count": 16
 			}
 		]
 	}
