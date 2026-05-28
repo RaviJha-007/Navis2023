@@ -390,7 +390,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'kattupalli',",
-				"     folderPath: 'gold/rtg_violation',",
+				"     folderPath: 'gold/violation',",
 				"     mergeSchema: false,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
