@@ -51,17 +51,11 @@
 				}
 			},
 			{
-				"name": "rtg_productivity_v1",
+				"name": "ITV_Wait_Idle_Time",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
 						"activity": "MoveSrc_apmt_salalah",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "EcEvents_apmt_salalah",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -77,85 +71,12 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "rtg_productivity_v1",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "lane_productivity_v1",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "MoveSrc_apmt_salalah",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "EcEvents_apmt_salalah",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "lane_productivity_v1",
+						"referenceName": "ITV_Wait_Idle_Time",
 						"type": "DataFlowReference",
 						"parameters": {
-							"Customer": "'apmt-salalah'"
+							"p_LadenSpeed_Kmph": 10,
+							"p_UnladenSpeed_Kmph": 20
 						}
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "truck_productivity_v1",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "MoveSrc_apmt_salalah",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "EcEvents_apmt_salalah",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "truck_productivity_v1",
-						"type": "DataFlowReference"
 					},
 					"compute": {
 						"coreCount": 8,
@@ -196,7 +117,7 @@
 				}
 			},
 			{
-				"name": "ITV_Wait_Idle_Time",
+				"name": "rtg_productivity_lane_apmt_salalah",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
@@ -216,11 +137,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "ITV_Wait_Idle_Time",
+						"referenceName": "rtg_productivity_lane_apmt_salalah",
 						"type": "DataFlowReference",
 						"parameters": {
-							"p_LadenSpeed_Kmph": 10,
-							"p_UnladenSpeed_Kmph": 20
+							"Customer": "'apmt-salalah'"
 						}
 					},
 					"compute": {
