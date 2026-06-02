@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 29",
+	"properties": {
+		"content": {
+			"query": "SELECT DISTINCT(COUNT(Move_Primary_key)), sum(Worktime_Seconds)/3600\n FROM [dbo].[rtg_lane_workhours]\n where move_date = '02-02-2026'\n\n\nSELECT DISTINCT(COUNT(Move_Primary_key))\n FROM [dbo].[rtg_session_moves]\n where move_date = '02-02-2026'\n\nSELECT sum(Worktime_Seconds)/3600\n FROM [dbo].[rtg_session_workhours]\n where move_date = '02-02-2026'\n\nSELECT sum([Total_Moves]), sum(Total_Work_Seconds)/3600\n FROM [dbo].[rtg_lane_productivity]\n where move_date = '02-02-2026'\n\nSELECT sum([Total_Moves]), sum(Total_Work_Seconds)/3600\n FROM [dbo].[rtg_session_productivity]\n where move_date = '02-02-2026'\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "apmt-salalah",
+				"poolName": "Built-in"
+			},
+			"resultLimit": -1
+		},
+		"type": "SqlQuery"
+	}
+}
