@@ -18,14 +18,14 @@
 						"referenceName": "linkedService1",
 						"type": "LinkedServiceReference"
 					},
-					"name": "LaneProductivity"
+					"name": "RTGLaneProductivity"
 				},
 				{
 					"linkedService": {
 						"referenceName": "linkedService2",
 						"type": "LinkedServiceReference"
 					},
-					"name": "LaneWorkhours"
+					"name": "RTGLaneWorkhours"
 				}
 			],
 			"transformations": [
@@ -415,7 +415,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> LaneProductivity",
+				"     skipDuplicateMapOutputs: true) ~> RTGLaneProductivity",
 				"alterRow4 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -434,7 +434,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> LaneWorkhours"
+				"     skipDuplicateMapOutputs: true) ~> RTGLaneWorkhours"
 			]
 		}
 	}
