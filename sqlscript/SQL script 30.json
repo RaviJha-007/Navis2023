@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 30",
+	"properties": {
+		"content": {
+			"query": "SELECT MAX(EcEventTime)\n FROM [dbo].[ecevents]\n\nWITH EventTimes AS\n(\n    SELECT\n        EcEventTime,\n        LAG(EcEventTime) OVER (ORDER BY EcEventTime) AS PrevTime\n    FROM dbo.ecevents\n    -- WHERE EcEventTime >= '2025-01-01'\n)\nSELECT\n    PrevTime,\n    EcEventTime,\n    DATEDIFF(DAY, PrevTime, EcEventTime) AS GapDays\nFROM EventTimes\nWHERE DATEDIFF(HOUR, PrevTime, EcEventTime) > 24\nORDER BY PrevTime;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "sgtd",
+				"poolName": "Built-in"
+			},
+			"resultLimit": -1
+		},
+		"type": "SqlQuery"
+	}
+}
