@@ -386,7 +386,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'tpa',",
-				"     folderPath: 'gold/rtg_violation',",
+				"     folderPath: 'gold/violation',",
 				"     mergeSchema: false,",
 				"     autoCompact: true,",
 				"     optimizedWrite: true,",
