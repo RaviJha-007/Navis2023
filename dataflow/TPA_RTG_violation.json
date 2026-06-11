@@ -376,7 +376,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select8",
-				"MoveHistory filter(Put_CHE_Kind == \"RTG\" && not(isNull(mve_gkey))) ~> filter6",
+				"MoveHistory filter(Put_CHE_Kind == \"RST\" && not(isNull(mve_gkey))) ~> filter6",
 				"select8 aggregate(groupBy(user_id),",
 				"     each(match(name!='user_id'), $$ = last($$))) ~> aggregate4",
 				"aggregate4 filter(not(isNull(user_id))) ~> filter7",
