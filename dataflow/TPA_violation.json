@@ -1,5 +1,5 @@
 {
-	"name": "TPA_RTG_violation",
+	"name": "TPA_violation",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
