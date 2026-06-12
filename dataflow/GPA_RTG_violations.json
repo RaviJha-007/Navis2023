@@ -380,7 +380,7 @@
 				"     skipDuplicateMapOutputs: true) ~> select6",
 				"select2 filter(not(isNull(gkey)) && (decking_Type == 'Bump Intruder' || decking_Type == 'Vessel Discharge' || decking_Type == 'Vessel Discharge - Twin' || \r",
 				"decking_Type == 'XD Drop if Floating Refine' || \r",
-				"decking_Type == 'XD Refine Request' || decking_Type == 'XD Rehandle Request'  || decking_Type == 'Gate Receival Assign Position' || decking_Type == 'Vessel Discharge' || decking_Type == 'Vessel Discharge - Twin')\r",
+				"decking_Type == 'XD Refine Request' || decking_Type == 'XD Rehandle Request'  || decking_Type == 'Gate Receival Assign Position')\r",
 				") ~> filter5",
 				"join6 derive(Block_To_Block_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 3) != substring(DH_To_Position_Name_Short_5, 1, 3), true(), false()),",
 				"          Same_Block_Violation = iif( (substring(MH_To_Position_Name_Short_5, 1, 3) == substring(DH_To_Position_Name_Short_5, 1, 3)) && (substring(MH_To_Position_Name_Short_5, 4, 4) != substring(DH_To_Position_Name_Short_5, 4, 4)), true(), false()),",
