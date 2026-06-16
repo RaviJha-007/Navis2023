@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "ccb50b9f-da69-4baf-97fd-daea97573eee"
+				"spark.autotune.trackingId": "ed999e58-dfbb-4a0a-8b0f-b5b60c09c26f"
 			}
 		},
 		"metadata": {
@@ -63,7 +63,7 @@
 					"\n",
 					"# ── Storage Settings ──────────────────────────────────────────\n",
 					"storage_account = \"navispowerbidatastorage2\"\n",
-					"container       = \"mundra-ct04\"\n",
+					"container       = \"mundra-ct02\"\n",
 					"\n",
 					"base_path = f\"abfss://{container}@{storage_account}.dfs.core.windows.net\"\n",
 					"\n",
@@ -82,12 +82,14 @@
 					"        \"source\"      : \"moves\",\n",
 					"        \"date_col\"    : None,          # uses Year + month columns (year_month mode)\n",
 					"        \"filter_type\" : \"year_month\",\n",
-					"    }\n",
-					"    # {\n",
-					"    #     \"source\"      : \"ecevents\",\n",
-					"    #     \"date_col\"    : None, # single date/timestamp column\n",
-					"    #     \"filter_type\" : \"year_month\",\n",
-					"    # },\n",
+					"        \"apply_filter\" : False,\n",
+					"    },\n",
+					"    {\n",
+					"        \"source\"      : \"ecevents\",\n",
+					"        \"date_col\"    : None, # single date/timestamp column\n",
+					"        \"filter_type\" : \"year_month\",\n",
+					"        \"apply_filter\" : False,\n",
+					"    },\n",
 					"    # {\n",
 					"    #     \"source\"      : \"deckings\",\n",
 					"    #     \"date_col\"    : None,\n",
@@ -97,7 +99,7 @@
 					"]\n",
 					""
 				],
-				"execution_count": 4
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -118,7 +120,7 @@
 					"print(f\"▶ Output tag    : {run_date_str}\")\n",
 					""
 				],
-				"execution_count": 5
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -153,7 +155,12 @@
 					"        df = spark.read.format(\"delta\").load(delta_path)\n",
 					"\n",
 					"        # ── Apply Dynamic Date Filter ─────────────────────────\n",
-					"        if filter_type == \"year_month\":\n",
+					"        apply_filter = cfg.get(\"apply_filter\", True)  # Default to True if not specified\n",
+					"        if not apply_filter:\n",
+					"            # Skip filtering for this source\n",
+					"            df_filtered = df\n",
+					"            print(f\"  ℹ️ Filtering disabled for {src} - exporting all data\")\n",
+					"        elif filter_type == \"year_month\":\n",
 					"            # Expects integer columns: Year, month (same as original notebook)\n",
 					"            df_filtered = df.filter(\n",
 					"                (F.col(\"Year\") > cutoff_year) |\n",
@@ -200,7 +207,7 @@
 					"        summary.append({\"source\": src, \"records\": \"—\", \"output\": output_file, \"status\": f\"❌ {e}\"})\n",
 					""
 				],
-				"execution_count": 6
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -222,7 +229,7 @@
 					"print(\"=\"*60)\n",
 					""
 				],
-				"execution_count": 7
+				"execution_count": 5
 			}
 		]
 	}
