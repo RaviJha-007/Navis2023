@@ -89,7 +89,7 @@
 				"          SectionFactor as string,",
 				"          {Outbound Carrier} as string,",
 				"          {Current POD} as string,",
-				"          {Gross Weight} as integer,",
+				"          {Gross Weight} as double,",
 				"          {Special Stow1} as string,",
 				"          {Special Stow2} as string,",
 				"          {Special Stow3} as string,",
