@@ -1,0 +1,251 @@
+{
+	"name": "stack_confirmity_PNG",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "StackConfirmity"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "StackConformity"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "filter2"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "aggregate3"
+				},
+				{
+					"name": "sort2"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "select4"
+				},
+				{
+					"name": "derivedColumn4"
+				},
+				{
+					"name": "derivedColumn5"
+				},
+				{
+					"name": "filter3"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ContainerNo as string,",
+				"          StackingFactor as string,",
+				"          AssignedCHE as string,",
+				"          BlockType as string,",
+				"          {Eq Type} as string,",
+				"          {Equipment Class} as string,",
+				"          CurrentPosition as string,",
+				"          YardRow as string,",
+				"          Cat as string,",
+				"          Sts as string,",
+				"          SectionFactor as string,",
+				"          {Outbound Carrier} as string,",
+				"          {Current POD} as string,",
+				"          {Gross Weight} as integer,",
+				"          {Special Stow1} as string,",
+				"          {Special Stow2} as string,",
+				"          {Special Stow3} as string,",
+				"          {Group Code} as string,",
+				"          Line as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: true,",
+				"     moveFiles: ['/bronze/stackconformitycsvs/load','bronze/stackconformitycsvs/archive'],",
+				"     rowUrlColumn: 'FileDate',",
+				"     format: 'delimited',",
+				"     fileSystem: 'png',",
+				"     folderPath: 'bronze/stackconformitycsvs/load',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '',",
+				"     columnNamesAsHeader: true) ~> StackConfirmity",
+				"select3 derive(Pos_WO_Tier = iif(instr(CurrentPosition, \".\")!=0, :current_stack,\"\"),",
+				"          Date = :created_date,",
+				"          Week = iif(dayOfWeek(:created_date) == 1,  weekOfYear(:created_date) + 1, weekOfYear(:created_date)),",
+				"          Tier = iif(instr(CurrentPosition, \".\")!=0, :current_tier,\"\"),",
+				"          stacking_array := split(StackingFactor, '/'),",
+				"          created_date := toDate(split(split(FileDate, \"_\")[2],\".\")[1], 'ddMMyyyy'),",
+				"          current_tier := split(CurrentPosition, \".\")[2],",
+				"          valid_tier_array := [\"a\",\"b\",\"c\"],",
+				"          current_stack := split(CurrentPosition, \".\")[1]) ~> derivedColumn1",
+				"filter3 aggregate(groupBy(Date,",
+				"          Pos_WO_Tier),",
+				"     Stack_Distinct = countDistinct(StackingFactor),",
+				"          minTier = min(Tier),",
+				"          maxWeight = max({Gross Weight}),",
+				"          minWeight = min({Gross Weight})) ~> aggregate1",
+				"filter3, derivedColumn2 join(derivedColumn1@Date == aggregate1@Date",
+				"     && derivedColumn1@Pos_WO_Tier == aggregate1@Pos_WO_Tier,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"derivedColumn4 sort(asc(Date, true),",
+				"     asc(ContainerNo, true),",
+				"     asc(Tier, true)) ~> sort1",
+				"select2 alterRow(insertIf(true())) ~> alterRow1",
+				"derivedColumn5 select(mapColumn(",
+				"          each(match(true()),",
+				"               regexReplace($$,' ','_') = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"StackConfirmity select(mapColumn(",
+				"          ContainerNo,",
+				"          StackingFactor,",
+				"          {Eq Type},",
+				"          {Equipment Class},",
+				"          CurrentPosition,",
+				"          YardRow,",
+				"          Cat,",
+				"          Sts,",
+				"          SectionFactor,",
+				"          {Outbound Carrier},",
+				"          {Current POD},",
+				"          {Gross Weight},",
+				"          {Group Code},",
+				"          Line,",
+				"          FileDate",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"aggregate1 derive(Stack_Conformity = iif(Stack_Distinct>1, \"Mix\", \"Pure\")) ~> derivedColumn2",
+				"join1 filter(Tier==minTier) ~> filter2",
+				"aggregate3 derive(Weight_Conformity = iif((maxWeight>=:maxLimit || minWeight<=:minLimit), \"Mix\", \"Pure\"),",
+				"          MaxWeightLimit = :maxLimit + 1000,",
+				"          MinWeightLimit = :minLimit,",
+				"          maxLimit := 1.15*refWeight,",
+				"          minLimit := refWeight*0.85) ~> derivedColumn3",
+				"sort2 aggregate(groupBy(derivedColumn1@Date,",
+				"          derivedColumn1@Pos_WO_Tier,",
+				"          minTier,",
+				"          maxWeight,",
+				"          minWeight),",
+				"     refWeight = first({Gross Weight}, true())) ~> aggregate3",
+				"filter2 sort(asc(aggregate1@Date, true),",
+				"     asc(aggregate1@Pos_WO_Tier, true),",
+				"     asc(Tier, true),",
+				"     partitionLevel: true) ~> sort2",
+				"join1, derivedColumn3 join(aggregate1@Date == aggregate3@Date",
+				"     && aggregate1@Pos_WO_Tier == aggregate3@Pos_WO_Tier",
+				"     && aggregate1@minTier == aggregate3@minTier",
+				"     && aggregate1@maxWeight == aggregate3@maxWeight",
+				"     && aggregate1@minWeight == aggregate3@minWeight,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2 select(mapColumn(",
+				"          ContainerNo,",
+				"          StackingFactor,",
+				"          {Eq Type},",
+				"          {Equipment Class},",
+				"          CurrentPosition,",
+				"          YardRow,",
+				"          Cat,",
+				"          Sts,",
+				"          SectionFactor,",
+				"          {Outbound Carrier},",
+				"          {Current POD},",
+				"          {Gross Weight},",
+				"          {Group Code},",
+				"          Line,",
+				"          FileDate,",
+				"          Week,",
+				"          Tier,",
+				"          Stack_Distinct,",
+				"          Stack_Conformity,",
+				"          Date = aggregate3@Date,",
+				"          Pos_WO_Tier = aggregate3@Pos_WO_Tier,",
+				"          minTier = aggregate3@minTier,",
+				"          maxWeight = aggregate3@maxWeight,",
+				"          minWeight = aggregate3@minWeight,",
+				"          refWeight,",
+				"          Weight_Conformity,",
+				"          MaxWeightLimit,",
+				"          MinWeightLimit",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select4",
+				"select4 derive(Weight_Conformity = iif(isNull(minTier) || Tier==\"\" , \"N/A\", Weight_Conformity),",
+				"          Stack_Conformity = iif(isNull(minTier) || Tier==\"\" , \"N/A\", Stack_Conformity)) ~> derivedColumn4",
+				"sort1 derive(Conformity = iif(in(:valid_tier_array, lower(Tier)), \r",
+				"iif((Weight_Conformity==\"Pure\" && Stack_Conformity==\"Pure\"), \"Pure\", \r",
+				"iif((Weight_Conformity==\"Mix\" && Stack_Conformity==\"Pure\"), \"Pure Stack, Mixed Weight\",\r",
+				"iif((Weight_Conformity==\"Pure\" && Stack_Conformity==\"Mix\"), \"Mixed Stack, Pure Weight\", \r",
+				"iif((Weight_Conformity==\"Mix\" && Stack_Conformity==\"Mix\"), \"Mixed Stack, Mixed Weight\", \"N/A\")))),\"N/A\"),",
+				"          valid_tier_array := [\"a\",\"b\",\"c\"]) ~> derivedColumn5",
+				"derivedColumn1 filter(isDate(toString(Date)) && not(isNull(ContainerNo)) && ContainerNo != '' && Pos_WO_Tier!=\"\" && Tier!=\"\") ~> filter3",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'png',",
+				"     folderPath: 'gold/confirmity',",
+				"     mergeSchema: true,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> StackConformity"
+			]
+		}
+	}
+}
