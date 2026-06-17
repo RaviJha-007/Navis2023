@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "c5c57668-a6a8-4640-aed8-ffb7da687ac7"
+				"spark.autotune.trackingId": "bdcf6cee-b2bb-4dc1-a36a-9d701e683cd0"
 			}
 		},
 		"metadata": {
@@ -350,7 +350,7 @@
 					"            .withColumn(f\"{che_type}_active_time_seconds\", F.lit(None).cast(\"double\")) \\\n",
 					"            .withColumn(f\"{che_type}_session_id\", F.lit(None).cast(\"long\"))"
 				],
-				"execution_count": null
+				"execution_count": 91
 			},
 			{
 				"cell_type": "code",
@@ -399,7 +399,7 @@
 					"\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 92
 			},
 			{
 				"cell_type": "code",
@@ -514,7 +514,7 @@
 					"# Add processing timestamp for tracking\n",
 					"final_output_clean = final_output_clean.withColumn(\"last_updated\", F.current_timestamp())"
 				],
-				"execution_count": null
+				"execution_count": 93
 			},
 			{
 				"cell_type": "code",
@@ -582,7 +582,7 @@
 					"print(f\"Data saved to: {output_path}\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 94
 			},
 			{
 				"cell_type": "code",
@@ -669,8 +669,32 @@
 					"# ========================================\n",
 					"print(\"\\n=== CREATING AGGREGATED PRODUCTIVITY TABLE ===\\n\")\n",
 					"\n",
-					"# Create aggregation by CHE_Id, move_date, and Move_Kind_Actual\n",
-					"aggregated_productivity = final_output_clean.groupBy(\n",
+					"# First, add CHE_Id column (similar to what you do in Power Query)\n",
+					"# Taking the first non-null RTG as CHE_Id\n",
+					"# Simpler version without complex array functions\n",
+					"final_output_with_che = final_output_clean.withColumn(\n",
+					"    \"CHE_Id\",\n",
+					"    F.coalesce(\n",
+					"        F.when(F.col(\"Fetch_CHE_Kind\") == \"RTG\", F.col(\"Fetch_CHE_Id\")),\n",
+					"        F.when(F.col(\"Carry_CHE_Kind\") == \"RTG\", F.col(\"Carry_CHE_Id\")),\n",
+					"        F.when(F.col(\"Put_CHE_Kind\") == \"RTG\", F.col(\"Put_CHE_Id\"))\n",
+					"    )\n",
+					").withColumn(\n",
+					"    \"Has_Multiple_RTGs\",\n",
+					"    F.when(\n",
+					"        (F.col(\"Fetch_CHE_Id\") != F.col(\"Carry_CHE_Id\")) |\n",
+					"        (F.col(\"Carry_CHE_Id\") != F.col(\"Put_CHE_Id\")) |\n",
+					"        (F.col(\"Fetch_CHE_Id\") != F.col(\"Put_CHE_Id\")),\n",
+					"        True\n",
+					"    ).otherwise(False)\n",
+					")\n",
+					"\n",
+					"\n",
+					"# Filter out rows where CHE_Id is null (no RTG involved)\n",
+					"final_with_che_filtered = final_output_with_che.filter(F.col(\"CHE_Id\").isNotNull())\n",
+					"\n",
+					"# Now create aggregation by CHE_Id, move_date, and Move_Kind_Actual\n",
+					"aggregated_productivity = final_with_che_filtered.groupBy(\n",
 					"    \"CHE_Id\", \n",
 					"    \"move_date\", \n",
 					"    \"Move_Kind_Actual\"\n",
@@ -679,8 +703,10 @@
 					"    F.sum(\"active_time_hours\").alias(\"Active_Hours\"),\n",
 					"    F.sum(\"is_productive_move\").alias(\"Productive_Move_Count\"),\n",
 					"    F.countDistinct(\"Unit_Nbr\").alias(\"Unique_Containers\"),\n",
-					"    F.countDistinct(\"session_id\").alias(\"Unique_Sessions\"),\n",
-					"    F.avg(\"active_time_seconds\").alias(\"Avg_Move_Time_Seconds\")\n",
+					"    F.sum(F.when(F.col(\"Has_Multiple_RTGs\") == True, 1).otherwise(0)).alias(\"Multi_RTG_Moves\"),\n",
+					"    F.avg(\"active_time_seconds\").alias(\"Avg_Move_Time_Seconds\"),\n",
+					"    # Get the predominant CHE_Type for this group\n",
+					"    F.first(\"CHE_Type\").alias(\"Primary_CHE_Type\")\n",
 					")\n",
 					"\n",
 					"# Create window for daily totals per CHE\n",
@@ -790,7 +816,11 @@
 					"# Display sample of aggregated data\n",
 					"print(\"\\n=== AGGREGATED PRODUCTIVITY SUMMARY ===\\n\")\n",
 					"print(\"Sample of aggregated data:\")\n",
-					"display(aggregated_final.limit(20))\n",
+					"display(aggregated_final.select(\n",
+					"    \"CHE_Id\", \"move_date\", \"Move_Kind_Actual\", \"Move_Count\", \n",
+					"    \"Active_Hours\", \"Moves_Per_Hour\", \"Total_Daily_Moves\", \n",
+					"    \"Total_Daily_Active_Hours\", \"Daily_Moves_Per_Hour\"\n",
+					").limit(20))\n",
 					"\n",
 					"# Show statistics\n",
 					"agg_stats = aggregated_final.agg(\n",
@@ -809,11 +839,9 @@
 					"Average Daily Productivity: {agg_stats['Avg_Daily_Productivity']:.1f} moves/hour\n",
 					"Average Utilization Rate: {agg_stats['Avg_Utilization_Rate']:.1f}%\n",
 					"\"\"\")\n",
-					"\n",
-					"\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 96
 			}
 		]
 	}
