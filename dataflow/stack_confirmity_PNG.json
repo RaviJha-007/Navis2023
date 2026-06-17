@@ -111,7 +111,7 @@
 				"          Week = iif(dayOfWeek(:created_date) == 1,  weekOfYear(:created_date) + 1, weekOfYear(:created_date)),",
 				"          Tier = iif(not(isNull({Yard Stack})), :current_tier,\"\"),",
 				"          StackingFactor = case(\r",
-				"    Cat == 'EXPORT' || Cat == 'Transship',\r",
+				"    Cat == 'EXPORT' || Cat == 'TRANSSHIP',\r",
 				"    concat({Outbound Carrier},\"/\",POD,\"/\",toString(Cls),\"/\",Sts),\r",
 				"\r",
 				"    Cat == 'IMPORT',\r",
