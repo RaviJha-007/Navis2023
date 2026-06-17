@@ -18,7 +18,7 @@
 						"referenceName": "linkedService1",
 						"type": "LinkedServiceReference"
 					},
-					"name": "StackConformity"
+					"name": "Conformity"
 				}
 			],
 			"transformations": [
@@ -166,7 +166,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> StackConformity"
+				"     skipDuplicateMapOutputs: true) ~> Conformity"
 			]
 		}
 	}
