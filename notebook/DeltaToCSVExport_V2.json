@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "ed999e58-dfbb-4a0a-8b0f-b5b60c09c26f"
+				"spark.autotune.trackingId": "c8526258-872c-4f87-a429-bb6a4ba1491c"
 			}
 		},
 		"metadata": {
@@ -99,7 +99,7 @@
 					"]\n",
 					""
 				],
-				"execution_count": 2
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
@@ -120,7 +120,7 @@
 					"print(f\"▶ Output tag    : {run_date_str}\")\n",
 					""
 				],
-				"execution_count": 3
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -207,7 +207,7 @@
 					"        summary.append({\"source\": src, \"records\": \"—\", \"output\": output_file, \"status\": f\"❌ {e}\"})\n",
 					""
 				],
-				"execution_count": 4
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -229,7 +229,7 @@
 					"print(\"=\"*60)\n",
 					""
 				],
-				"execution_count": 5
+				"execution_count": 9
 			}
 		]
 	}
