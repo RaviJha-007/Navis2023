@@ -240,7 +240,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'png',",
-				"     folderPath: 'gold/confirmity',",
+				"     folderPath: 'gold/stack_confirmity',",
 				"     mergeSchema: true,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
