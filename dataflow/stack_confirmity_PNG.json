@@ -234,7 +234,7 @@
 				"iif((Weight_Conformity==\"Mix\" && Stack_Conformity==\"Pure\"), \"Pure Stack, Mixed Weight\",\r",
 				"iif((Weight_Conformity==\"Pure\" && Stack_Conformity==\"Mix\"), \"Mixed Stack, Pure Weight\", \r",
 				"iif((Weight_Conformity==\"Mix\" && Stack_Conformity==\"Mix\"), \"Mixed Stack, Mixed Weight\", \"N/A\")))),\"N/A\"),",
-				"          valid_tier_array := [\"a\",\"b\",\"c\"]) ~> derivedColumn5",
+				"          valid_tier_array := [\"1\",\"2\",\"3\",\"4\"]) ~> derivedColumn5",
 				"derivedColumn1 filter(isDate(toString(Date)) && not(isNull(ContainerNo)) && ContainerNo != '' && Pos_WO_Tier!=\"\" && Tier!=\"\") ~> filter3",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
