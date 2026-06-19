@@ -1,0 +1,172 @@
+{
+	"name": "confirmity_Ennore",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "StackConfirmity"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "Conformity"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "window2"
+				},
+				{
+					"name": "aggregate2"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "window3"
+				},
+				{
+					"name": "aggregate3"
+				},
+				{
+					"name": "join3"
+				},
+				{
+					"name": "select3"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {Container No.} as string,",
+				"          {Stacking Factor} as string,",
+				"          {Assigned CHE} as string,",
+				"          {Blk Typ} as string,",
+				"          Class as string,",
+				"          {Current Position} as string,",
+				"          {Yard Row} as string,",
+				"          Cat as string,",
+				"          Sts as string,",
+				"          {Section Factor} as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: true,",
+				"     moveFiles: ['bronze/stackconformity/load','bronze/stackconformity/archive'],",
+				"     rowUrlColumn: 'FileDate',",
+				"     format: 'delimited',",
+				"     fileSystem: 'ennore',",
+				"     folderPath: 'bronze/stackconformity/load',",
+				"     columnDelimiter: '\\t',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '',",
+				"     columnNamesAsHeader: true) ~> StackConfirmity",
+				"StackConfirmity derive(Pos_WO_Tier = (iif(isInteger(right({Current Position}, 1)), left({Current Position}, length({Current Position}) - 2), {Current Position})),",
+				"          Date = :created_date,",
+				"          Week = iif(dayOfWeek(:created_date) == 1,  weekOfYear(:created_date) + 1, weekOfYear(:created_date)),",
+				"          stacking_array := split({Stacking Factor}, '/'),",
+				"          created_date := toDate(split(split(FileDate, \".\")[1],\"/\")[5], 'yyyyMMdd')) ~> derivedColumn1",
+				"filter1 sort(asc(Date, true),",
+				"     asc({Container No.}, true)) ~> sort1",
+				"select3 filter(not(isDate(StackConfirmity@{Container No.})) && not(isNull(StackConfirmity@{Container No.})) && StackConfirmity@{Container No.} != '') ~> filter1",
+				"select2 alterRow(insertIf(true())) ~> alterRow1",
+				"sort1 select(mapColumn(",
+				"          each(match(true()),",
+				"               regexReplace($$,' ','_') = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"derivedColumn1 window(over(Date,",
+				"          {Yard Row}),",
+				"     asc({Section Factor}, true),",
+				"     sectionrank = rank()) ~> window2",
+				"window3 aggregate(groupBy(Date,",
+				"          {Yard Row}),",
+				"     Section_conformity = iif(max(sectionrank) > 1, 'Mix', 'Pure')) ~> aggregate2",
+				"window3, aggregate2 join(derivedColumn1@Date == aggregate2@Date",
+				"     && StackConfirmity@{Yard Row} == aggregate2@{Yard Row},",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"window2 window(over(Date,",
+				"          Pos_WO_Tier),",
+				"     asc({Stacking Factor}, true),",
+				"     stackrank = rank()) ~> window3",
+				"window3 aggregate(groupBy(Date,",
+				"          Pos_WO_Tier),",
+				"     Stack_confirmty = iif(max(stackrank) > 1, 'Mix', 'Pure')) ~> aggregate3",
+				"join2, aggregate3 join(derivedColumn1@Date == aggregate3@Date",
+				"     && derivedColumn1@Pos_WO_Tier == aggregate3@Pos_WO_Tier,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join3",
+				"join3 select(mapColumn(",
+				"          {Container No.},",
+				"          {Stacking Factor},",
+				"          {Assigned CHE},",
+				"          {Blk Typ},",
+				"          Class,",
+				"          {Current Position},",
+				"          {Yard Row} = StackConfirmity@{Yard Row},",
+				"          Cat,",
+				"          Sts,",
+				"          {Section Factor},",
+				"          Pos_WO_Tier = derivedColumn1@Pos_WO_Tier,",
+				"          Date = derivedColumn1@Date,",
+				"          Week,",
+				"          sectionrank,",
+				"          stackrank,",
+				"          Section_conformity,",
+				"          Stack_confirmty",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'ennore',",
+				"     folderPath: 'gold/conformities',",
+				"     mergeSchema: true,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0777,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> Conformity"
+			]
+		}
+	}
+}
