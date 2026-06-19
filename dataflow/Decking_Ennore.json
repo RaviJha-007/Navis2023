@@ -1,6 +1,7 @@
 {
 	"name": "Decking_Ennore",
 	"properties": {
+		"description": "It's not completed.  Waiting for data to be completed",
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
