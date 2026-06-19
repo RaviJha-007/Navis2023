@@ -93,7 +93,7 @@
 				"          created_date := toDate(split(split(FileDate, \".\")[1],\"/\")[5], 'yyyyMMdd')) ~> derivedColumn1",
 				"filter1 sort(asc(Date, true),",
 				"     asc({Container No.}, true)) ~> sort1",
-				"select3 filter(not(isDate(StackConfirmity@{Container No.})) && not(isNull(StackConfirmity@{Container No.})) && StackConfirmity@{Container No.} != '') ~> filter1",
+				"select3 filter(not(isDate({Container No.})) && not(isNull({Container No.})) && {Container No.} != '') ~> filter1",
 				"select2 alterRow(insertIf(true())) ~> alterRow1",
 				"sort1 select(mapColumn(",
 				"          each(match(true()),",
