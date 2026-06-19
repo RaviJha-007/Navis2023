@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "bdcf6cee-b2bb-4dc1-a36a-9d701e683cd0"
+				"spark.autotune.trackingId": "aaad7089-d81e-489c-8733-7b9b47b99a68"
 			}
 		},
 		"metadata": {
@@ -62,7 +62,7 @@
 					"\n",
 					""
 				],
-				"execution_count": 85
+				"execution_count": 12
 			},
 			{
 				"cell_type": "code",
@@ -76,7 +76,7 @@
 					"customer = 'cwit'  # Can be parameterized\n",
 					"base_path = f\"abfss://{customer}@navispowerbidatastorage2.dfs.core.windows.net\""
 				],
-				"execution_count": 86
+				"execution_count": 13
 			},
 			{
 				"cell_type": "code",
@@ -110,7 +110,7 @@
 					"\n",
 					"# print(f\"RTG moves with valid mve_gkey and t_put: {rtg_moves_df.count()}\")"
 				],
-				"execution_count": 87
+				"execution_count": 14
 			},
 			{
 				"cell_type": "code",
@@ -145,7 +145,7 @@
 					"\n",
 					""
 				],
-				"execution_count": 88
+				"execution_count": 15
 			},
 			{
 				"cell_type": "code",
@@ -207,7 +207,7 @@
 					"    \"move_date\", F.to_date(\"t_put\")\n",
 					")"
 				],
-				"execution_count": 89
+				"execution_count": 16
 			},
 			{
 				"cell_type": "code",
@@ -269,7 +269,7 @@
 					"    # If no CHE moves found, create empty dataframe with proper schema\n",
 					"    all_che_moves = spark.createDataFrame([], schema=\"mve_gkey string, CHE_Id long, t_put timestamp, move_date date, che_type string\")"
 				],
-				"execution_count": 90
+				"execution_count": 17
 			},
 			{
 				"cell_type": "code",
@@ -350,7 +350,7 @@
 					"            .withColumn(f\"{che_type}_active_time_seconds\", F.lit(None).cast(\"double\")) \\\n",
 					"            .withColumn(f\"{che_type}_session_id\", F.lit(None).cast(\"long\"))"
 				],
-				"execution_count": 91
+				"execution_count": 18
 			},
 			{
 				"cell_type": "code",
@@ -399,7 +399,7 @@
 					"\n",
 					""
 				],
-				"execution_count": 92
+				"execution_count": 19
 			},
 			{
 				"cell_type": "code",
@@ -514,10 +514,16 @@
 					"# Add processing timestamp for tracking\n",
 					"final_output_clean = final_output_clean.withColumn(\"last_updated\", F.current_timestamp())"
 				],
-				"execution_count": 93
+				"execution_count": 20
 			},
 			{
 				"cell_type": "code",
+				"metadata": {
+					"editable": true,
+					"run_control": {
+						"frozen": false
+					}
+				},
 				"source": [
 					"# 7. SAVE TO GOLD LAYER\n",
 					"# =====================\n",
@@ -664,6 +670,9 @@
 			},
 			{
 				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
 				"source": [
 					"# 9. CREATE AGGREGATED PRODUCTIVITY TABLE\n",
 					"# ========================================\n",
@@ -706,7 +715,7 @@
 					"    F.sum(F.when(F.col(\"Has_Multiple_RTGs\") == True, 1).otherwise(0)).alias(\"Multi_RTG_Moves\"),\n",
 					"    F.avg(\"active_time_seconds\").alias(\"Avg_Move_Time_Seconds\"),\n",
 					"    # Get the predominant CHE_Type for this group\n",
-					"    F.first(\"CHE_Type\").alias(\"Primary_CHE_Type\")\n",
+					"    # F.first(\"CHE_Type\").alias(\"Primary_CHE_Type\")\n",
 					")\n",
 					"\n",
 					"# Create window for daily totals per CHE\n",
@@ -841,7 +850,7 @@
 					"\"\"\")\n",
 					""
 				],
-				"execution_count": 96
+				"execution_count": 21
 			}
 		]
 	}
