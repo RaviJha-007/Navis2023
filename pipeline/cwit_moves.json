@@ -153,40 +153,6 @@
 				}
 			},
 			{
-				"name": "RTG_Productivity",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "MoveSrc_CWIT",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "rtg_productivity_cwit",
-						"type": "DataFlowReference",
-						"parameters": {
-							"Customer": "'cwit'"
-						}
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
 				"name": "TT Productivity",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
@@ -215,6 +181,33 @@
 						"computeType": "General"
 					},
 					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "RMG Productivity",
+				"type": "SynapseNotebook",
+				"dependsOn": [
+					{
+						"activity": "MoveSrc_CWIT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "CWIT_RMG_Productivity",
+						"type": "NotebookReference"
+					},
+					"snapshot": true
 				}
 			}
 		],
