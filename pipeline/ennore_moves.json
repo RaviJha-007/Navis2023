@@ -58,9 +58,16 @@
 				}
 			},
 			{
-				"name": "confirmity_Ennore",
+				"name": "Job Execution",
 				"type": "ExecuteDataFlow",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "MoveSrc_Ennore",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -71,7 +78,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "confirmity_Ennore",
+						"referenceName": "Ennore_moves_time_delta",
 						"type": "DataFlowReference"
 					},
 					"compute": {
