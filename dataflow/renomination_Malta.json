@@ -83,7 +83,7 @@
 				"          POD_Change_Flag = iif((trim(POD_Changes)=='NULL' || isNull(POD_Changes)),0,1),",
 				"          Outbound_Carrier_Change_Flag = iif((trim(Outbound_Carrier_Changes)=='NULL' || isNull(Outbound_Carrier_Changes)),0,1),",
 				"          Week = weekOfYear(:date),",
-				"          Category_Change_Flag = iif((trim(Category_Changes)=='NULL' || isNull(Outbound_Carrier_Changes)),0,1),",
+				"          Category_Change_Flag = iif((trim(Category_Changes)=='NULL' || isNull(Category_Changes)),0,1),",
 				"          date := toDate((Re_route_Time) ,\"dd/MM/yyyy\")) ~> derivedColumn1",
 				"select1 select(mapColumn(",
 				"          Container_Nbr,",
