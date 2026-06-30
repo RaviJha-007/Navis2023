@@ -1,0 +1,47 @@
+{
+	"name": "EcEvents_RSGT",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "CSV"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "DataTypeConversion"
+				},
+				{
+					"name": "AlterRow1"
+				},
+				{
+					"name": "Filter1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "select3"
+				}
+			],
+			"script": "source(output(\n\t\tecEventGkey as long,\n\t\tyardGkey as short,\n\t\tYardID as string,\n\t\tFcyID as string,\n\t\tcheKind as string,\n\t\tCHE_Name as string,\n\t\tCHE_ID as short,\n\t\tTimeStamp as string,\n\t\teventType as short,\n\t\teventSubType as short,\n\t\teventTypeDescription as string,\n\t\tfromCheIdName as string,\n\t\tToCheIdName as string,\n\t\tunit as string,\n\t\tpow as string,\n\t\tpool as string,\n\t\tworkQueue as string,\n\t\ttravelDistance as short,\n\t\tmoveKind as string,\n\t\tisTwin as boolean,\n\t\tstartDistance as short,\n\t\tworkAssignment as long,\n\t\tunitRef as string,\n\t\ttran_ID as string,\n\t\tlocType as string,\n\t\tlocID as string,\n\t\tlocSlot as string,\n\t\topsPosID as string,\n\t\tunladenLoctype as string,\n\t\tunladenLocID as string,\n\t\tunladenLocSlot as string,\n\t\tladenLoctype as string,\n\t\tladenLocID as string,\n\t\tladen_LocSlot as string,\n\t\tlastEstMoveTime as string,\n\t\toperator_name as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: false,\n\tvalidateSchema: true,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/ecevents/load','bronze/ecevents/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'rsgt',\n\tfolderPath: 'bronze/ecevents/load',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\'']) ~> CSV\nselect2 derive(EcEventTime = coalesce(toTimestamp(timestamp,'MM/dd/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yy HH:mm:ss'),toTimestamp(timestamp,'dd/MM/yy HH:mm'),toTimestamp(timestamp,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(timestamp,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(timestamp,'dd/MM/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yyyy HH:mm:ss')),\n\t\tYear = iifNull(year(coalesce(toTimestamp(timestamp,'MM/dd/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yy HH:mm:ss'),toTimestamp(timestamp,'dd/MM/yy HH:mm'),toTimestamp(timestamp,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(timestamp,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(timestamp,'dd/MM/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yyyy HH:mm:ss')))),\n\t\tMonth = iifNull(month(coalesce(toTimestamp(timestamp,'MM/dd/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yy HH:mm:ss'),toTimestamp(timestamp,'dd/MM/yy HH:mm'),toTimestamp(timestamp,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(timestamp,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(timestamp,'dd/MM/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yyyy HH:mm:ss')))),\n\t\tWeek = iifNull(weekOfYear(coalesce(toTimestamp(timestamp,'MM/dd/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yy HH:mm:ss'),toTimestamp(timestamp,'dd/MM/yy HH:mm'),toTimestamp(timestamp,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(timestamp,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(timestamp,'dd/MM/yyyy HH:mm:ss'),toTimestamp(timestamp,'dd-MM-yyyy HH:mm:ss')))),\n\t\tecEventGkey = toLong(eceventgkey)) ~> DataTypeConversion\naggregate1 alterRow(upsertIf(true())) ~> AlterRow1\nDataTypeConversion filter(not(isNull(DataTypeConversion@ecEventGkey))) ~> Filter1\nselect3 aggregate(groupBy(ecEventGkey),\n\teach(match(name!=\"ecEventGkey\"), $$ = first($$))) ~> aggregate1\nCSV select(mapColumn(\n\t\teach(match(true()),\n\t\t\tlower($$) = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select2\nFilter1 select(mapColumn(\n\t\tecEventGkey = DataTypeConversion@ecEventGkey,\n\t\tyardgkey,\n\t\tyardid,\n\t\tfcyid,\n\t\tchekind,\n\t\tche_name,\n\t\tche_id,\n\t\ttimestamp,\n\t\teventtype,\n\t\teventsubtype,\n\t\teventtypedescription,\n\t\tfromcheidname,\n\t\ttocheidname,\n\t\tunit,\n\t\tpow,\n\t\tpool,\n\t\tworkqueue,\n\t\ttraveldistance,\n\t\tmovekind,\n\t\tistwin,\n\t\tstartdistance,\n\t\tworkassignment,\n\t\tunitref,\n\t\ttran_id,\n\t\tloctype,\n\t\tlocid,\n\t\tlocslot,\n\t\topsposid,\n\t\tunladenloctype,\n\t\tunladenlocid,\n\t\tunladenlocslot,\n\t\tladenloctype,\n\t\tladenlocid,\n\t\tladen_locslot,\n\t\tlastestmovetime,\n\t\toperator_name,\n\t\tEcEventTime,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select3\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'rsgt',\n\tfolderPath: 'silver/ecevents',\n\tmergeSchema: true,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['ecEventGkey'],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink1"
+		}
+	}
+}
