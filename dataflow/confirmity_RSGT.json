@@ -125,7 +125,7 @@
 				"     broadcast: 'auto')~> join2",
 				"window2 window(over(Date,",
 				"          Pos_WO_Tier),",
-				"     asc(STACKINGFACTOR, true),",
+				"     asc(SECTIONFACTOR, true),",
 				"     stackrank = rank()) ~> window3",
 				"window3 aggregate(groupBy(Date,",
 				"          Pos_WO_Tier),",
