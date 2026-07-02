@@ -84,7 +84,7 @@
 				"          Outbound_Carrier_Change_Flag = iif((trim(Outbound_Carrier_Changes)=='NULL' || isNull(Outbound_Carrier_Changes)),0,1),",
 				"          Week = weekOfYear(:date),",
 				"          Category_Change_Flag = iif((trim(Category_Changes)=='NULL' || isNull(Category_Changes)),0,1),",
-				"          date := toDate((Re_route_Time) ,\"dd-MM-yyyy hh:mm:ss\")) ~> derivedColumn1",
+				"          date := toDate((Re_route_Time) ,'dd-MM-yyyy HH:mm:ss')) ~> derivedColumn1",
 				"select1 select(mapColumn(",
 				"          Container_Nbr,",
 				"          Status,",
