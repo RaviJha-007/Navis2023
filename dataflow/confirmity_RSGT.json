@@ -112,7 +112,7 @@
 				"     skipDuplicateMapOutputs: true) ~> select2",
 				"derivedColumn1 window(over(Date,",
 				"          YARDROW),",
-				"     asc(SECTIONFACTOR, true),",
+				"     asc(STACKINGFACTOR, true),",
 				"     sectionrank = rank()) ~> window2",
 				"window3 aggregate(groupBy(Date,",
 				"          {Yard Row} = YARDROW),",
