@@ -102,7 +102,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "TPA_RTG_violation",
+						"referenceName": "TPA_violation",
 						"type": "DataFlowReference"
 					},
 					"compute": {
