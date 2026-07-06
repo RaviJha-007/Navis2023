@@ -225,7 +225,6 @@
 				"          Shipper_Id,",
 				"          Consignee_Id,",
 				"          Commodity_Id,",
-				"          Date,",
 				"          Year,",
 				"          Month,",
 				"          Week,",
