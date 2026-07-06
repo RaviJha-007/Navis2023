@@ -67,6 +67,9 @@
 				},
 				{
 					"name": "derivedColumn12"
+				},
+				{
+					"name": "filter1"
 				}
 			],
 			"scriptLines": [
@@ -170,21 +173,20 @@
 				"          Berth_Id,",
 				"          Shipper_Id,",
 				"          Consignee_Id,",
-				"          Commodity_Id,",
-				"          Date,",
-				"          Year,",
-				"          Month,",
-				"          Week",
+				"          Commodity_Id",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
-				"select3 derive(move_date = toDate(move_time)) ~> derivedColumn8",
+				"select3 derive(move_date = toDate(move_time),",
+				"          Year = year(move_time),",
+				"          Month = month(move_time),",
+				"          Week = weekOfYear(move_time)) ~> derivedColumn8",
 				"derivedColumn8 window(over(CHE_Id),",
 				"     asc(move_time, true),",
 				"     prev_move_time = lag(move_time,1)) ~> window1",
 				"window1 derive(moves_gap_seconds = (toLong(move_time) - toLong(prev_move_time))/1000) ~> derivedColumn9",
 				"derivedColumn9 derive(new_move_session_flag = iif(isNull(prev_move_time) || moves_gap_seconds > 10800 ,1,0)) ~> derivedColumn10",
-				"derivedColumn10 derive(Worktime_Seconds = iif(new_move_session_flag==1, toLong(0), moves_gap_seconds)) ~> derivedColumn11",
+				"filter1 derive(Worktime_Seconds = iif(new_move_session_flag==1, toLong(0), moves_gap_seconds)) ~> derivedColumn11",
 				"derivedColumn11 aggregate(groupBy(CHE_Id,",
 				"          CHE_Kind,",
 				"          Year,",
@@ -236,6 +238,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
 				"aggregate4 derive(Productive_Moves = Total_Moves-(Twin_Count/2)) ~> derivedColumn12",
+				"derivedColumn10 filter(not(isNull(move_time))) ~> filter1",
 				"alterRow3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
