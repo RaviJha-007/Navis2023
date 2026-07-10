@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "98c0c0ab-0b60-4d27-88df-074233d65e83"
+				"spark.autotune.trackingId": "10e2980b-0293-47d9-b7c3-80132f37e891"
 			}
 		},
 		"metadata": {
@@ -73,7 +73,7 @@
 					"print(f\"✅ Output Target: {OUTPUT_DELTA}\")\n",
 					""
 				],
-				"execution_count": 17
+				"execution_count": 25
 			},
 			{
 				"cell_type": "code",
@@ -97,7 +97,7 @@
 					"# print(f\"   → Section=1Z, Bay=025, Row=03, Tier=B (tier 2)\")\n",
 					""
 				],
-				"execution_count": 18
+				"execution_count": 26
 			},
 			{
 				"cell_type": "code",
@@ -152,7 +152,7 @@
 					"    print(f\"  {t} → {tier_letter_to_number(t)}\")\n",
 					""
 				],
-				"execution_count": 19
+				"execution_count": 27
 			},
 			{
 				"cell_type": "code",
@@ -178,7 +178,7 @@
 					"print(f\"✅ Records loaded (UNIT_LOAD/UNIT_YARD_SHIFT/UNIT_YARD_MOVE only): {df_moves.count():,}\")\n",
 					""
 				],
-				"execution_count": 20
+				"execution_count": 28
 			},
 			{
 				"cell_type": "code",
@@ -254,7 +254,7 @@
 					"#     print(f\"  {pos:25s} → stack={result[0]}, section={result[1]}, tier={result[5]}\")\n",
 					""
 				],
-				"execution_count": 21
+				"execution_count": 29
 			},
 			{
 				"cell_type": "code",
@@ -305,7 +305,7 @@
 					").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 22
+				"execution_count": 30
 			},
 			{
 				"cell_type": "code",
@@ -471,7 +471,7 @@
 					"        \"record_type\"            : \"LOAD\",\n",
 					"\n",
 					"        \"mve_gkey_load\"          : int(load[\"mve_gkey\"]),\n",
-					"        \"load_unit_nbr\"               : load[\"Unit_Nbr\"],\n",
+					"        \"load_unit_nbr\"          : load[\"Unit_Nbr\"],\n",
 					"        \"carrier_visit_key\"      : int(cb) if cb else None,\n",
 					"        \"load_from_stack\"        : load[\"from_stack\"],\n",
 					"        \"load_from_section\"      : load[\"from_section\"],\n",
@@ -487,6 +487,7 @@
 					"        \"load_pow\"               : load[\"pow\"],\n",
 					"\n",
 					"        \"mve_gkey_shift\"         : None,\n",
+					"        \"shift_unit_nbr\"         : None,\n",
 					"        \"shift_event_type\"       : None,\n",
 					"        \"shift_from_stack\"       : None,\n",
 					"        \"shift_from_section\"     : None,\n",
@@ -497,7 +498,7 @@
 					"        \"shift_time\"             : None,\n",
 					"        \"shift_weight_kg\"        : None,\n",
 					"        \"shift_freight_kind\"     : None,\n",
-					"        \"shift_unit_nbr\"         : None,\n",
+					"        \n",
 					"\n",
 					"        \"category\"               : None,\n",
 					"        \"has_rehandle\"           : False,\n",
@@ -522,7 +523,7 @@
 					"\n",
 					"        # ── Load Info (all null) ───────────────────────────────\n",
 					"        \"mve_gkey_load\"          : None,\n",
-					"        \"shift_unit_nbr\"         : shift[\"Unit_Nbr\"],\n",
+					"        \"load_unit_nbr\"          : None,\n",
 					"        \"carrier_visit_key\"      : int(ca) if ca else None,\n",
 					"        \"load_from_stack\"        : None,\n",
 					"        \"load_from_section\"      : None,\n",
@@ -534,10 +535,10 @@
 					"        \"load_week\"              : None,\n",
 					"        \"load_weight_kg\"         : None,\n",
 					"        \"load_freight_kind\"      : None,\n",
-					"        \"load_unit_nbr\"          : None,\n",
 					"\n",
 					"        # ── Shift Info ────────────────────────────────────────\n",
 					"        \"mve_gkey_shift\"         : int(shift[\"mve_gkey\"]),\n",
+					"        \"shift_unit_nbr\"         : shift[\"Unit_Nbr\"],\n",
 					"        \"shift_event_type\"       : shift[\"Event_Type_Id\"],\n",
 					"        \"shift_from_stack\"       : shift[\"from_stack\"],\n",
 					"        \"shift_from_section\"     : shift[\"from_section\"],\n",
@@ -582,7 +583,7 @@
 					"print(f\"   OUTPUT ROWS              : {len(results):,}\")\n",
 					""
 				],
-				"execution_count": 23
+				"execution_count": 31
 			},
 			{
 				"cell_type": "code",
@@ -664,7 +665,7 @@
 					"    raise\n",
 					""
 				],
-				"execution_count": 24
+				"execution_count": 32
 			},
 			{
 				"cell_type": "code",
