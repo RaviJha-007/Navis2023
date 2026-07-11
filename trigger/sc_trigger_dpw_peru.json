@@ -2,7 +2,7 @@
 	"name": "sc_trigger_dpw_peru",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
