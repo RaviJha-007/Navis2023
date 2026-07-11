@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "GPA storage trigger for Work Instructions data",
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
