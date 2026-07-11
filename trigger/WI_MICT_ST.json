@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "MICT storage Event Trigger for WI pipeline",
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
