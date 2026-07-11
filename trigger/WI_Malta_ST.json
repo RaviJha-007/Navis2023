@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "Work instruction storage event trigger for malta",
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
