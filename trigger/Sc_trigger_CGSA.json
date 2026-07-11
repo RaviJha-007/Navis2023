@@ -2,7 +2,7 @@
 	"name": "Sc_trigger_CGSA",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
