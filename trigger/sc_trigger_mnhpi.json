@@ -2,7 +2,7 @@
 	"name": "sc_trigger_mnhpi",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
