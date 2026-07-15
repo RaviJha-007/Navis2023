@@ -84,7 +84,7 @@
 				"     format: 'delta',",
 				"     fileSystem: 'pnct',",
 				"     folderPath: 'silver/ecevents') ~> ecevents",
-				"ecevents filter(chekind == 'SC' && ((movekind == 'DSCH' && eventtypedescription == 'LTRW') || (movekind == 'LOAD' && eventtypedescription == 'LTSH'))) ~> filter1",
+				"ecevents filter(chekind == 'SC' && ((movekind == 'RECV' && eventtypedescription == 'LTRW') || (movekind == 'DLVR' && eventtypedescription == 'LTGD'))) ~> filter1",
 				"filter1 derive(Day_of_Week = dayOfWeek(EcEventTime)) ~> derivedColumn1",
 				"derivedColumn1 select(mapColumn(",
 				"          ecEventGkey,",
