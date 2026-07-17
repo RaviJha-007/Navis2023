@@ -1,0 +1,47 @@
+{
+	"name": "VesselVisits_Malta",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "vesselvisits"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "VesselVisit"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Select1"
+				},
+				{
+					"name": "Aggregate1"
+				},
+				{
+					"name": "Select2"
+				},
+				{
+					"name": "AlterRow1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"script": "source(output(\n\t\t{Complex Id} as string,\n\t\t{Facility Id} as string,\n\t\t{Carrier Visit Id} as string,\n\t\tPhase as string,\n\t\t{Visit Nbr} as string,\n\t\t{Carrier Mode} as string,\n\t\tATA as string,\n\t\tATD as string,\n\t\tETA as string,\n\t\tETD as string,\n\t\t{Operator Line Id} as string,\n\t\t{Operator Line Role} as string,\n\t\t{Operator Line Name} as string,\n\t\t{Time First Availabilty} as string,\n\t\t{Time Discharge Complete} as string,\n\t\t{Service Id} as string,\n\t\t{Service Name} as string,\n\t\t{Vessel Id} as string,\n\t\t{IB VYG} as string,\n\t\t{OB VYG} as string,\n\t\t{Carrier Name} as string,\n\t\t{Vessel Class} as string,\n\t\t{Published ETA} as string,\n\t\t{Published ETD} as string,\n\t\tSTARTWORK as string,\n\t\tENDWORK as string,\n\t\t{Begin Receive_Date} as string,\n\t\t{Cargo Cutoff Date} as string,\n\t\t{Hazard Cutoff Date} as string,\n\t\t{Reefer Cutoff Date} as string,\n\t\t{Labor On Board Date} as string,\n\t\t{Labor Off Board Date} as string,\n\t\t{Off Port Arrival Date} as string,\n\t\t{Off Port Departure} as string,\n\t\t{Pilot On Board Date} as string,\n\t\t{Pilot Off Board Date} as string,\n\t\t{Est BBK Discharge} as string,\n\t\t{Est BBK Load} as string,\n\t\t{Est Load} as string,\n\t\t{Est Discharge} as string,\n\t\t{Est Restow} as string,\n\t\t{Est Shift} as string,\n\t\tvvFlexString01 as string,\n\t\tvvFlexString02 as string,\n\t\tvvFlexString03 as string,\n\t\tvvFlexString04 as string,\n\t\tvvFlexString05 as string,\n\t\tvvFlexString06 as string,\n\t\tvvFlexString07 as string,\n\t\tvvFlexString08 as string,\n\t\tvvFlexDate01 as string,\n\t\tvvFlexDate02 as string,\n\t\tvvFlexDate03 as string,\n\t\tvvFlexDate04 as string,\n\t\tvvFlexDate05 as string,\n\t\tvvFlexDate06 as string,\n\t\tvvFlexDate07 as string,\n\t\tvvFlexDate08 as string,\n\t\t{Carrier Visit Key} as string,\n\t\t{Vessel Classification} as string,\n\t\t{Vessel Class Length Overall cm} as string,\n\t\t{Vessel Class Beam cm} as string,\n\t\t{Vessel TEU Capacity} as string,\n\t\t{Lloyds Code} as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/vesselvisits/load','bronze/vesselvisits/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'malta',\n\tfolderPath: 'bronze/vesselvisits/load/',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\''],\n\tmode: 'read') ~> vesselvisits\nSelect2 select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nderivedColumn1 aggregate(groupBy(Hash_Col),\n\teach(match(name!='Hash_Col'), $$ = first($$))) ~> Aggregate1\nvesselvisits select(mapColumn(\n\t\teach(match(/* All input columns */ true()),\n\t\t\t/* Input name */ $$ = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nfilter1 alterRow(upsertIf(true())) ~> AlterRow1\nAggregate1 filter(not(isNull(Hash_Col))) ~> filter1\nSelect1 derive(Hash_Col = md5(\r\n    toString(Carrier_Visit_Key) + \r\n    coalesce(ATA, '') + \r\n    coalesce(ATD, '') + \r\n    coalesce(ETA, '') + \r\n    coalesce(ETD, '') +\r\n    coalesce(Phase, '')\r\n)) ~> derivedColumn1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'malta',\n\tfolderPath: 'silver/vesselvisits',\n\tmergeSchema: false,\n\tautoCompact: false,\n\toptimizedWrite: false,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['Hash_Col'],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> VesselVisit"
+		}
+	}
+}
