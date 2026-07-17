@@ -1,5 +1,5 @@
 {
-	"name": "PNCT_RTG_violations",
+	"name": "PNCT_SC_violations",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
