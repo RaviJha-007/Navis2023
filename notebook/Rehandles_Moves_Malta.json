@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "10e2980b-0293-47d9-b7c3-80132f37e891"
+				"spark.autotune.trackingId": "98ce3067-b1b9-448c-8e49-f115c06debda"
 			}
 		},
 		"metadata": {
@@ -73,7 +73,7 @@
 					"print(f\"✅ Output Target: {OUTPUT_DELTA}\")\n",
 					""
 				],
-				"execution_count": 25
+				"execution_count": 1
 			},
 			{
 				"cell_type": "code",
@@ -97,7 +97,7 @@
 					"# print(f\"   → Section=1Z, Bay=025, Row=03, Tier=B (tier 2)\")\n",
 					""
 				],
-				"execution_count": 26
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -152,7 +152,7 @@
 					"    print(f\"  {t} → {tier_letter_to_number(t)}\")\n",
 					""
 				],
-				"execution_count": 27
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -178,7 +178,7 @@
 					"print(f\"✅ Records loaded (UNIT_LOAD/UNIT_YARD_SHIFT/UNIT_YARD_MOVE only): {df_moves.count():,}\")\n",
 					""
 				],
-				"execution_count": 28
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -254,7 +254,7 @@
 					"#     print(f\"  {pos:25s} → stack={result[0]}, section={result[1]}, tier={result[5]}\")\n",
 					""
 				],
-				"execution_count": 29
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -305,7 +305,7 @@
 					").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 30
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
@@ -583,7 +583,7 @@
 					"print(f\"   OUTPUT ROWS              : {len(results):,}\")\n",
 					""
 				],
-				"execution_count": 31
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -665,7 +665,7 @@
 					"    raise\n",
 					""
 				],
-				"execution_count": 32
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
