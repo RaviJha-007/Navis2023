@@ -1,0 +1,84 @@
+{
+	"name": "DailyOptimise",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "pbixpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 1,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "3",
+				"spark.autotune.trackingId": "bee6f6d5-83af-475c-a7f6-e96ab39b4967"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Synapse/workspaces/navispowerbidata2/bigDataPools/pbixpool",
+				"name": "pbixpool",
+				"type": "Spark",
+				"endpoint": "https://navispowerbidata2.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pbixpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"automaticScaleJobs": true
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"from datetime import datetime\n",
+					"\n",
+					"storage_account = \"navispowerbidatastorage2\"\n",
+					"file_systems    = [\"malta\", \"mict\", \"gpa\"]\n",
+					"\n",
+					"print(f\"🔧 Daily Maintenance — {datetime.now().strftime('%Y-%m-%d %H:%M')}\")\n",
+					"print(\"=\" * 60)\n",
+					"\n",
+					"for file_system in file_systems:\n",
+					"    silver_path = f\"abfss://workinstruction@{storage_account}.dfs.core.windows.net/silver/{file_system}/\"\n",
+					"    \n",
+					"    # Check file count before\n",
+					"    before = spark.sql(f\"DESCRIBE DETAIL delta.`{silver_path}`\").collect()[0][\"numFiles\"]\n",
+					"    \n",
+					"    # Optimize\n",
+					"    spark.sql(f\"OPTIMIZE delta.`{silver_path}`\")\n",
+					"    \n",
+					"    # Check file count after\n",
+					"    after = spark.sql(f\"DESCRIBE DETAIL delta.`{silver_path}`\").collect()[0][\"numFiles\"]\n",
+					"    \n",
+					"    print(f\"  ✅ {file_system.upper()}: {before} files → {after} files\")\n",
+					"\n",
+					"print(\"=\" * 60)\n",
+					"print(\"✅ Daily maintenance complete!\")\n",
+					""
+				],
+				"execution_count": null
+			}
+		]
+	}
+}
