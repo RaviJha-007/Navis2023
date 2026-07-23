@@ -6,7 +6,7 @@
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "Pipeline 2",
+					"referenceName": "Weekly Optimisation",
 					"type": "PipelineReference"
 				}
 			}
