@@ -118,6 +118,9 @@
 				},
 				{
 					"name": "derivedColumn7"
+				},
+				{
+					"name": "filter8"
 				}
 			],
 			"scriptLines": [
@@ -316,7 +319,7 @@
 				"          MH_Section = left(MH_To_Position_Name_Short_5,  4),",
 				"          MH_Stack = left(right(MH_To_Position_Name_Short_5,  3),2),",
 				"          MH_Tier = right(MH_To_Position_Name_Short_5, 1),",
-				"          DH_Block = regexExtract(DH_To_Position_Name_Short_5, `^([A-Za-z]+)` , 1),",
+				"          DH_Block = '',",
 				"          DH_Section = left(DH_To_Position_Name_Short_5,  4),",
 				"          DH_Stack = left(right(DH_To_Position_Name_Short_5,  3),2),",
 				"          DH_Tier = right(DH_To_Position_Name_Short_5 , 1),",
@@ -336,7 +339,7 @@
 				"          {MH T_Put DateTime} = select1@t_put,",
 				"          {MH Put CHE Operator Id} = select1@Put_CHE_Operator_Id,",
 				"          mve_gkey = aggregate1@mve_gkey,",
-				"          gkey,",
+				"          gkey = select2@gkey,",
 				"          {MH Put CHE Id} = select1@Put_CHE_Id,",
 				"          {Freight Kind Id} = select1@Freight_Kind_Id,",
 				"          MaxDHTime,",
@@ -355,7 +358,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select4",
-				"derivedColumn4, filter7 join(lower(select1@Put_CHE_Operator_Id) == lower(user_id),",
+				"filter8, filter7 join(lower(select1@Put_CHE_Operator_Id) == lower(user_id),",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -380,10 +383,10 @@
 				"          Same_Block_Violation = iif( MH_Block == DH_Block && MH_Section != DH_Section , true(), false()),",
 				"          Stack_Violation = iif( MH_Block == DH_Block && MH_Section == DH_Section && MH_Stack != DH_Stack, true(), false())) ~> derivedColumn6",
 				"XpsEcUser select(mapColumn(",
-				"          gkey = GKEY,",
-				"          user_id = USER_ID,",
-				"          name = NAME,",
-				"          yard = YARD",
+				"          gkey,",
+				"          user_id,",
+				"          name,",
+				"          yard",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select8",
@@ -393,6 +396,7 @@
 				"aggregate4 filter(not(isNull(user_id))) ~> filter7",
 				"select1 derive(Year_Month = (Year*100) + Month,",
 				"          Year_Week = (Year*100) + Week) ~> derivedColumn7",
+				"derivedColumn4 filter(regexMatch(left(MH_To_Position_Name_Short_5, 2), '^[0-9]{2}$')) ~> filter8",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
