@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "9423277b-b4d3-48a8-b503-d3476e850489"
+				"spark.autotune.trackingId": "e5893172-5fef-4d95-9014-54b8880aa65a"
 			}
 		},
 		"metadata": {
@@ -214,7 +214,7 @@
 					"        ).otherwise(F.lit(\"Same-Terminal\"))\n",
 					"    ) \\\n",
 					"    .withColumn(\"terminal_flow\",\n",
-					"        F.concat(F.col(\"Crane_Terminal\"), F.lit(\" → \"), F.col(\"load_crane_terminal\"))\n",
+					"        F.concat(F.col(\"Crane_Terminal\"), F.lit(\" to \"), F.col(\"load_crane_terminal\"))\n",
 					"    ) \\\n",
 					"    .withColumn(\"disch_date\",  F.to_date(\"t_put\")) \\\n",
 					"    .withColumn(\"load_date\",   F.to_date(\"load_datetime\")) \\\n",
@@ -244,7 +244,7 @@
 					"# print(f\"Total pairs: {df_final.count()}\")\n",
 					""
 				],
-				"execution_count": 5
+				"execution_count": 6
 			}
 		]
 	}
