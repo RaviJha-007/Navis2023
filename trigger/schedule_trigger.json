@@ -25,12 +25,6 @@
 			},
 			{
 				"pipelineReference": {
-					"referenceName": "malta",
-					"type": "PipelineReference"
-				}
-			},
-			{
-				"pipelineReference": {
 					"referenceName": "rio",
 					"type": "PipelineReference"
 				}
