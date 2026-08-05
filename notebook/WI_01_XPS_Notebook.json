@@ -1,0 +1,65 @@
+{
+	"name": "WI_01_XPS_Notebook",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "b3e460a6-a891-426e-bfd5-ea64f2114834"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"# ============================================================\n",
+					"# PARAMETERS\n",
+					"# ============================================================\n",
+					"\n",
+					"storage_account  = \"navispowerbidatastorage2\"\n",
+					"file_system      = \"gpa\"\n",
+					"file_name        = \"out.GPA Panned to vessel 4.txt\"\n",
+					"input_folder     = \"bronze/gpa/load\"\n",
+					"delta_table_name = \"gpa_vessel_moves\"\n",
+					"write_mode       = \"merge\"\n",
+					"\n",
+					"bronze_path = (\n",
+					"    f\"abfss://{file_system}@{storage_account}\"\n",
+					"    f\".dfs.core.windows.net/{input_folder}/\"\n",
+					")\n",
+					"delta_path = (\n",
+					"    f\"abfss://{file_system}@{storage_account}\"\n",
+					"    f\".dfs.core.windows.net/delta/{delta_table_name}/\"\n",
+					")\n",
+					"\n",
+					"print(f\"🔄 File       : {file_name}\")\n",
+					"print(f\"📂 Bronze     : {bronze_path}\")\n",
+					"print(f\"📂 Delta      : {delta_path}\")\n",
+					"print(f\"✏️  Write Mode : {write_mode}\")\n",
+					""
+				],
+				"execution_count": null
+			}
+		]
+	}
+}
