@@ -13,7 +13,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "b3e460a6-a891-426e-bfd5-ea64f2114834"
+				"spark.autotune.trackingId": "f2504e70-f9f7-4985-b421-e83ac3e9cff2"
 			}
 		},
 		"metadata": {
@@ -56,7 +56,9 @@
 					"print(f\"📂 Bronze     : {bronze_path}\")\n",
 					"print(f\"📂 Delta      : {delta_path}\")\n",
 					"print(f\"✏️  Write Mode : {write_mode}\")\n",
-					""
+					"\n",
+					"\n",
+					"# Should I use the same container for each terminal or use WorkInstruction container to upload the data????"
 				],
 				"execution_count": null
 			}
