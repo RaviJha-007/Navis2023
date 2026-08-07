@@ -300,7 +300,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "VesselVisits",
+						"referenceName": "VesselVisits_Malta",
 						"type": "DataFlowReference"
 					},
 					"compute": {
