@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "15664721-97a2-40e2-a011-66e84e3af33b"
+				"spark.autotune.trackingId": "8aa25856-767a-4bc0-9a10-a95e02a2bc5c"
 			}
 		},
 		"metadata": {
@@ -224,13 +224,16 @@
 					"    .withColumn(\"tranship_type\",\n",
 					"        F.when(\n",
 					"            F.col(\"load_mve_gkey\").isNull(),\n",
-					"            F.lit(\"Pending Load\")                   # ← No load yet\n",
+					"            F.lit(\"Pending Load\")                           # No load yet\n",
 					"        ).when(\n",
-					"            F.col(\"Crane_Terminal\") != F.col(\"load_crane_terminal\"),\n",
-					"            F.lit(\"Cross-Terminal\")\n",
+					"            (F.col(\"Crane_Terminal\") == F.col(\"To_Terminal\")) &\n",
+					"            (F.col(\"To_Terminal\")  == F.col(\"load_yard_terminal\"))  &\n",
+					"            (F.col(\"load_yard_terminal\")   == F.col(\"load_crane_terminal\")),\n",
+					"            F.lit(\"Same-Terminal\")                          # All 4 legs on same terminal\n",
 					"        ).otherwise(\n",
-					"            F.lit(\"Same-Terminal\")\n",
+					"            F.lit(\"Cross-Terminal\")                         # Any leg differs\n",
 					"        )\n",
+					"    \n",
 					"    ) \\\n",
 					"    .withColumn(\"terminal_flow\",\n",
 					"        F.when(\n",
@@ -273,7 +276,7 @@
 					"df_final.unpersist()\n",
 					""
 				],
-				"execution_count": 4
+				"execution_count": 2
 			}
 		]
 	}
