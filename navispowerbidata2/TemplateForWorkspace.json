@@ -16516,12 +16516,12 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "VesselVisits",
+								"referenceName": "VesselVisits_Malta",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
-									"source1": {},
-									"sink1": {}
+									"vesselvisits": {},
+									"VesselVisit": {}
 								}
 							},
 							"staging": {},
@@ -16561,6 +16561,39 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "Transhipment",
+						"type": "SynapseNotebook",
+						"dependsOn": [
+							{
+								"activity": "MoveSrc_malta",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "Malta_trshp_Pairs",
+								"type": "NotebookReference"
+							},
+							"snapshot": true,
+							"conf": {
+								"spark.dynamicAllocation.enabled": null,
+								"spark.dynamicAllocation.minExecutors": null,
+								"spark.dynamicAllocation.maxExecutors": null
+							},
+							"numExecutors": null
+						}
 					}
 				],
 				"policy": {
@@ -16579,8 +16612,9 @@
 				"[concat(variables('workspaceId'), '/dataflows/lanechange_malta')]",
 				"[concat(variables('workspaceId'), '/dataflows/renomination_Malta')]",
 				"[concat(variables('workspaceId'), '/notebooks/Rehandles_Moves_Malta')]",
-				"[concat(variables('workspaceId'), '/dataflows/VesselVisits')]",
-				"[concat(variables('workspaceId'), '/dataflows/confirmity_Malta')]"
+				"[concat(variables('workspaceId'), '/dataflows/VesselVisits_Malta')]",
+				"[concat(variables('workspaceId'), '/dataflows/confirmity_Malta')]",
+				"[concat(variables('workspaceId'), '/notebooks/Malta_trshp_Pairs')]"
 			]
 		},
 		{
@@ -35073,7 +35107,7 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select2",
-						"select2 filter((decking_type == 'Bump Intruder' || decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin' || decking_type == 'Gate Receival Assign Position') && to_pos_slot=='Failed to deck') ~> filter1",
+						"select2 filter((decking_type == 'Bump Intruder' || decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin' || decking_type == 'Gate Receival Assign Position'|| decking_type == 'PR-SC Scheduler - All Ranges') && to_pos_slot=='Failed to deck') ~> filter1",
 						"filter1 derive(Decking_Type_Actual = iif((decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin'), 'Vessel Discharge',decking_type),",
 						"          Year_Week = (Year * 100) + Week,",
 						"          Year_Month = (Year * 100) + Month,",
@@ -111720,7 +111754,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "15664721-97a2-40e2-a011-66e84e3af33b"
+						"spark.autotune.trackingId": "ea8d407c-eba5-425c-9ca1-47e71f813e0e"
 					}
 				},
 				"metadata": {
@@ -111926,13 +111960,16 @@
 							"    .withColumn(\"tranship_type\",\n",
 							"        F.when(\n",
 							"            F.col(\"load_mve_gkey\").isNull(),\n",
-							"            F.lit(\"Pending Load\")                   # ← No load yet\n",
+							"            F.lit(\"Pending Load\")                           # No load yet\n",
 							"        ).when(\n",
-							"            F.col(\"Crane_Terminal\") != F.col(\"load_crane_terminal\"),\n",
-							"            F.lit(\"Cross-Terminal\")\n",
+							"            (F.col(\"Crane_Terminal\") == F.col(\"To_Terminal\")) &\n",
+							"            (F.col(\"To_Terminal\")  == F.col(\"load_yard_terminal\"))  &\n",
+							"            (F.col(\"load_yard_terminal\")   == F.col(\"load_crane_terminal\")),\n",
+							"            F.lit(\"Same-Terminal\")                          # All 4 legs on same terminal\n",
 							"        ).otherwise(\n",
-							"            F.lit(\"Same-Terminal\")\n",
+							"            F.lit(\"Cross-Terminal\")                         # Any leg differs\n",
 							"        )\n",
+							"    \n",
 							"    ) \\\n",
 							"    .withColumn(\"terminal_flow\",\n",
 							"        F.when(\n",
@@ -111976,7 +112013,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 4
+						"execution_count": 2
 					}
 				]
 			},
@@ -115106,7 +115143,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "1b4f753a-bd8f-41e2-8339-d30d5719481b"
+						"spark.autotune.trackingId": "f2504e70-f9f7-4985-b421-e83ac3e9cff2"
 					}
 				},
 				"metadata": {
@@ -115124,7 +115161,6 @@
 				"cells": [
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PARAMETERS\n",
