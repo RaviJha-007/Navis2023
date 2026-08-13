@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "1be71708-1148-4f24-8b8a-10fa888fc911"
+				"spark.autotune.trackingId": "b116d41e-b22e-45ff-bf51-88c63831bee5"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"# file_name   = \"WI_Load_06082026_1029.txt\"   # injected by pipeline\n",
 					""
 				],
-				"execution_count": 129
+				"execution_count": 149
 			},
 			{
 				"cell_type": "code",
@@ -132,7 +132,7 @@
 					"print(f\"🔑 Gold      : {gold_path}\")\n",
 					""
 				],
-				"execution_count": 130
+				"execution_count": 150
 			},
 			{
 				"cell_type": "code",
@@ -308,7 +308,7 @@
 					"}\n",
 					""
 				],
-				"execution_count": 131
+				"execution_count": 151
 			},
 			{
 				"cell_type": "code",
@@ -429,7 +429,7 @@
 					"print(f\"✅ Fixed Silver schema: {len(SILVER_COLUMNS)} columns\")\n",
 					""
 				],
-				"execution_count": 132
+				"execution_count": 152
 			},
 			{
 				"cell_type": "code",
@@ -458,7 +458,7 @@
 					"print(f\"✅ equip_class_lookup  : {len(ec_rows)} ISO codes\")\n",
 					""
 				],
-				"execution_count": 133
+				"execution_count": 153
 			},
 			{
 				"cell_type": "code",
@@ -530,7 +530,7 @@
 					"    print(\"✅ All datetime extraction tests passed\")\n",
 					""
 				],
-				"execution_count": 134
+				"execution_count": 154
 			},
 			{
 				"cell_type": "code",
@@ -564,7 +564,7 @@
 					"        )\n",
 					""
 				],
-				"execution_count": 135
+				"execution_count": 155
 			},
 			{
 				"cell_type": "code",
@@ -719,7 +719,7 @@
 					"    return result_rows, stats\n",
 					""
 				],
-				"execution_count": 136
+				"execution_count": 156
 			},
 			{
 				"cell_type": "code",
@@ -737,7 +737,7 @@
 					"    print(f\"Line {i+1} parsed ({len(parsed)} fields): {parsed}\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 157
 			},
 			{
 				"cell_type": "code",
@@ -766,7 +766,7 @@
 					"    print(f\"   • {f.name:<50} {status}\")\n",
 					""
 				],
-				"execution_count": 137
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -1177,7 +1177,7 @@
 					"        \"❌ No files were successfully processed. Check errors above.\"\n",
 					"    )"
 				],
-				"execution_count": 138
+				"execution_count": null
 			}
 		]
 	}
