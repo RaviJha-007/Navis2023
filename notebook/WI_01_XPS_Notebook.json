@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "379401c3-741a-498b-93f5-a52ea147b729"
+				"spark.autotune.trackingId": "cac7048d-4d4d-4527-9463-7cf617808890"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"# file_name   = \"WI_Load_06082026_1029.txt\"   # injected by pipeline\n",
 					""
 				],
-				"execution_count": 63
+				"execution_count": 83
 			},
 			{
 				"cell_type": "code",
@@ -132,7 +132,7 @@
 					"print(f\"🔑 Gold      : {gold_path}\")\n",
 					""
 				],
-				"execution_count": 64
+				"execution_count": 84
 			},
 			{
 				"cell_type": "code",
@@ -229,7 +229,7 @@
 					"    print(f\"✅ Column map loaded: {len(COLUMN_MAP)} fields, no duplicates\")\n",
 					""
 				],
-				"execution_count": 65
+				"execution_count": 85
 			},
 			{
 				"cell_type": "code",
@@ -356,7 +356,7 @@
 					"    print(f\"✅ Silver schema: {len(SILVER_COLUMNS)} columns, no duplicates\")\n",
 					""
 				],
-				"execution_count": 66
+				"execution_count": 86
 			},
 			{
 				"cell_type": "code",
@@ -378,7 +378,7 @@
 					"print(f\"✅ equip_class_lookup  : {len(ec_rows)} ISO codes\")\n",
 					""
 				],
-				"execution_count": 67
+				"execution_count": 87
 			},
 			{
 				"cell_type": "code",
@@ -413,7 +413,7 @@
 					"    print(f\"   {ok} {fname:<40} → {dt}  sort={srt}\")\n",
 					""
 				],
-				"execution_count": 68
+				"execution_count": 88
 			},
 			{
 				"cell_type": "code",
@@ -439,7 +439,7 @@
 					"        print(f\"\\nℹ️  All-null fields (kept as null in Delta): {zero}\")\n",
 					""
 				],
-				"execution_count": 69
+				"execution_count": 89
 			},
 			{
 				"cell_type": "code",
@@ -569,7 +569,7 @@
 					"print(\"✅ Parser ready\")\n",
 					""
 				],
-				"execution_count": 70
+				"execution_count": 90
 			},
 			{
 				"cell_type": "code",
@@ -671,7 +671,7 @@
 					"    print(f\"   • {f.name:<50} datetime={dt_str}  sort={srt}\")\n",
 					""
 				],
-				"execution_count": 71
+				"execution_count": 91
 			},
 			{
 				"cell_type": "code",
@@ -777,6 +777,9 @@
 					"        ])\n",
 					"        df_raw = spark.createDataFrame(parsed_rows, schema=raw_schema)\n",
 					"\n",
+					"        # Define these sets based on your COLUMN_MAP cast_type entries\n",
+					"        INTEGER_COLS = {\"actual_sequence\", \"queue_seq\", \"yard_crane_seq\"}\n",
+					"        DOUBLE_COLS  = {\"unit_vgm__kg\"}\n",
 					"        # ── STEP 7 : Cast only (rename already done in COLUMN_MAP) ──\n",
 					"        df_typed = df_raw.select([\n",
 					"            F.trim(F.col(c)).cast(IntegerType()).alias(c)\n",
@@ -787,20 +790,10 @@
 					"            for c in df_raw.columns\n",
 					"        ])\n",
 					"\n",
-					"        # Define these sets based on your COLUMN_MAP cast_type entries\n",
-					"        INTEGER_COLS = {\"actual_sequence\", \"queue_seq\", \"yard_crane_seq\"}\n",
-					"        DOUBLE_COLS  = {\"unit_vgm__kg\"}\n",
+					"        \n",
 					"\n",
 					"\n",
-					"        # ── STEP 9 : Move kind — MVKD only, null stays null ──\n",
-					"        df_typed = df_typed.withColumn(\n",
-					"            \"move_kind\",\n",
-					"            F.when(\n",
-					"                F.col(\"move_kind\").isNotNull() &\n",
-					"                (F.trim(F.col(\"move_kind\")) != \"\"),\n",
-					"                F.trim(F.col(\"move_kind\"))\n",
-					"            ).otherwise(F.lit(None).cast(StringType()))\n",
-					"        )\n",
+					"        \n",
 					"\n",
 					"        # ── STEP 10 : wi_created from filename datetime ───────\n",
 					"        # TIME field = \"age\" (dwell age string) — NOT a timestamp\n",
@@ -873,7 +866,6 @@
 					"            .withColumn(\"unit_tier_num\",\n",
 					"                F.col(\"unit_tier_num\").cast(IntegerType()))\n",
 					"            .withColumn(\"wi_modified\",      F.col(\"wi_created\"))\n",
-					"            .withColumn(\"file_move_kind\",   F.col(\"move_kind\"))\n",
 					"            .withColumn(\"stow_factor\",\n",
 					"                F.concat_ws(\"-\",\n",
 					"                    F.col(\"unit_o_b_actual_visit\"),\n",
@@ -1018,10 +1010,16 @@
 					"    raise RuntimeError(\"❌ No files processed.\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 92
 			},
 			{
 				"cell_type": "code",
+				"metadata": {
+					"editable": false,
+					"run_control": {
+						"frozen": true
+					}
+				},
 				"source": [
 					"# ============================================================\n",
 					"# VERIFY AND FIX — run this cell to confirm and correct\n",
