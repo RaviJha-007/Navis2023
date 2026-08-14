@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "cac7048d-4d4d-4527-9463-7cf617808890"
+				"spark.autotune.trackingId": "31ad4c6e-91a6-44d5-87b1-53e2d9fdb2b9"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"# file_name   = \"WI_Load_06082026_1029.txt\"   # injected by pipeline\n",
 					""
 				],
-				"execution_count": 83
+				"execution_count": 93
 			},
 			{
 				"cell_type": "code",
@@ -132,7 +132,7 @@
 					"print(f\"🔑 Gold      : {gold_path}\")\n",
 					""
 				],
-				"execution_count": 84
+				"execution_count": 94
 			},
 			{
 				"cell_type": "code",
@@ -229,7 +229,7 @@
 					"    print(f\"✅ Column map loaded: {len(COLUMN_MAP)} fields, no duplicates\")\n",
 					""
 				],
-				"execution_count": 85
+				"execution_count": 95
 			},
 			{
 				"cell_type": "code",
@@ -356,7 +356,7 @@
 					"    print(f\"✅ Silver schema: {len(SILVER_COLUMNS)} columns, no duplicates\")\n",
 					""
 				],
-				"execution_count": 86
+				"execution_count": 96
 			},
 			{
 				"cell_type": "code",
@@ -378,7 +378,7 @@
 					"print(f\"✅ equip_class_lookup  : {len(ec_rows)} ISO codes\")\n",
 					""
 				],
-				"execution_count": 87
+				"execution_count": 97
 			},
 			{
 				"cell_type": "code",
@@ -413,7 +413,7 @@
 					"    print(f\"   {ok} {fname:<40} → {dt}  sort={srt}\")\n",
 					""
 				],
-				"execution_count": 88
+				"execution_count": 98
 			},
 			{
 				"cell_type": "code",
@@ -439,7 +439,7 @@
 					"        print(f\"\\nℹ️  All-null fields (kept as null in Delta): {zero}\")\n",
 					""
 				],
-				"execution_count": 89
+				"execution_count": 99
 			},
 			{
 				"cell_type": "code",
@@ -569,7 +569,7 @@
 					"print(\"✅ Parser ready\")\n",
 					""
 				],
-				"execution_count": 90
+				"execution_count": 100
 			},
 			{
 				"cell_type": "code",
@@ -671,7 +671,7 @@
 					"    print(f\"   • {f.name:<50} datetime={dt_str}  sort={srt}\")\n",
 					""
 				],
-				"execution_count": 91
+				"execution_count": 101
 			},
 			{
 				"cell_type": "code",
@@ -777,23 +777,19 @@
 					"        ])\n",
 					"        df_raw = spark.createDataFrame(parsed_rows, schema=raw_schema)\n",
 					"\n",
-					"        # Define these sets based on your COLUMN_MAP cast_type entries\n",
+					"        # ── STEP 7 : Rename + Cast (minimal, no APOD dynamic logic) ──\n",
 					"        INTEGER_COLS = {\"actual_sequence\", \"queue_seq\", \"yard_crane_seq\"}\n",
 					"        DOUBLE_COLS  = {\"unit_vgm__kg\"}\n",
-					"        # ── STEP 7 : Cast only (rename already done in COLUMN_MAP) ──\n",
+					"\n",
 					"        df_typed = df_raw.select([\n",
-					"            F.trim(F.col(c)).cast(IntegerType()).alias(c)\n",
-					"            if c in INTEGER_COLS\n",
-					"            else F.trim(F.col(c)).cast(DoubleType()).alias(c)\n",
-					"            if c in DOUBLE_COLS\n",
-					"            else F.trim(F.col(c)).alias(c)\n",
-					"            for c in df_raw.columns\n",
+					"            F.trim(F.col(src_col)).cast(IntegerType()).alias(out_col)\n",
+					"            if out_col in INTEGER_COLS\n",
+					"            else F.trim(F.col(src_col)).cast(DoubleType()).alias(out_col)\n",
+					"            if out_col in DOUBLE_COLS\n",
+					"            else F.trim(F.col(src_col)).alias(out_col)\n",
+					"            for src_col, (out_col, _) in COLUMN_MAP.items()\n",
 					"        ])\n",
 					"\n",
-					"        \n",
-					"\n",
-					"\n",
-					"        \n",
 					"\n",
 					"        # ── STEP 10 : wi_created from filename datetime ───────\n",
 					"        # TIME field = \"age\" (dwell age string) — NOT a timestamp\n",
@@ -1010,7 +1006,7 @@
 					"    raise RuntimeError(\"❌ No files processed.\")\n",
 					""
 				],
-				"execution_count": 92
+				"execution_count": 102
 			},
 			{
 				"cell_type": "code",
