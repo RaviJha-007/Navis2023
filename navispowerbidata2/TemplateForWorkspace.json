@@ -26882,7 +26882,7 @@
 							"name": "filter1"
 						}
 					],
-					"script": "source(output(\n\t\tGKEY as string,\n\t\tUYV_GKEY as string,\n\t\tUNIT_ID as string,\n\t\tDECKING_TYPE as string,\n\t\tNODE_ID as string,\n\t\tYARD as string,\n\t\tFROM_POS_LOCTYPE as string,\n\t\tFROM_POS_LOCID as string,\n\t\tFROM_POS_LOC_GKEY as string,\n\t\tFROM_POS_SLOT as string,\n\t\tFROM_POS_NAME as string,\n\t\tFROM_POS_BIN as string,\n\t\tFROM_POS_TIER as string,\n\t\tTO_POS_LOCTYPE as string,\n\t\tTO_POS_LOCID as string,\n\t\tTO_POS_LOC_GKEY as string,\n\t\tTO_POS_SLOT as string,\n\t\tTO_POS_NAME as string,\n\t\tTO_POS_BIN as string,\n\t\tTO_POS_TIER as string,\n\t\tTOTAL_SCORE as string,\n\t\tEXECUTION_TIME as string,\n\t\tPHASE as string,\n\t\tTIME_STAMP as string\n\t),\n\tuseSchema: true,\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/deckinghistory/load','bronze/deckinghistory/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'gpa',\n\tfolderPath: 'bronze/deckinghistory/load',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\''],\n\tmode: 'read') ~> CSV\nAggregate1 derive(time_stamp = :timestamp,\n\t\tYear = year(:timestamp),\n\t\tMonth = month(:timestamp),\n\t\tWeek = weekOfYear(:timestamp),\n\t\ttimestamp := coalesce(toTimestamp(split(time_stamp,\".\")[1],'dd/MM/yyyy HH:mm:ss'),toTimestamp(split(time_stamp,\".\")[1],'dd/MM/yyyy HH:mm'),toTimestamp(split(time_stamp,\".\")[1],'dd-MM-yyyy HH:mm:ss'),toTimestamp(split(time_stamp,\".\")[1],'dd-MM-yyyy HH:mm'))) ~> DataTypeConversion\nSelect2 select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nSelect1 aggregate(groupBy(gkey,\n\t\tuyv_gkey,\n\t\tunit_id),\n\teach(match(name!='gkey'&&name!='uyv_gkey'&&name!='unit_id'), $$ = first($$))) ~> Aggregate1\nCSV select(mapColumn(\n\t\tgkey = GKEY,\n\t\tuyv_gkey = UYV_GKEY,\n\t\tunit_id = UNIT_ID,\n\t\tdecking_type = DECKING_TYPE,\n\t\tnode_id = NODE_ID,\n\t\tyard = YARD,\n\t\tfrom_pos_loctype = FROM_POS_LOCTYPE,\n\t\tfrom_pos_locid = FROM_POS_LOCID,\n\t\tfrom_pos_loc_gkey = FROM_POS_LOC_GKEY,\n\t\tfrom_pos_slot = FROM_POS_SLOT,\n\t\tfrom_pos_name = FROM_POS_NAME,\n\t\tfrom_pos_bin = FROM_POS_BIN,\n\t\tfrom_pos_tier = FROM_POS_TIER,\n\t\tto_pos_loctype = TO_POS_LOCTYPE,\n\t\tto_pos_locid = TO_POS_LOCID,\n\t\tto_pos_loc_gkey = TO_POS_LOC_GKEY,\n\t\tto_pos_slot = TO_POS_SLOT,\n\t\tto_pos_name = TO_POS_NAME,\n\t\tto_pos_bin = TO_POS_BIN,\n\t\tto_pos_tier = TO_POS_TIER,\n\t\ttotal_score = TOTAL_SCORE,\n\t\texecution_time = EXECUTION_TIME,\n\t\tphase = PHASE,\n\t\ttime_stamp = TIME_STAMP\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nfilter1 alterRow(upsertIf(true())) ~> AlterRow1\nDataTypeConversion filter(not(isNull(gkey)) && not(isNull(time_stamp))) ~> filter1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tmve_gkey as integer,\n\t\tUnit_Nbr as string,\n\t\tFacility_Id as string,\n\t\tComplex_Id as string,\n\t\tYard_Id as string,\n\t\tCarrier_Visit_Key as integer,\n\t\tEvent_Type_Id as string,\n\t\tMove_Kind as string,\n\t\tFrom_Location as string,\n\t\tTo_Location as string,\n\t\tFrom_Position_Name as string,\n\t\tTo_Position_Name as string,\n\t\tCarry_CHE_Operator_Id as short,\n\t\tFetch_CHE_Operator_Id as string,\n\t\tPut_CHE_Operator_Id as string,\n\t\tFetch_CHE_Id as long,\n\t\tFetch_CHE_Kind as string,\n\t\tCarry_CHE_Id as long,\n\t\tCarry_CHE_Kind as string,\n\t\tPut_CHE_Id as long,\n\t\tPut_CHE_Kind as string,\n\t\tQC_CHE_Id as long,\n\t\tQC_CHE_Kind as string,\n\t\tt_carry_complete as timestamp,\n\t\tt_put as timestamp,\n\t\tt_fetch as timestamp,\n\t\tt_dispatch as timestamp,\n\t\tt_discharge as timestamp,\n\t\tt_carry_dispatch as timestamp,\n\t\tt_carry_fetch_ready as timestamp,\n\t\tt_carry_put_ready as timestamp,\n\t\tdist_carry as integer,\n\t\tdist_start as short,\n\t\tTwin_Fetch as string,\n\t\tTwin_Carry as string,\n\t\tTwin_Put as string,\n\t\tCategory_Id as string,\n\t\tFreight_Kind_Id as string,\n\t\tto_pos_gkey as integer,\n\t\tfm_pos_gkey as integer,\n\t\tpow as string,\n\t\tufv_gkey as integer,\n\t\tGoods_And_Ctr_Wt_Kg as double,\n\t\tactive_ufv as integer,\n\t\tRequires_Power_Flag as string,\n\t\tOOG_Flag as string,\n\t\tATD as timestamp,\n\t\tATA as timestamp,\n\t\tYear as integer,\n\t\tMonth as integer,\n\t\tWeek as integer\n\t),\n\tformat: 'delta',\n\tfileSystem: 'gpa',\n\tfolderPath: 'silver/deckings',\n\tmergeSchema: true,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['gkey','uyv_gkey','unit_id'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink1"
+					"script": "source(output(\n\t\tGKEY as string,\n\t\tUYV_GKEY as string,\n\t\tUNIT_ID as string,\n\t\tDECKING_TYPE as string,\n\t\tNODE_ID as string,\n\t\tYARD as string,\n\t\tFROM_POS_LOCTYPE as string,\n\t\tFROM_POS_LOCID as string,\n\t\tFROM_POS_LOC_GKEY as string,\n\t\tFROM_POS_SLOT as string,\n\t\tFROM_POS_NAME as string,\n\t\tFROM_POS_BIN as string,\n\t\tFROM_POS_TIER as string,\n\t\tTO_POS_LOCTYPE as string,\n\t\tTO_POS_LOCID as string,\n\t\tTO_POS_LOC_GKEY as string,\n\t\tTO_POS_SLOT as string,\n\t\tTO_POS_NAME as string,\n\t\tTO_POS_BIN as string,\n\t\tTO_POS_TIER as string,\n\t\tTOTAL_SCORE as string,\n\t\tEXECUTION_TIME as string,\n\t\tPHASE as string,\n\t\tTIME_STAMP as string,\n\t\tFREIGHT_KIND as string\n\t),\n\tuseSchema: true,\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/deckinghistory/load','bronze/deckinghistory/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'gpa',\n\tfolderPath: 'bronze/deckinghistory/load',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\''],\n\tmode: 'read') ~> CSV\nAggregate1 derive(time_stamp = :timestamp,\n\t\tYear = year(:timestamp),\n\t\tMonth = month(:timestamp),\n\t\tWeek = weekOfYear(:timestamp),\n\t\ttimestamp := coalesce(toTimestamp(split(time_stamp,\".\")[1],'dd/MM/yyyy HH:mm:ss'),toTimestamp(split(time_stamp,\".\")[1],'dd/MM/yyyy HH:mm'),toTimestamp(split(time_stamp,\".\")[1],'dd-MM-yyyy HH:mm:ss'),toTimestamp(split(time_stamp,\".\")[1],'dd-MM-yyyy HH:mm'))) ~> DataTypeConversion\nSelect2 select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nSelect1 aggregate(groupBy(gkey,\n\t\tuyv_gkey,\n\t\tunit_id),\n\teach(match(name!='gkey'&&name!='uyv_gkey'&&name!='unit_id'), $$ = first($$))) ~> Aggregate1\nCSV select(mapColumn(\n\t\tgkey = GKEY,\n\t\tuyv_gkey = UYV_GKEY,\n\t\tunit_id = UNIT_ID,\n\t\tdecking_type = DECKING_TYPE,\n\t\tnode_id = NODE_ID,\n\t\tyard = YARD,\n\t\tfrom_pos_loctype = FROM_POS_LOCTYPE,\n\t\tfrom_pos_locid = FROM_POS_LOCID,\n\t\tfrom_pos_loc_gkey = FROM_POS_LOC_GKEY,\n\t\tfrom_pos_slot = FROM_POS_SLOT,\n\t\tfrom_pos_name = FROM_POS_NAME,\n\t\tfrom_pos_bin = FROM_POS_BIN,\n\t\tfrom_pos_tier = FROM_POS_TIER,\n\t\tto_pos_loctype = TO_POS_LOCTYPE,\n\t\tto_pos_locid = TO_POS_LOCID,\n\t\tto_pos_loc_gkey = TO_POS_LOC_GKEY,\n\t\tto_pos_slot = TO_POS_SLOT,\n\t\tto_pos_name = TO_POS_NAME,\n\t\tto_pos_bin = TO_POS_BIN,\n\t\tto_pos_tier = TO_POS_TIER,\n\t\ttotal_score = TOTAL_SCORE,\n\t\texecution_time = EXECUTION_TIME,\n\t\tphase = PHASE,\n\t\ttime_stamp = TIME_STAMP,\n\t\tfreight_kind = FREIGHT_KIND\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nfilter1 alterRow(upsertIf(true())) ~> AlterRow1\nDataTypeConversion filter(not(isNull(gkey)) && not(isNull(time_stamp))) ~> filter1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tgkey as string,\n\t\tuyv_gkey as string,\n\t\tunit_id as string,\n\t\tdecking_type as string,\n\t\tnode_id as string,\n\t\tyard as string,\n\t\tfrom_pos_loctype as string,\n\t\tfrom_pos_locid as string,\n\t\tfrom_pos_loc_gkey as string,\n\t\tfrom_pos_slot as string,\n\t\tfrom_pos_name as string,\n\t\tfrom_pos_bin as string,\n\t\tfrom_pos_tier as string,\n\t\tto_pos_loctype as string,\n\t\tto_pos_locid as string,\n\t\tto_pos_loc_gkey as string,\n\t\tto_pos_slot as string,\n\t\tto_pos_name as string,\n\t\tto_pos_bin as string,\n\t\tto_pos_tier as string,\n\t\ttotal_score as string,\n\t\texecution_time as string,\n\t\tphase as string,\n\t\ttime_stamp as timestamp,\n\t\tYear as integer,\n\t\tMonth as integer,\n\t\tWeek as integer,\n\t\tfreight_kind as string\n\t),\n\tformat: 'delta',\n\tfileSystem: 'gpa',\n\tfolderPath: 'silver/deckings',\n\tmergeSchema: true,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['gkey','uyv_gkey','unit_id'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink1"
 				}
 			},
 			"dependsOn": [
@@ -34940,7 +34940,8 @@
 						"          time_stamp as timestamp,",
 						"          Year as integer,",
 						"          Month as integer,",
-						"          Week as integer",
+						"          Week as integer,",
+						"          freight_kind as string",
 						"     ),",
 						"     allowSchemaDrift: true,",
 						"     validateSchema: false,",
@@ -34976,7 +34977,8 @@
 						"          time_stamp,",
 						"          Year,",
 						"          Month,",
-						"          Week",
+						"          Week,",
+						"          freight_kind",
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select2",
@@ -35017,7 +35019,8 @@
 						"          Year_Week as integer,",
 						"          Year_Month as integer,",
 						"          Date as date,",
-						"          fld_actual_count as integer",
+						"          fld_actual_count as integer,",
+						"          freight_kind as string",
 						"     ),",
 						"     format: 'delta',",
 						"     fileSystem: 'gpa',",
@@ -35060,6 +35063,7 @@
 						"          Year_Week,",
 						"          Year_Month,",
 						"          Date,",
+						"          freight_kind,",
 						"          fld_actual_count = FLD_Actual_count",
 						"     )) ~> fld"
 					]
@@ -115221,7 +115225,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "31ad4c6e-91a6-44d5-87b1-53e2d9fdb2b9"
+						"spark.autotune.trackingId": "1021d0ef-9692-4834-b493-b90d202e3e82"
 					}
 				},
 				"metadata": {
@@ -115269,7 +115273,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 93
+						"execution_count": 1
 					},
 					{
 						"cell_type": "code",
@@ -115337,7 +115341,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 94
+						"execution_count": 2
 					},
 					{
 						"cell_type": "code",
@@ -115435,7 +115439,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 95
+						"execution_count": 3
 					},
 					{
 						"cell_type": "code",
@@ -115549,6 +115553,9 @@
 							"    \"planned_row\",\n",
 							"    \"dead_weight_tons\",\n",
 							"    \"teus\",\n",
+							"    \"est_mv_time\",\n",
+							"    \"est_mv_hour\",\n",
+							"    \"est_mv_quarter_hour\",\n",
 							"    \"time_until_move\",\n",
 							"    \"stop\",\n",
 							"]\n",
@@ -115563,7 +115570,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 96
+						"execution_count": 4
 					},
 					{
 						"cell_type": "code",
@@ -115586,7 +115593,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 97
+						"execution_count": 5
 					},
 					{
 						"cell_type": "code",
@@ -115622,7 +115629,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 98
+						"execution_count": 6
 					},
 					{
 						"cell_type": "code",
@@ -115649,7 +115656,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 99
+						"execution_count": 7
 					},
 					{
 						"cell_type": "code",
@@ -115780,83 +115787,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 100
-					},
-					{
-						"cell_type": "code",
-						"metadata": {
-							"editable": false,
-							"run_control": {
-								"frozen": true
-							}
-						},
-						"source": [
-							"# ============================================================\n",
-							"# FULLY SELF-CONTAINED DIAGNOSTIC CELL\n",
-							"# Run this independently to test parsing\n",
-							"# ============================================================\n",
-							"import re\n",
-							"from notebookutils import mssparkutils\n",
-							"\n",
-							"# ── 1. Config ────────────────────────────────────────────────\n",
-							"storage_account = \"navispowerbidatastorage2\"\n",
-							"file_system     = \"gpa\"\n",
-							"bronze_txt_path = (\n",
-							"    f\"abfss://{file_system}@{storage_account}\"\n",
-							"    f\".dfs.core.windows.net/bronze/workinstruction_xps/load/\"\n",
-							")\n",
-							"\n",
-							"# ── 2. Find first TXT file ───────────────────────────────────\n",
-							"all_files = mssparkutils.fs.ls(bronze_txt_path)\n",
-							"txt_files = [f for f in all_files if f.name.lower().endswith(\".txt\")]\n",
-							"\n",
-							"if not txt_files:\n",
-							"    print(\"❌ No TXT files found in:\", bronze_txt_path)\n",
-							"else:\n",
-							"    diag_file = txt_files[0]\n",
-							"    print(f\"✅ Using file: {diag_file.name}\")\n",
-							"\n",
-							"    # ── 3. Read raw text ─────────────────────────────────────\n",
-							"    raw_text = mssparkutils.fs.head(diag_file.path, 1024 * 1024 * 10)\n",
-							"    print(f\"✅ Raw text length: {len(raw_text):,} chars\")\n",
-							"\n",
-							"    # ── 4. Sample data lines ──────────────────────────────────\n",
-							"    sample_lines = [\n",
-							"        l for l in raw_text.split('\\n')\n",
-							"        if l.strip() and not l.strip().startswith('#')\n",
-							"    ][:5]\n",
-							"\n",
-							"    print(f\"✅ Data lines sampled: {len(sample_lines)}\")\n",
-							"\n",
-							"    # ── 5. Inline parser (no dependency on any other cell) ───\n",
-							"    def _diag_parse_kv_line(line: str) -> dict:\n",
-							"        row = {}\n",
-							"        parts = re.split(r'\\t', line.strip())\n",
-							"        if len(parts) <= 1:\n",
-							"            parts = re.split(r' {2,}', line.strip())\n",
-							"        for part in parts:\n",
-							"            part = part.strip()\n",
-							"            if not part or ':' not in part:\n",
-							"                continue\n",
-							"            key, _, value = part.partition(':')\n",
-							"            key   = key.strip()\n",
-							"            value = value.strip()\n",
-							"            if key:\n",
-							"                row[key] = value if value else None\n",
-							"        return result\n",
-							"\n",
-							"    # ── 6. Print results ──────────────────────────────────────\n",
-							"    for i, line in enumerate(sample_lines):\n",
-							"        parsed = _diag_parse_kv_line(line)\n",
-							"        print(f\"\\n{'─'*60}\")\n",
-							"        print(f\"Line {i+1} raw    : {repr(line[:150])}\")\n",
-							"        print(f\"Line {i+1} fields : {len(parsed)}\")\n",
-							"        for k, v in parsed.items():\n",
-							"            print(f\"   {k:<8} → {v}\")\n",
-							""
-						],
-						"outputs": [],
-						"execution_count": 184
+						"execution_count": 8
 					},
 					{
 						"cell_type": "code",
@@ -115884,7 +115815,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 101
+						"execution_count": 9
 					},
 					{
 						"cell_type": "code",
@@ -116116,6 +116047,107 @@
 							"            .withColumn(\"week\",                  F.weekofyear(F.col(\"wi_created\")))\n",
 							"            .drop(\"equip_class\", \"weight_class\")\n",
 							"        )\n",
+							"        # ============================================================\n",
+							"        # STEP 11c : Compute anchor date from min(time_until_move)\n",
+							"        # Skips ## corrupted values, uses file DATE only (not time)\n",
+							"        # ============================================================\n",
+							"        import datetime\n",
+							"        from pyspark.sql.types import StringType, IntegerType\n",
+							"        from pyspark.sql import functions as F\n",
+							"\n",
+							"        DAY_ABBR_MAP = {\"MO\":0,\"TU\":1,\"WE\":2,\"TH\":3,\"FR\":4,\"SA\":5,\"SU\":6}\n",
+							"\n",
+							"        def parse_ttmv(val):\n",
+							"            if not val or \"#\" in val: return None\n",
+							"            parts = val.strip().split(\":\")\n",
+							"            if len(parts) != 2: return None\n",
+							"            h, m = parts\n",
+							"            if not h.isdigit() or not m.isdigit() or int(m) > 59: return None\n",
+							"            return int(h) * 60 + int(m)\n",
+							"\n",
+							"        parse_ttmv_udf = F.udf(parse_ttmv, IntegerType())\n",
+							"\n",
+							"        df_mapped = df_mapped.withColumn(\"_ttmv_min\", parse_ttmv_udf(F.col(\"time_until_move\")))\n",
+							"\n",
+							"        stats = df_mapped.agg(\n",
+							"            F.count(\"time_until_move\").alias(\"total\"),\n",
+							"            F.sum(F.when(F.col(\"time_until_move\").contains(\"#\"), 1).otherwise(0)).alias(\"corrupted\"),\n",
+							"            F.sum(F.when(F.col(\"_ttmv_min\").isNotNull(), 1).otherwise(0)).alias(\"clean\"),\n",
+							"            F.min(\"_ttmv_min\").alias(\"min_mins\"),\n",
+							"        ).collect()[0]\n",
+							"\n",
+							"        print(f\"📊 time_until_move — total:{stats.total:,} clean:{stats.clean:,} corrupted:{stats.corrupted:,}\")\n",
+							"\n",
+							"        file_date = datetime.date.fromisoformat(file_date_str)\n",
+							"\n",
+							"        if stats.min_mins is not None:\n",
+							"            anchor_date = (\n",
+							"                datetime.datetime.combine(file_date, datetime.time(0,0))\n",
+							"                + datetime.timedelta(minutes=int(stats.min_mins))\n",
+							"            ).date()\n",
+							"            print(f\"✅ Anchor: {file_date} + {stats.min_mins}min → {anchor_date} ({anchor_date.strftime('%A')})\")\n",
+							"        else:\n",
+							"            anchor_date = file_date\n",
+							"            print(f\"⚠️  No clean rows — fallback anchor: {anchor_date} ({anchor_date.strftime('%A')})\")\n",
+							"\n",
+							"        anchor_date_str = anchor_date.isoformat()\n",
+							"        anchor_wd       = anchor_date.weekday()\n",
+							"\n",
+							"        # Resolution preview\n",
+							"        print(f\"\\n📅 Weekday resolution from anchor ({anchor_date.strftime('%A %d %b %Y')}):\")\n",
+							"        for abbr, wd in DAY_ABBR_MAP.items():\n",
+							"            delta    = (wd - anchor_wd) % 7\n",
+							"            if delta > 5: delta -= 7\n",
+							"            resolved = anchor_date + datetime.timedelta(days=delta)\n",
+							"            print(f\"   {abbr} → {resolved}  ({resolved.strftime('%A')})\"\n",
+							"                + (\" ← drift buffer\" if delta == -1 else \"\"))\n",
+							"        # ============================================================\n",
+							"        # STEP 11d : Resolve est_mv_time / est_mv_hour / est_mv_quarter_hour\n",
+							"        # move_time null → est_mv_time null (handled automatically)\n",
+							"        # ============================================================\n",
+							"\n",
+							"        def resolve_mv_time(val, anchor_str):\n",
+							"            if not val or not anchor_str: return None\n",
+							"            import datetime as _dt\n",
+							"            _DAYS = {\"MO\":0,\"TU\":1,\"WE\":2,\"TH\":3,\"FR\":4,\"SA\":5,\"SU\":6}\n",
+							"            v = val.strip().lstrip(\"+\").upper()\n",
+							"            if len(v) != 6 or v[:2] not in _DAYS or not v[2:].isdigit(): return None\n",
+							"            hh, mm = int(v[2:4]), int(v[4:6])\n",
+							"            if hh > 23 or mm > 59: return None\n",
+							"            anchor = _dt.date.fromisoformat(anchor_str)\n",
+							"            delta  = ((_DAYS[v[:2]] - anchor.weekday()) % 7)\n",
+							"            if delta > 5: delta -= 7\n",
+							"            resolved = _dt.datetime.combine(\n",
+							"                anchor + _dt.timedelta(days=delta), _dt.time(hh, mm)\n",
+							"            )\n",
+							"            return resolved.strftime(\"%Y-%m-%d %H:%M:%S\")\n",
+							"\n",
+							"        resolve_mv_udf = F.udf(resolve_mv_time, StringType())\n",
+							"\n",
+							"        for src_col, out_col in [\n",
+							"            (\"move_time\",         \"est_mv_time\"),\n",
+							"            (\"move_hour\",         \"est_mv_hour\"),\n",
+							"            (\"move_quarter_hour\", \"est_mv_quarter_hour\"),\n",
+							"        ]:\n",
+							"            df_mapped = df_mapped.withColumn(\n",
+							"                out_col,\n",
+							"                F.to_timestamp(\n",
+							"                    resolve_mv_udf(F.col(src_col), F.lit(anchor_date_str)),\n",
+							"                    \"yyyy-MM-dd HH:mm:ss\"\n",
+							"                )\n",
+							"            )\n",
+							"\n",
+							"        df_mapped = df_mapped.drop(\"_ttmv_min\")\n",
+							"\n",
+							"        print(\"✅ est_mv_time, est_mv_hour, est_mv_quarter_hour added\")\n",
+							"        print(f\"   Null move_time rows → est_mv_time will be null ✅\")\n",
+							"\n",
+							"        # Sanity check\n",
+							"        df_mapped.select(\"move_time\",\"est_mv_time\") \\\n",
+							"            .filter(F.col(\"move_time\").isNotNull()) \\\n",
+							"            .distinct().orderBy(\"est_mv_time\") \\\n",
+							"            .show(20, truncate=False)\n",
+							"\n",
 							"\n",
 							"        # ── STEP 12 : Enforce fixed schema ───────────────────\n",
 							"        existing_cols = set(df_mapped.columns)\n",
@@ -116220,7 +116252,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 102
+						"execution_count": 10
 					},
 					{
 						"cell_type": "code",
