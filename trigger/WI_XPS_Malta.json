@@ -10,7 +10,7 @@
 					"type": "PipelineReference"
 				},
 				"parameters": {
-					"client_id": "malta",
+					"client_id": "Malta",
 					"file_system": "malta"
 				}
 			}
