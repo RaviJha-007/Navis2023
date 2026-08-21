@@ -86,6 +86,24 @@
 		"WI_Malta_ST_properties_typeProperties_scope": {
 			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
+		"WI_XPS_GPA_properties_WI_01_XPS_parameters_client_id": {
+			"value": "GPA"
+		},
+		"WI_XPS_GPA_properties_WI_01_XPS_parameters_file_system": {
+			"value": "gpa"
+		},
+		"WI_XPS_GPA_properties_typeProperties_scope": {
+			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
+		},
+		"WI_XPS_Malta_properties_WI_01_XPS_parameters_client_id": {
+			"value": "Malta"
+		},
+		"WI_XPS_Malta_properties_WI_01_XPS_parameters_file_system": {
+			"value": "malta"
+		},
+		"WI_XPS_Malta_properties_typeProperties_scope": {
+			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
+		},
 		"sc_trigger_properties_typeProperties_scope": {
 			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
