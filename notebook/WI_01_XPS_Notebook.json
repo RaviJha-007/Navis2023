@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "1021d0ef-9692-4834-b493-b90d202e3e82"
+				"spark.autotune.trackingId": "db8a5191-74ea-45c0-9abb-6996231b1f3a"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"# file_name   = \"WI_Load_06082026_1029.txt\"   # injected by pipeline\n",
 					""
 				],
-				"execution_count": 1
+				"execution_count": 21
 			},
 			{
 				"cell_type": "code",
@@ -132,7 +132,7 @@
 					"print(f\"🔑 Gold      : {gold_path}\")\n",
 					""
 				],
-				"execution_count": 2
+				"execution_count": 22
 			},
 			{
 				"cell_type": "code",
@@ -229,7 +229,7 @@
 					"    print(f\"✅ Column map loaded: {len(COLUMN_MAP)} fields, no duplicates\")\n",
 					""
 				],
-				"execution_count": 3
+				"execution_count": 23
 			},
 			{
 				"cell_type": "code",
@@ -359,7 +359,7 @@
 					"    print(f\"✅ Silver schema: {len(SILVER_COLUMNS)} columns, no duplicates\")\n",
 					""
 				],
-				"execution_count": 4
+				"execution_count": 24
 			},
 			{
 				"cell_type": "code",
@@ -381,7 +381,7 @@
 					"print(f\"✅ equip_class_lookup  : {len(ec_rows)} ISO codes\")\n",
 					""
 				],
-				"execution_count": 5
+				"execution_count": 25
 			},
 			{
 				"cell_type": "code",
@@ -416,7 +416,7 @@
 					"    print(f\"   {ok} {fname:<40} → {dt}  sort={srt}\")\n",
 					""
 				],
-				"execution_count": 6
+				"execution_count": 26
 			},
 			{
 				"cell_type": "code",
@@ -442,7 +442,7 @@
 					"        print(f\"\\nℹ️  All-null fields (kept as null in Delta): {zero}\")\n",
 					""
 				],
-				"execution_count": 7
+				"execution_count": 27
 			},
 			{
 				"cell_type": "code",
@@ -572,7 +572,7 @@
 					"print(\"✅ Parser ready\")\n",
 					""
 				],
-				"execution_count": 8
+				"execution_count": 28
 			},
 			{
 				"cell_type": "code",
@@ -599,7 +599,7 @@
 					"    print(f\"   • {f.name:<50} datetime={dt_str}  sort={srt}\")\n",
 					""
 				],
-				"execution_count": 9
+				"execution_count": 29
 			},
 			{
 				"cell_type": "code",
@@ -652,6 +652,16 @@
 					"        else:\n",
 					"            print(f\"⚠️  No datetime in filename — using current_timestamp()\")\n",
 					"            source_file_sort = 0\n",
+					"                # ── Derive file_date_str from file_datetime_str ──────────────\n",
+					"        if file_datetime_str:\n",
+					"            # file_datetime_str format: \"yyyy-MM-dd HH:mm:ss\"\n",
+					"            file_date_str = file_datetime_str[:10]   # → \"yyyy-MM-dd\"\n",
+					"        else:\n",
+					"            # Fallback: use today's date\n",
+					"            file_date_str = datetime.date.today().isoformat()\n",
+					"\n",
+					"        print(f\"✅ file_date_str  : {file_date_str}\")\n",
+					"\n",
 					"\n",
 					"        # ── STEP 3 : QA — declared columns ───────────────────\n",
 					"        declared_cols, filter_count = extract_declared_columns(raw_text)\n",
@@ -1035,7 +1045,7 @@
 					"    raise RuntimeError(\"❌ No files processed.\")\n",
 					""
 				],
-				"execution_count": 10
+				"execution_count": 30
 			},
 			{
 				"cell_type": "code",
