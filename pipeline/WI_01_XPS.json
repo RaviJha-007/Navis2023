@@ -19,6 +19,19 @@
 						"referenceName": "WI_01_XPS_Notebook",
 						"type": "NotebookReference"
 					},
+					"parameters": {
+						"client_id": {
+							"value": "@pipeline().parameters.client_id",
+							"type": "string"
+						},
+						"file_system": {
+							"value": {
+								"value": "@pipeline().parameters.file_system",
+								"type": "Expression"
+							},
+							"type": "string"
+						}
+					},
 					"snapshot": true,
 					"sparkPool": {
 						"referenceName": "pbixpool",
