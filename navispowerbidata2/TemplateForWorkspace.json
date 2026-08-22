@@ -11917,6 +11917,19 @@
 								"referenceName": "WI_01_XPS_Notebook",
 								"type": "NotebookReference"
 							},
+							"parameters": {
+								"client_id": {
+									"value": "@pipeline().parameters.client_id",
+									"type": "string"
+								},
+								"file_system": {
+									"value": {
+										"value": "@pipeline().parameters.file_system",
+										"type": "Expression"
+									},
+									"type": "string"
+								}
+							},
 							"snapshot": true,
 							"sparkPool": {
 								"referenceName": "pbixpool",
@@ -113636,7 +113649,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "23ecd141-1738-471d-ba20-474c9d7b1c73"
+						"spark.autotune.trackingId": "a6374086-5a09-4c5c-b821-95e33a34ab35"
 					}
 				},
 				"metadata": {
@@ -113661,7 +113674,8 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56
+						"memory": 56,
+						"automaticScaleJobs": true
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -113687,6 +113701,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# TERMINAL CONFIGURATION\n",
@@ -113917,6 +113932,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# REGISTER LOOKUP TABLES FROM CONFIG\n",
@@ -113944,6 +113960,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# READ BRONZE CSV FILES\n",
@@ -114120,6 +114137,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# DYNAMIC DATE/TIME PARSING\n",
@@ -114168,6 +114186,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# HELPER FUNCTION: POSITION PARSING\n",
@@ -114478,6 +114497,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# DYNAMIC POSITION PARSING\n",
@@ -114992,6 +115012,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# ADD REMAINING DERIVED COLUMNS\n",
@@ -115097,6 +115118,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FINAL SILVER DATA (Filter row_number = 1)\n",
@@ -115218,6 +115240,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# WRITE TO SILVER LAYER\n",
@@ -115254,6 +115277,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# WRITE TO GOLD LAYER (All Terminals - Latest Data)\n",
@@ -115320,6 +115344,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# ARCHIVE BRONZE FILES\n",
@@ -115373,7 +115398,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "4dd703d3-57f7-44c7-b8c2-dd0835eea96c"
+						"spark.autotune.trackingId": "ab96a176-f762-4253-975c-74d183ff7cfd"
 					}
 				},
 				"metadata": {
@@ -115398,8 +115423,7 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56,
-						"automaticScaleJobs": true
+						"memory": 56
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -115426,7 +115450,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# TERMINAL CONFIGURATION\n",
@@ -115513,7 +115536,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COLUMN MAP  — ground truth from ATTRS/NAMES in converter\n",
@@ -115612,7 +115634,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FIXED SILVER SCHEMA\n",
@@ -115744,7 +115765,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# LOOKUP TABLES\n",
@@ -115768,7 +115788,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FILENAME DATETIME EXTRACTION\n",
@@ -115805,7 +115824,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COVERAGE VALIDATOR\n",
@@ -115833,7 +115851,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PARSER  — CRITICAL FIX\n",
@@ -115965,7 +115982,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# DISCOVER TXT FILES\n",
@@ -115994,7 +116010,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PROCESS EACH FILE\n",
@@ -117249,7 +117264,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "a8ec5782-15c6-4a23-a1f8-0c669c2adaee"
+						"spark.autotune.trackingId": "ff18f0d7-e436-4bf6-a47b-989e3408cc9d"
 					}
 				},
 				"metadata": {
@@ -117274,7 +117289,8 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56
+						"memory": 56,
+						"automaticScaleJobs": true
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -117300,6 +117316,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# CONFIGURATION\n",
@@ -117327,6 +117344,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# READ SILVER DATA - LATEST ONLY\n",
@@ -117892,6 +117910,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# WRITE TO GOLD LAYER (APPEND MODE - With client_id Partitioning)\n",
