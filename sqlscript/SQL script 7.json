@@ -2,12 +2,12 @@
 	"name": "SQL script 7",
 	"properties": {
 		"content": {
-			"query": "SELECT OBJECT_DEFINITION(OBJECT_ID('[dbo].[stack_confirmity]')) AS ViewDefinition;\n\nDrop VIEW dbo.rtg_ecevents\nDrop VIEW dbo.rtg_workhours\n\ncreate or ALTER view rtg_ecevents\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/rtg_ecevents',\n        data_source = 'mict',\n        FORMAT = 'DELTA'\n    ) AS [rtg_ecevents];\n\ncreate or ALTER view rtg_workhours\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/rtg_workhours',\n        data_source = 'mict',\n        FORMAT = 'DELTA'\n    ) AS [rtg_workhours];",
+			"query": "SELECT OBJECT_DEFINITION(OBJECT_ID('[dbo].[stack_confirmity]')) AS ViewDefinition;\n\nDrop VIEW dbo.rtg_ecevents\nDrop VIEW dbo.rtg_workhours\n\ncreate or ALTER view itv_hours_moves\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/itv_hours_moves',\n        data_source = 'cgsa',\n        FORMAT = 'DELTA'\n    ) AS [itv_hours_moves];\n\ncreate or ALTER view itv_productivity\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/itv_productivity',\n        data_source = 'cgsa',\n        FORMAT = 'DELTA'\n    ) AS [itv_productivity];",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "mict",
+				"databaseName": "cgsa",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000
