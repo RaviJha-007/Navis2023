@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "de1c78e7-e53e-4c4a-8814-93a033aa961b"
+				"spark.autotune.trackingId": "fe0270b6-d26b-4a4a-870c-6cbdea26289a"
 			}
 		},
 		"metadata": {
@@ -60,12 +60,12 @@
 					"# PARAMETERS  — set per pipeline run\n",
 					"# ============================================================\n",
 					"\n",
-					"client_id   = \"GPA\"\n",
-					"file_system = \"gpa\"\n",
+					"client_id   = \"Malta\"\n",
+					"file_system = \"malta\"\n",
 					"# file_name   = \"WI_Load_06082026_1029.txt\"   # injected by pipeline\n",
 					""
 				],
-				"execution_count": 51
+				"execution_count": 71
 			},
 			{
 				"cell_type": "code",
@@ -150,7 +150,7 @@
 					"print(f\"🔑 Gold      : {gold_path}\")\n",
 					""
 				],
-				"execution_count": 52
+				"execution_count": 72
 			},
 			{
 				"cell_type": "code",
@@ -247,7 +247,7 @@
 					"    print(f\"✅ Column map loaded: {len(COLUMN_MAP)} fields, no duplicates\")\n",
 					""
 				],
-				"execution_count": 53
+				"execution_count": 73
 			},
 			{
 				"cell_type": "code",
@@ -377,7 +377,7 @@
 					"    print(f\"✅ Silver schema: {len(SILVER_COLUMNS)} columns, no duplicates\")\n",
 					""
 				],
-				"execution_count": 54
+				"execution_count": 74
 			},
 			{
 				"cell_type": "code",
@@ -399,7 +399,7 @@
 					"print(f\"✅ equip_class_lookup  : {len(ec_rows)} ISO codes\")\n",
 					""
 				],
-				"execution_count": 55
+				"execution_count": 75
 			},
 			{
 				"cell_type": "code",
@@ -434,7 +434,7 @@
 					"    print(f\"   {ok} {fname:<40} → {dt}  sort={srt}\")\n",
 					""
 				],
-				"execution_count": 56
+				"execution_count": 76
 			},
 			{
 				"cell_type": "code",
@@ -460,7 +460,7 @@
 					"        print(f\"\\nℹ️  All-null fields (kept as null in Delta): {zero}\")\n",
 					""
 				],
-				"execution_count": 57
+				"execution_count": 77
 			},
 			{
 				"cell_type": "code",
@@ -590,7 +590,7 @@
 					"print(\"✅ Parser ready\")\n",
 					""
 				],
-				"execution_count": 58
+				"execution_count": 78
 			},
 			{
 				"cell_type": "code",
@@ -617,7 +617,7 @@
 					"    print(f\"   • {f.name:<50} datetime={dt_str}  sort={srt}\")\n",
 					""
 				],
-				"execution_count": 59
+				"execution_count": 79
 			},
 			{
 				"cell_type": "code",
@@ -1137,7 +1137,7 @@
 					"    raise RuntimeError(\"❌ No files processed.\")\n",
 					""
 				],
-				"execution_count": 60
+				"execution_count": 80
 			},
 			{
 				"cell_type": "code",
