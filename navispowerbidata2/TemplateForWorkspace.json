@@ -116313,7 +116313,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "ff46959d-2c0f-48b0-b06c-c3e21739f940"
+						"spark.autotune.trackingId": "e6380609-6a51-409b-b88a-be0b3b98bf5b"
 					}
 				},
 				"metadata": {
@@ -116362,7 +116362,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 20
+						"execution_count": 71
 					},
 					{
 						"cell_type": "code",
@@ -116449,7 +116449,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 21
+						"execution_count": 72
 					},
 					{
 						"cell_type": "code",
@@ -116548,7 +116548,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 22
+						"execution_count": 73
 					},
 					{
 						"cell_type": "code",
@@ -116680,7 +116680,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 23
+						"execution_count": 74
 					},
 					{
 						"cell_type": "code",
@@ -116704,7 +116704,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 24
+						"execution_count": 75
 					},
 					{
 						"cell_type": "code",
@@ -116741,7 +116741,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 25
+						"execution_count": 76
 					},
 					{
 						"cell_type": "code",
@@ -116769,7 +116769,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 26
+						"execution_count": 77
 					},
 					{
 						"cell_type": "code",
@@ -116901,7 +116901,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 27
+						"execution_count": 78
 					},
 					{
 						"cell_type": "code",
@@ -116930,7 +116930,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 28
+						"execution_count": 79
 					},
 					{
 						"cell_type": "code",
@@ -116963,6 +116963,78 @@
 							"    print(f\"\\n{'='*65}\")\n",
 							"    print(f\"🔄 Processing : {file_name}\")\n",
 							"    print(f\"{'='*65}\")\n",
+							"    \n",
+							"  # ── STEP 1b : Idempotency Guard — Skip already processed files ──────\n",
+							"\n",
+							"    print(f\"\\n🔍 Checking if '{file_name}' was already processed...\")\n",
+							"\n",
+							"    already_processed = False\n",
+							"\n",
+							"    bronze_duplicate_path = (\n",
+							"        f\"abfss://{file_system}@{storage_account}\"\n",
+							"        f\".dfs.core.windows.net/bronze/workinstruction_xps/duplicate/\"\n",
+							"    )\n",
+							"\n",
+							"    try:\n",
+							"        # ── Check 1 : Silver Delta table ────────────────────────\n",
+							"        silver_exists = False\n",
+							"        if DeltaTable.isDeltaTable(spark, silver_path):\n",
+							"            existing_count = spark.read.format(\"delta\").load(silver_path) \\\n",
+							"                                .filter(\n",
+							"                                    (F.col(\"source_file_name\") == file_name) &\n",
+							"                                    (F.col(\"client_id\") == client_id)\n",
+							"                                ) \\\n",
+							"                                .limit(1) \\\n",
+							"                                .count()\n",
+							"            if existing_count > 0:\n",
+							"                silver_exists = True\n",
+							"                print(f\"⚠️  Found in Silver   : '{file_name}' already processed for '{client_id}'\")\n",
+							"\n",
+							"        # ── Check 2 : Archive folder ─────────────────────────────\n",
+							"        archive_exists = False\n",
+							"        try:\n",
+							"            archived_files = [f.name for f in mssparkutils.fs.ls(bronze_archive_path)]\n",
+							"            if file_name in archived_files:\n",
+							"                archive_exists = True\n",
+							"                print(f\"⚠️  Found in Archive  : '{file_name}' already archived\")\n",
+							"        except Exception:\n",
+							"            pass  # Archive folder may not exist yet — non-fatal\n",
+							"\n",
+							"        # ── Decision ─────────────────────────────────────────────\n",
+							"        if silver_exists or archive_exists:\n",
+							"            already_processed = True\n",
+							"            reason = []\n",
+							"            if silver_exists: reason.append(\"Silver\")\n",
+							"            if archive_exists: reason.append(\"Archive\")\n",
+							"            print(f\"\\n🔴 DUPLICATE DETECTED via: {' + '.join(reason)}\")\n",
+							"            print(f\"   Moving to duplicate folder instead of processing...\")\n",
+							"\n",
+							"            try:\n",
+							"                mssparkutils.fs.mv(\n",
+							"                    file_path,\n",
+							"                    f\"{bronze_duplicate_path}{file_name}\",\n",
+							"                    True\n",
+							"                )\n",
+							"                print(f\"📁 Moved to duplicate : {bronze_duplicate_path}{file_name}\")\n",
+							"            except Exception as dup_move_err:\n",
+							"                # If duplicate folder already has this file too\n",
+							"                print(f\"⚠️  Could not move to duplicate folder: {dup_move_err}\")\n",
+							"                print(f\"   Attempting to remove from bronze instead...\")\n",
+							"                try:\n",
+							"                    mssparkutils.fs.rm(file_path, False)\n",
+							"                    print(f\"🗑️  Removed from bronze: {file_name}\")\n",
+							"                except Exception as rm_err:\n",
+							"                    print(f\"⚠️  Could not remove from bronze (non-fatal): {rm_err}\")\n",
+							"        else:\n",
+							"            print(f\"✅ File not found in Silver or Archive — safe to process\")\n",
+							"\n",
+							"    except Exception as guard_err:\n",
+							"        print(f\"⚠️  Idempotency check failed (non-fatal): {guard_err}\")\n",
+							"        already_processed = False\n",
+							"\n",
+							"    if already_processed:\n",
+							"        continue  # ← Skip all processing steps for this file\n",
+							"\n",
 							"\n",
 							"    try:\n",
 							"\n",
@@ -117380,7 +117452,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 29
+						"execution_count": 80
 					},
 					{
 						"cell_type": "code",
