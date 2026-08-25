@@ -89,11 +89,17 @@
 				}
 			},
 			{
-				"name": "violations_sgtd",
+				"name": "SGTD_RTG_Violations",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
 						"activity": "MoveSrc_sgtd",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Decking",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -109,7 +115,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "violations_sgtd",
+						"referenceName": "SGTD_RTG_violations",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -282,6 +288,30 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "stack_confirmity_SGTD_new",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "Decking",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "Decking_SGTD",
 						"type": "DataFlowReference"
 					},
 					"compute": {
