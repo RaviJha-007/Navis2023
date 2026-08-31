@@ -242,7 +242,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
 				"source1 aggregate(groupBy(ecEventGkey),",
-				"     each(match(name!=\"ecEventGkey\"), ERROR_FUNCTION('') = ERROR_FUNCTION(''))) ~> aggregate2",
+				"     each(match(name!=\"ecEventGkey\"), $$ = first($$))) ~> aggregate2",
 				"AlterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
