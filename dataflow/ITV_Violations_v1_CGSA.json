@@ -64,6 +64,9 @@
 				},
 				{
 					"name": "select3"
+				},
+				{
+					"name": "aggregate2"
 				}
 			],
 			"scriptLines": [
@@ -203,7 +206,7 @@
 				"    iif(moveKind==\"LOAD\", \r",
 				"        iif(cheID==cheID_nxt && eventName==\"EVENT_1\" && eventName_nxt==\"EVENT_2\" && (yardBlock!=yardBlock_nxt || yardRow!=yardRow_nxt), 1, 0),0)\r",
 				")) ~> derivedColumn3",
-				"source1 select(mapColumn(",
+				"aggregate2 select(mapColumn(",
 				"          ecEventGkey,",
 				"          yardGkey,",
 				"          YardID,",
@@ -238,6 +241,8 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
+				"source1 aggregate(groupBy(ecEventGkey),",
+				"     each(match(name!=\"ecEventGkey\"), ERROR_FUNCTION('') = ERROR_FUNCTION(''))) ~> aggregate2",
 				"AlterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
