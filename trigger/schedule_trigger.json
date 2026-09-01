@@ -109,7 +109,7 @@
 			},
 			{
 				"pipelineReference": {
-					"referenceName": "Pipeline 3",
+					"referenceName": "CGSA",
 					"type": "PipelineReference"
 				}
 			}
