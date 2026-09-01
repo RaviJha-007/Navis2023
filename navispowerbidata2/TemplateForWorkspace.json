@@ -1349,6 +1349,316 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/CGSA')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "MoveSrc_CGSA",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "MoveSrc_cgsa",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"CSV": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "DualCycling",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "MoveSrc_CGSA",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Dual Cycling_cgsa",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "Rehandle",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "MoveSrc_CGSA",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Rehandle_cgsa",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"MoveHistory": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "laden unladen time",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "MoveSrc_CGSA",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "LadenUnladen_TimeDistance_DualyCycle_CGSA",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "TT_productivity_CGSA",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "MoveSrc_CGSA",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "TT_productivity_CGSA",
+								"type": "DataFlowReference",
+								"parameters": {
+									"Customer": "'cgsa'"
+								},
+								"datasetParameters": {
+									"moves": {},
+									"ItvProductivity": {},
+									"ItvWorkhours": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "EcEvents_CGSA",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "EcEvents_CGSA",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"CSV": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "jobstepping_cgsa",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "EcEvents_CGSA",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "jobstepping_cgsa",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"xpseceuser": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "ITV_Violations_v1_CGSA",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "EcEvents_CGSA",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "ITV_Violations_v1_CGSA",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"source2": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/MoveSrc_cgsa')]",
+				"[concat(variables('workspaceId'), '/dataflows/Dual Cycling_cgsa')]",
+				"[concat(variables('workspaceId'), '/dataflows/Rehandle_cgsa')]",
+				"[concat(variables('workspaceId'), '/dataflows/LadenUnladen_TimeDistance_DualyCycle_CGSA')]",
+				"[concat(variables('workspaceId'), '/dataflows/TT_productivity_CGSA')]",
+				"[concat(variables('workspaceId'), '/dataflows/EcEvents_CGSA')]",
+				"[concat(variables('workspaceId'), '/dataflows/jobstepping_cgsa')]",
+				"[concat(variables('workspaceId'), '/dataflows/ITV_Violations_v1_CGSA')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/CGSA_confirmities')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
@@ -20194,7 +20504,6 @@
 				"[concat(variables('workspaceId'), '/dataflows/rio_moves_time_delta')]",
 				"[concat(variables('workspaceId'), '/dataflows/jobstepping_rio')]",
 				"[concat(variables('workspaceId'), '/dataflows/ladenUnladen_rio')]",
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
 				"[concat(variables('workspaceId'), '/dataflows/RIO_Decking')]",
 				"[concat(variables('workspaceId'), '/dataflows/FLD_RIO')]"
 			]
@@ -23477,6 +23786,37 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/SE_Trigger_Socar_Weekly')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "Weekly scheduled trigger for SOCAR",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Socar",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Week",
+						"interval": 1,
+						"startTime": "2026-09-25T06:00:00",
+						"timeZone": "Arabian Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/Socar')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/Sc_trigger_CGSA')]",
 			"type": "Microsoft.Synapse/workspaces/triggers",
 			"apiVersion": "2019-06-01-preview",
@@ -24232,6 +24572,13 @@
 							"type": "PipelineReference"
 						},
 						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "CGSA",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
 					}
 				],
 				"type": "ScheduleTrigger",
@@ -24269,7 +24616,8 @@
 				"[concat(variables('workspaceId'), '/pipelines/TEAGTL')]",
 				"[concat(variables('workspaceId'), '/pipelines/SPIA')]",
 				"[concat(variables('workspaceId'), '/pipelines/RSGT')]",
-				"[concat(variables('workspaceId'), '/pipelines/PNG')]"
+				"[concat(variables('workspaceId'), '/pipelines/PNG')]",
+				"[concat(variables('workspaceId'), '/pipelines/CGSA')]"
 			]
 		},
 		{
@@ -27165,6 +27513,58 @@
 						}
 					],
 					"script": "source(output(\n\t\tgkey as string,\n\t\tuyv_gkey as string,\n\t\tunit_id as string,\n\t\tdecking_type as string,\n\t\tnode_id as string,\n\t\tyard as string,\n\t\tfrom_pos_loctype as string,\n\t\tfrom_pos_locid as string,\n\t\tfrom_pos_loc_gkey as string,\n\t\tfrom_pos_slot as string,\n\t\tfrom_pos_name as string,\n\t\tfrom_pos_bin as string,\n\t\tfrom_pos_tier as string,\n\t\tto_pos_loctype as string,\n\t\tto_pos_locid as string,\n\t\tto_pos_loc_gkey as string,\n\t\tto_pos_slot as string,\n\t\tto_pos_name as string,\n\t\tto_pos_bin as string,\n\t\tto_pos_tier as string,\n\t\ttotal_score as string,\n\t\texecution_time as string,\n\t\tphase as string,\n\t\ttime_stamp as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: false,\n\tvalidateSchema: true,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/deckinghistory/load','bronze/deckinghistory/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'dgt',\n\tfolderPath: 'bronze/deckinghistory/load',\n\tcolumnDelimiter: ';',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\''],\n\tmode: 'read') ~> CSV\nAggregate1 derive(time_stamp = :timestamp,\n\t\tYear = year(:timestamp),\n\t\tMonth = month(:timestamp),\n\t\tWeek = weekOfYear(:timestamp),\n\t\ttimestamp := coalesce(toTimestamp(split(time_stamp,\".\")[1],'dd-MM-yyyy HH:mm:ss'),toTimestamp(split(time_stamp,\".\")[1],'yyyy-MM-dd HH:mm:ss'),toTimestamp(split(time_stamp,\".\")[1],'yyyy-MM-dd HH:mm'))) ~> DataTypeConversion\nSelect2 select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nSelect1 aggregate(groupBy(gkey),\n\teach(match(name!='gkey'), $$ = first($$))) ~> Aggregate1\nCSV select(mapColumn(\n\t\tgkey,\n\t\tuyv_gkey,\n\t\tunit_id,\n\t\ttime_stamp,\n\t\tdecking_type,\n\t\tnode_id,\n\t\tyard,\n\t\tfrom_pos_loctype,\n\t\tfrom_pos_locid,\n\t\tfrom_pos_loc_gkey,\n\t\tfrom_pos_slot,\n\t\tfrom_pos_name,\n\t\tfrom_pos_bin,\n\t\tfrom_pos_tier,\n\t\tto_pos_loctype,\n\t\tto_pos_locid,\n\t\tto_pos_loc_gkey,\n\t\tto_pos_slot,\n\t\tto_pos_name,\n\t\tto_pos_bin,\n\t\tto_pos_tier,\n\t\ttotal_score,\n\t\texecution_time,\n\t\tphase\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nfilter1 alterRow(upsertIf(true())) ~> AlterRow1\nDataTypeConversion filter(not(isNull(gkey)) && not(isNull(time_stamp))) ~> filter1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tmve_gkey as integer,\n\t\tUnit_Nbr as string,\n\t\tFacility_Id as string,\n\t\tComplex_Id as string,\n\t\tYard_Id as string,\n\t\tCarrier_Visit_Key as integer,\n\t\tEvent_Type_Id as string,\n\t\tMove_Kind as string,\n\t\tFrom_Location as string,\n\t\tTo_Location as string,\n\t\tFrom_Position_Name as string,\n\t\tTo_Position_Name as string,\n\t\tCarry_CHE_Operator_Id as short,\n\t\tFetch_CHE_Operator_Id as string,\n\t\tPut_CHE_Operator_Id as string,\n\t\tFetch_CHE_Id as long,\n\t\tFetch_CHE_Kind as string,\n\t\tCarry_CHE_Id as long,\n\t\tCarry_CHE_Kind as string,\n\t\tPut_CHE_Id as long,\n\t\tPut_CHE_Kind as string,\n\t\tQC_CHE_Id as long,\n\t\tQC_CHE_Kind as string,\n\t\tt_carry_complete as timestamp,\n\t\tt_put as timestamp,\n\t\tt_fetch as timestamp,\n\t\tt_dispatch as timestamp,\n\t\tt_discharge as timestamp,\n\t\tt_carry_dispatch as timestamp,\n\t\tt_carry_fetch_ready as timestamp,\n\t\tt_carry_put_ready as timestamp,\n\t\tdist_carry as integer,\n\t\tdist_start as short,\n\t\tTwin_Fetch as string,\n\t\tTwin_Carry as string,\n\t\tTwin_Put as string,\n\t\tCategory_Id as string,\n\t\tFreight_Kind_Id as string,\n\t\tto_pos_gkey as integer,\n\t\tfm_pos_gkey as integer,\n\t\tpow as string,\n\t\tufv_gkey as integer,\n\t\tGoods_And_Ctr_Wt_Kg as double,\n\t\tactive_ufv as integer,\n\t\tRequires_Power_Flag as string,\n\t\tOOG_Flag as string,\n\t\tATD as timestamp,\n\t\tATA as timestamp,\n\t\tYear as integer,\n\t\tMonth as integer,\n\t\tWeek as integer\n\t),\n\tformat: 'delta',\n\tfileSystem: 'dgt',\n\tfolderPath: 'silver/deckings',\n\tmergeSchema: true,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['gkey'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink1"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Decking_DGT_copy1')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "CSV"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "DataTypeConversion"
+						},
+						{
+							"name": "Select1"
+						},
+						{
+							"name": "Aggregate1"
+						},
+						{
+							"name": "Select2"
+						},
+						{
+							"name": "AlterRow1"
+						},
+						{
+							"name": "filter1"
+						}
+					],
+					"script": "source(output(\n\t\tgkey as string,\n\t\tuyv_gkey as string,\n\t\tunit_id as string,\n\t\tdecking_type as string,\n\t\tnode_id as string,\n\t\tyard as string,\n\t\tfrom_pos_loctype as string,\n\t\tfrom_pos_locid as string,\n\t\tfrom_pos_loc_gkey as string,\n\t\tfrom_pos_slot as string,\n\t\tfrom_pos_name as string,\n\t\tfrom_pos_bin as string,\n\t\tfrom_pos_tier as string,\n\t\tto_pos_loctype as string,\n\t\tto_pos_locid as string,\n\t\tto_pos_loc_gkey as string,\n\t\tto_pos_slot as string,\n\t\tto_pos_name as string,\n\t\tto_pos_bin as string,\n\t\tto_pos_tier as string,\n\t\ttotal_score as string,\n\t\texecution_time as string,\n\t\tphase as string,\n\t\ttime_stamp as string,\n\t\tFreightKind as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: false,\n\tvalidateSchema: true,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/deckinghistory/load','bronze/deckinghistory/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'dgt',\n\tfolderPath: 'bronze/deckinghistory/load',\n\tcolumnDelimiter: '\\t',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\''],\n\tmode: 'read') ~> CSV\nAggregate1 derive(time_stamp = :timestamp,\n\t\tYear = year(:timestamp),\n\t\tMonth = month(:timestamp),\n\t\tWeek = weekOfYear(:timestamp),\n\t\ttimestamp := coalesce(toTimestamp(split(time_stamp,\".\")[1],'dd-MM-yyyy HH:mm:ss'),toTimestamp(split(time_stamp,\".\")[1],'yyyy-MM-dd HH:mm:ss'),toTimestamp(split(time_stamp,\".\")[1],'yyyy-MM-dd HH:mm'))) ~> DataTypeConversion\nSelect2 select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nSelect1 aggregate(groupBy(gkey),\n\teach(match(name!='gkey'), $$ = first($$))) ~> Aggregate1\nCSV select(mapColumn(\n\t\tgkey,\n\t\tuyv_gkey,\n\t\tunit_id,\n\t\tdecking_type,\n\t\tnode_id,\n\t\tyard,\n\t\tfrom_pos_loctype,\n\t\tfrom_pos_locid,\n\t\tfrom_pos_loc_gkey,\n\t\tfrom_pos_slot,\n\t\tfrom_pos_name,\n\t\tfrom_pos_bin,\n\t\tfrom_pos_tier,\n\t\tto_pos_loctype,\n\t\tto_pos_locid,\n\t\tto_pos_loc_gkey,\n\t\tto_pos_slot,\n\t\tto_pos_name,\n\t\tto_pos_bin,\n\t\tto_pos_tier,\n\t\ttotal_score,\n\t\texecution_time,\n\t\tphase,\n\t\ttime_stamp,\n\t\tFreightKind\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nfilter1 alterRow(upsertIf(true())) ~> AlterRow1\nDataTypeConversion filter(not(isNull(gkey)) && not(isNull(time_stamp))) ~> filter1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tgkey as string,\n\t\tuyv_gkey as string,\n\t\tunit_id as string,\n\t\ttime_stamp as timestamp,\n\t\tdecking_type as string,\n\t\tnode_id as string,\n\t\tyard as string,\n\t\tfrom_pos_loctype as string,\n\t\tfrom_pos_locid as string,\n\t\tfrom_pos_loc_gkey as string,\n\t\tfrom_pos_slot as string,\n\t\tfrom_pos_name as string,\n\t\tfrom_pos_bin as string,\n\t\tfrom_pos_tier as string,\n\t\tto_pos_loctype as string,\n\t\tto_pos_locid as string,\n\t\tto_pos_loc_gkey as string,\n\t\tto_pos_slot as string,\n\t\tto_pos_name as string,\n\t\tto_pos_bin as string,\n\t\tto_pos_tier as string,\n\t\ttotal_score as string,\n\t\texecution_time as string,\n\t\tphase as string,\n\t\tYear as integer,\n\t\tMonth as integer,\n\t\tWeek as integer\n\t),\n\tformat: 'delta',\n\tfileSystem: 'dgt',\n\tfolderPath: 'silver/deckings',\n\tmergeSchema: true,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['gkey'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tgkey,\n\t\tuyv_gkey,\n\t\tunit_id,\n\t\ttime_stamp,\n\t\tdecking_type,\n\t\tnode_id,\n\t\tyard,\n\t\tfrom_pos_loctype,\n\t\tfrom_pos_locid,\n\t\tfrom_pos_loc_gkey,\n\t\tfrom_pos_slot,\n\t\tfrom_pos_name,\n\t\tfrom_pos_bin,\n\t\tfrom_pos_tier,\n\t\tto_pos_loctype,\n\t\tto_pos_locid,\n\t\tto_pos_loc_gkey,\n\t\tto_pos_slot,\n\t\tto_pos_name,\n\t\tto_pos_bin,\n\t\tto_pos_tier,\n\t\ttotal_score,\n\t\texecution_time,\n\t\tphase,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t),\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink1"
 				}
 			},
 			"dependsOn": [
@@ -36608,6 +37008,153 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/FLD_RIO')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "DeckingHistory"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService2",
+								"type": "LinkedServiceReference"
+							},
+							"name": "fld"
+						}
+					],
+					"transformations": [
+						{
+							"name": "select2"
+						},
+						{
+							"name": "filter1"
+						},
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "AlterRow1"
+						},
+						{
+							"name": "window1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          gkey as long,",
+						"          uyv_gkey as long,",
+						"          unit_id as string,",
+						"          time_stamp as timestamp,",
+						"          decking_type as string,",
+						"          node_id as string,",
+						"          yard as string,",
+						"          from_pos_loctype as string,",
+						"          from_pos_locid as string,",
+						"          from_pos_loc_gkey as string,",
+						"          from_pos_slot as string,",
+						"          from_pos_name as string,",
+						"          from_pos_bin as string,",
+						"          from_pos_tier as string,",
+						"          to_pos_loctype as string,",
+						"          to_pos_locid as string,",
+						"          to_pos_loc_gkey as string,",
+						"          to_pos_slot as string,",
+						"          to_pos_name as string,",
+						"          to_pos_bin as string,",
+						"          to_pos_tier as string,",
+						"          total_score as string,",
+						"          execution_time as string,",
+						"          details as string,",
+						"          phase as string,",
+						"          Year as integer,",
+						"          Month as integer,",
+						"          Week as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: true,",
+						"     moveFiles: ['/bronze/deckinghistory/load','bronze/deckinghistory/archive'],",
+						"     format: 'delta',",
+						"     fileSystem: 'rio',",
+						"     folderPath: 'silver/deckings') ~> DeckingHistory",
+						"DeckingHistory select(skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select2",
+						"select2 filter((decking_type == 'Bump Intruder' || decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin' || decking_type == 'Gate Receival Assign Position') && to_pos_slot=='Fail!') ~> filter1",
+						"filter1 derive(Decking_Type_Actual = iif((decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin'), 'Vessel Discharge',decking_type),",
+						"          Year_Week = (Year * 100) + Week,",
+						"          Year_Month = (Year * 100) + Month,",
+						"          Date = toDate(time_stamp)) ~> derivedColumn1",
+						"window1 alterRow(upsertIf(true())) ~> AlterRow1",
+						"derivedColumn1 window(over(Date,",
+						"          unit_id,",
+						"          Decking_Type_Actual),",
+						"     asc(time_stamp, true),",
+						"     FLD_Actual_count = iif((rank() > 1), 0, 1)) ~> window1",
+						"AlterRow1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          gkey as long,",
+						"          uyv_gkey as long,",
+						"          unit_id as string,",
+						"          decking_type as string,",
+						"          from_pos_locid as string,",
+						"          from_pos_slot as string,",
+						"          from_pos_name as string,",
+						"          from_pos_tier as string,",
+						"          to_pos_locid as string,",
+						"          to_pos_slot as string,",
+						"          to_pos_name as string,",
+						"          to_pos_tier as string,",
+						"          total_score as string,",
+						"          execution_time as string,",
+						"          phase as string,",
+						"          freightKind as string,",
+						"          time_stamp as timestamp,",
+						"          Year as integer,",
+						"          Month as integer,",
+						"          Week as integer,",
+						"          Decking_Type_Actual as string,",
+						"          Year_Week as integer,",
+						"          Year_Month as integer,",
+						"          Date as date,",
+						"          fld_actual_count as integer",
+						"     ),",
+						"     format: 'delta',",
+						"     fileSystem: 'rio',",
+						"     folderPath: 'gold/fld',",
+						"     mergeSchema: false,",
+						"     autoCompact: true,",
+						"     optimizedWrite: true,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: false,",
+						"     updateable: false,",
+						"     upsertable: true,",
+						"     keys:['unit_id','gkey','uyv_gkey','Date'],",
+						"     umask: 0777,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> fld"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]",
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService2')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/FLD_RSGT')]",
 			"type": "Microsoft.Synapse/workspaces/dataflows",
 			"apiVersion": "2019-06-01-preview",
@@ -42196,6 +42743,9 @@
 						},
 						{
 							"name": "select3"
+						},
+						{
+							"name": "aggregate2"
 						}
 					],
 					"scriptLines": [
@@ -42335,7 +42885,7 @@
 						"    iif(moveKind==\"LOAD\", \r",
 						"        iif(cheID==cheID_nxt && eventName==\"EVENT_1\" && eventName_nxt==\"EVENT_2\" && (yardBlock!=yardBlock_nxt || yardRow!=yardRow_nxt), 1, 0),0)\r",
 						")) ~> derivedColumn3",
-						"source1 select(mapColumn(",
+						"aggregate2 select(mapColumn(",
 						"          ecEventGkey,",
 						"          yardGkey,",
 						"          YardID,",
@@ -42370,6 +42920,8 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select3",
+						"source1 aggregate(groupBy(ecEventGkey),",
+						"     each(match(name!=\"ecEventGkey\"), $$ = first($$))) ~> aggregate2",
 						"AlterRow1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'delta',",
@@ -47647,6 +48199,60 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/MoveSrc_DGT_copy1')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "CSV"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService2",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink2"
+						}
+					],
+					"transformations": [
+						{
+							"name": "DataTypeConversion"
+						},
+						{
+							"name": "Select1"
+						},
+						{
+							"name": "Aggregate1"
+						},
+						{
+							"name": "Select2"
+						},
+						{
+							"name": "AlterRow1"
+						},
+						{
+							"name": "MapDrifted1",
+							"description": "Creates an explicit mapping for each drifted column"
+						}
+					],
+					"script": "source(output(\n\t\t{Unit Nbr} as string,\n\t\t{Facility Id} as string,\n\t\t{Complex Id} as string,\n\t\t{Yard Id} as string,\n\t\t{Carrier Visit Key} as string,\n\t\t{Event Type Id} as string,\n\t\t{Move Kind} as string,\n\t\t{From Location} as string,\n\t\t{To Location} as string,\n\t\t{From Position Name} as string,\n\t\t{To Position Name} as string,\n\t\t{Carry CHE Operator Id} as string,\n\t\t{Fetch CHE Operator Id} as string,\n\t\t{Put CHE Operator Id} as string,\n\t\t{Fetch CHE Id} as string,\n\t\t{Fetch CHE Kind} as string,\n\t\t{Carry CHE Id} as string,\n\t\t{Carry CHE Kind} as string,\n\t\t{Put CHE Id} as string,\n\t\t{Put CHE Kind} as string,\n\t\t{QC CHE Id} as string,\n\t\t{QC CHE Kind} as string,\n\t\tt_carry_complete as string,\n\t\tt_put as string,\n\t\tt_fetch as string,\n\t\tt_dispatch as string,\n\t\tt_discharge as string,\n\t\tt_carry_dispatch as string,\n\t\tt_carry_fetch_ready as string,\n\t\tt_carry_put_ready as string,\n\t\tdist_carry as string,\n\t\tdist_start as string,\n\t\t{Twin Fetch} as string,\n\t\t{Twin Carry} as string,\n\t\t{Twin Put} as string,\n\t\t{Category Id} as string,\n\t\t{Freight Kind Id} as string,\n\t\tto_pos_gkey as string,\n\t\tfm_pos_gkey as string,\n\t\t{Restow Reason} as string,\n\t\t{Container Line Id} as string,\n\t\t{Container Line Role} as string,\n\t\tpow as string,\n\t\tmve_gkey as long,\n\t\tufv_gkey as integer,\n\t\t{Berth Id} as string,\n\t\t{Goods And Ctr Wt Kg} as integer,\n\t\tactive_ufv as integer,\n\t\t{Requires Power Flag} as string,\n\t\t{OOG Flag} as string,\n\t\t{Shipper Id} as string,\n\t\t{Consignee Id} as string,\n\t\t{Commodity Id} as string,\n\t\tATA as string,\n\t\tATD as string,\n\t\tRehandles as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: true,\n\tvalidateSchema: true,\n\tignoreNoFilesFound: false,\n\tmoveFiles: ['bronze/moves/load','bronze/moves/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'dgt',\n\tfolderPath: 'bronze/moves/load',\n\tcolumnDelimiter: '\\t',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\'']) ~> CSV\nAggregate1 derive(t_carry_complete = coalesce(toTimestamp(t_carry_complete,'MM/dd/yyyy HH:mm:ss'),toTimestamp(t_carry_complete,'dd-MM-yyyy HH:mm:ss'),toTimestamp(t_carry_complete,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(t_carry_complete,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(t_carry_complete,'dd/MM/yyyy HH:mm:ss'),toTimestamp(t_carry_complete,'dd/MM/yyyy HH:mm')),\n\t\tt_put = coalesce(toTimestamp(t_put,'dd/MM/yyyy HH:mm'),toTimestamp(t_put,'dd-MM-yyyy HH:mm:ss'),toTimestamp(t_put,'dd.MM.yy HH:mm:ss'),toTimestamp(t_put,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(t_put,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(t_put,'dd/MM/yyyy HH:mm:ss'),toTimestamp(t_put,'dd-MM-yyyy HH:mm:ss')),\n\t\tt_fetch = coalesce(toTimestamp(t_fetch,'dd/MM/yyyy HH:mm'),toTimestamp(t_fetch,'dd-MM-yyyy HH:mm:ss'),toTimestamp(t_fetch,'dd.MM.yy HH:mm:ss'),toTimestamp(t_fetch,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(t_fetch,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(t_fetch,'dd/MM/yyyy HH:mm:ss'),toTimestamp(t_fetch,'dd-MM-yyyy HH:mm:ss')),\n\t\tt_discharge = coalesce(toTimestamp(t_discharge,'dd/MM/yyyy HH:mm'),toTimestamp(t_discharge,'dd-MM-yyyy HH:mm:ss'),toTimestamp(t_discharge,'dd.MM.yy HH:mm:ss'),toTimestamp(t_discharge,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(t_discharge,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(t_discharge,'dd/MM/yyyy HH:mm:ss'),toTimestamp(t_discharge,'dd-MM-yyyy HH:mm:ss')),\n\t\tFetch_CHE_Id = toLong(Fetch_CHE_Id),\n\t\tQC_CHE_Id = toLong(QC_CHE_Id),\n\t\tPut_CHE_Id = toLong(Put_CHE_Id),\n\t\tCarry_CHE_Id = toLong(Carry_CHE_Id),\n\t\tYear = year(coalesce(toTimestamp(t_put,'dd/MM/yyyy HH:mm'),toTimestamp(t_put,'dd-MM-yyyy HH:mm:ss'),toTimestamp(t_put,'dd.MM.yy HH:mm:ss'),toTimestamp(t_put,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(t_put,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(t_put,'dd/MM/yyyy HH:mm:ss'),toTimestamp(t_put,'dd-MM-yy HH:mm:ss'))),\n\t\tMonth = month(coalesce(toTimestamp(t_put,'dd/MM/yyyy HH:mm'),toTimestamp(t_put,'dd-MM-yyyy HH:mm:ss'),toTimestamp(t_put,'dd.MM.yy HH:mm:ss'),toTimestamp(t_put,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(t_put,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(t_put,'dd/MM/yyyy HH:mm:ss'),toTimestamp(t_put,'dd-MM-yy HH:mm:ss'))),\n\t\tWeek = weekOfYear(coalesce(toTimestamp(t_put,'dd/MM/yyyy HH:mm'),toTimestamp(t_put,'dd-MM-yyyy HH:mm:ss'),toTimestamp(t_put,'dd.MM.yy HH:mm:ss'),toTimestamp(t_put,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(t_put,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(t_put,'dd/MM/yyyy HH:mm:ss'),toTimestamp(t_put,'dd-MM-yy HH:mm:ss'))),\n\t\tt_dispatch = coalesce(toTimestamp(t_dispatch,'dd/MM/yyyy HH:mm'),toTimestamp(t_dispatch,'dd-MM-yyyy HH:mm:ss'),toTimestamp(t_dispatch,'dd.MM.yy HH:mm:ss'),toTimestamp(t_dispatch,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(t_dispatch,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(t_dispatch,'dd/MM/yyyy HH:mm:ss'),toTimestamp(t_dispatch,'dd-MM-yy HH:mm:ss')),\n\t\tt_carry_dispatch = coalesce(toTimestamp(t_carry_dispatch,'dd/MM/yyyy HH:mm'),toTimestamp(t_carry_dispatch,'dd-MM-yyyy HH:mm:ss'),toTimestamp(t_carry_dispatch,'dd.MM.yy HH:mm:ss'),toTimestamp(t_carry_dispatch,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(t_carry_dispatch,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(t_carry_dispatch,'dd/MM/yyyy HH:mm:ss'),toTimestamp(t_carry_dispatch,'dd-MM-yy HH:mm:ss')),\n\t\tt_carry_fetch_ready = coalesce(toTimestamp(t_carry_fetch_ready,'dd/MM/yyyy HH:mm'),toTimestamp(t_carry_fetch_ready,'dd-MM-yyyy HH:mm:ss'),toTimestamp(t_carry_fetch_ready,'dd.MM.yy HH:mm:ss'),toTimestamp(t_carry_fetch_ready,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(t_carry_fetch_ready,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(t_carry_fetch_ready,'dd/MM/yyyy HH:mm:ss'),toTimestamp(t_carry_fetch_ready,'dd-MM-yy HH:mm:ss')),\n\t\tt_carry_put_ready = coalesce(toTimestamp(t_carry_put_ready,'dd/MM/yyyy HH:mm'),toTimestamp(t_carry_put_ready,'dd-MM-yyyy HH:mm:ss'),toTimestamp(t_carry_put_ready,'dd.MM.yy HH:mm:ss'),toTimestamp(t_carry_put_ready,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(t_carry_put_ready,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(t_carry_put_ready,'dd/MM/yyyy HH:mm:ss'),toTimestamp(t_carry_put_ready,'dd-MM-yy HH:mm:ss')),\n\t\tATD = coalesce(toTimestamp(ATD,'dd/MM/yyyy HH:mm'),toTimestamp(ATD,'dd-MM-yyyy HH:mm:ss'),toTimestamp(ATD,'dd.MM.yy HH:mm:ss'),toTimestamp(ATD,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(ATD,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(ATD,'dd/MM/yyyy HH:mm:ss'),toTimestamp(ATD,'dd-MM-yy HH:mm:ss')),\n\t\tATA = coalesce(toTimestamp(ATA,'dd/MM/yyyy HH:mm'),toTimestamp(ATA,'dd-MM-yyyy HH:mm:ss'),toTimestamp(ATA,'dd.MM.yy HH:mm:ss'),toTimestamp(ATA,'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp(ATA,'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp(ATA,'dd/MM/yyyy HH:mm:ss'),toTimestamp(ATA,'dd-MM-yy HH:mm:ss'))) ~> DataTypeConversion\nSelect2 select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nSelect1 aggregate(groupBy(mve_gkey),\n\teach(match(name!='mve_gkey'), $$ = first($$))) ~> Aggregate1\nMapDrifted1 select(mapColumn(\n\t\t{Unit Nbr},\n\t\t{Facility Id},\n\t\t{Complex Id},\n\t\t{Yard Id},\n\t\t{Carrier Visit Key},\n\t\t{Event Type Id},\n\t\t{Move Kind},\n\t\t{From Location},\n\t\t{To Location},\n\t\t{From Position Name},\n\t\t{To Position Name},\n\t\t{Carry CHE Operator Id},\n\t\t{Fetch CHE Operator Id},\n\t\t{Put CHE Operator Id},\n\t\t{Fetch CHE Id},\n\t\t{Fetch CHE Kind},\n\t\t{Carry CHE Id},\n\t\t{Carry CHE Kind},\n\t\t{Put CHE Id},\n\t\t{Put CHE Kind},\n\t\t{QC CHE Id},\n\t\t{QC CHE Kind},\n\t\tt_carry_complete,\n\t\tt_put,\n\t\tt_fetch,\n\t\tt_dispatch,\n\t\tt_discharge,\n\t\tt_carry_dispatch,\n\t\tt_carry_fetch_ready,\n\t\tt_carry_put_ready,\n\t\tdist_carry,\n\t\tdist_start,\n\t\t{Twin Fetch},\n\t\t{Twin Carry},\n\t\t{Twin Put},\n\t\t{Category Id},\n\t\t{Freight Kind Id},\n\t\tto_pos_gkey,\n\t\tfm_pos_gkey,\n\t\t{Restow Reason},\n\t\t{Container Line Id},\n\t\t{Container Line Role},\n\t\tpow,\n\t\tmve_gkey,\n\t\tufv_gkey,\n\t\t{Berth Id},\n\t\t{Goods And Ctr Wt Kg},\n\t\tactive_ufv,\n\t\t{Requires Power Flag},\n\t\t{OOG Flag},\n\t\t{Shipper Id},\n\t\t{Consignee Id},\n\t\t{Commodity Id},\n\t\tATD,\n\t\tRehandles,\n\t\tATA\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nDataTypeConversion alterRow(upsertIf(true())) ~> AlterRow1\nCSV derive({Carrier Service} = toString(byName('Carrier Service'))) ~> MapDrifted1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'dgt',\n\tfolderPath: 'silver/moves',\n\tmergeSchema: false,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['mve_gkey'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink2"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]",
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService2')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/MoveSrc_Ennore')]",
 			"type": "Microsoft.Synapse/workspaces/dataflows",
 			"apiVersion": "2019-06-01-preview",
@@ -52899,6 +53505,55 @@
 						}
 					],
 					"script": "source(output(\n\t\tmve_gkey as integer,\n\t\tUnit_Nbr as string,\n\t\tFacility_Id as string,\n\t\tComplex_Id as string,\n\t\tYard_Id as string,\n\t\tCarrier_Visit_Key as integer,\n\t\tEvent_Type_Id as string,\n\t\tMove_Kind as string,\n\t\tFrom_Location as string,\n\t\tTo_Location as string,\n\t\tFrom_Position_Name as string,\n\t\tTo_Position_Name as string,\n\t\tCarry_CHE_Operator_Id as string,\n\t\tFetch_CHE_Operator_Id as string,\n\t\tPut_CHE_Operator_Id as string,\n\t\tFetch_CHE_Id as long,\n\t\tFetch_CHE_Kind as string,\n\t\tCarry_CHE_Id as long,\n\t\tCarry_CHE_Kind as string,\n\t\tPut_CHE_Id as long,\n\t\tPut_CHE_Kind as string,\n\t\tQC_CHE_Id as long,\n\t\tQC_CHE_Kind as string,\n\t\tt_carry_complete as timestamp,\n\t\tt_put as timestamp,\n\t\tt_fetch as timestamp,\n\t\tt_dispatch as timestamp,\n\t\tt_discharge as timestamp,\n\t\tt_carry_dispatch as timestamp,\n\t\tt_carry_fetch_ready as timestamp,\n\t\tt_carry_put_ready as timestamp,\n\t\tdist_carry as short,\n\t\tdist_start as short,\n\t\tTwin_Fetch as string,\n\t\tTwin_Carry as string,\n\t\tTwin_Put as string,\n\t\tCategory_Id as string,\n\t\tFreight_Kind_Id as string,\n\t\tto_pos_gkey as string,\n\t\tfm_pos_gkey as string,\n\t\tRestow_Reason as string,\n\t\tContainer_Line_Id as string,\n\t\tContainer_Line_Role as string,\n\t\tpow as string,\n\t\tufv_gkey as integer,\n\t\tBerth_Id as string,\n\t\tGoods_And_Ctr_Wt_Kg as string,\n\t\tactive_ufv as integer,\n\t\tRequires_Power_Flag as string,\n\t\tOOG_Flag as string,\n\t\tShipper_Id as string,\n\t\tConsignee_Id as string,\n\t\tCommodity_Id as string,\n\t\tATA as timestamp,\n\t\tATD as timestamp,\n\t\tRehandles as short,\n\t\tYear as integer,\n\t\tMonth as integer,\n\t\tWeek as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'delta',\n\tfileSystem: 'tdt',\n\tfolderPath: 'silver/moves',\n\tmode: 'read') ~> source1\nSelect1 filter(equals(Event_Type_Id,'UNIT_DISCH') || equals(Event_Type_Id,'UNIT_LOAD')) ~> Filter1\nFilter1 derive(Move_Completion_Date_Time = iif(Event_Type_Id=='UNIT_LOAD', t_carry_complete, t_discharge),\n\t\tMove_Complete_Date = toDate(toString(iif(Event_Type_Id=='UNIT_LOAD', t_carry_complete, t_discharge),'yyyy-MM-dd'),'yyyy-MM-dd'),\n\t\tMove_Complete_Time = toString(iif(Event_Type_Id=='UNIT_LOAD', t_carry_complete, t_discharge),'HH:mm:ss'),\n\t\tVessel_Code = iif(Event_Type_Id=='UNIT_LOAD',left(substring(To_Position_Name,3),instr(substring(To_Position_Name,3), '-')),left(substring(From_Position_Name,3),instr(substring(From_Position_Name,3), '-')))) ~> DerivedColumn1\nsource1 select(mapColumn(\n\t\tYard_Id,\n\t\tCarrier_Visit_Key,\n\t\tEvent_Type_Id,\n\t\tMove_Kind,\n\t\tFrom_Location,\n\t\tTo_Location,\n\t\tFrom_Position_Name,\n\t\tTo_Position_Name,\n\t\tQC_CHE_Id,\n\t\tQC_CHE_Kind,\n\t\tt_carry_complete,\n\t\tt_put,\n\t\tt_fetch,\n\t\tt_dispatch,\n\t\tt_discharge,\n\t\tpow,\n\t\tYear,\n\t\tMonth,\n\t\tWeek,\n\t\tmve_gkey,\n\t\tUnit_Nbr\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nDerivedColumn2 alterRow(upsertIf(true()),\n\tinsertIf(true())) ~> AlterRow1\nDerivedColumn1 window(asc(pow, true),\n\tasc(Move_Completion_Date_Time, true),\n\tstartRowOffset: -1L,\n\tendRowOffset: -1L,\n\tMove_Completion_Date_Time_PREV = lag(Move_Completion_Date_Time),\n\t\tPOW_PREV = lag(pow),\n\t\tVessel_PREV = iif(lag(Event_Type_Id)=='UNIT_LOAD',left(substring(lag(To_Position_Name),3),instr(substring(lag(To_Position_Name),3), '-')),left(substring(lag(From_Position_Name),3),instr(substring(lag(From_Position_Name),3), '-')))) ~> Window1\nWindow1 derive(Idle_Time_Min = iif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0)),\n\t\tIdle_Time_Range = case(iif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))>0 \r\n&& iif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))<=2,\"0 to 02 min\",\r\niif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))>2 \r\n&& iif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))<=5,\"02 to 05 min\",\r\niif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))>5\r\n&& iif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))<=10,\"05 to 10 min\",\r\niif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))>10\r\n&& iif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))<=15,\"10 to 15 min\",\r\niif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))>15\r\n&& iif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))<=20,\"15 to 20 min\",\r\niif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))>20\r\n&& iif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))<=25,\"20 to 25 min\",\r\niif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))>25\r\n&& iif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))<=30,\"25 to 30 min\",\r\niif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))>30\r\n&& iif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))<=60,\"30 to 60 min\",\r\niif(POW_PREV==pow && Vessel_Code==Vessel_PREV,minus(Move_Completion_Date_Time,Move_Completion_Date_Time_PREV)/60000,toLong(0))>60,\"60 & more\")) ~> DerivedColumn2\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'tdt',\n\tfolderPath: 'gold/qc_idle_time',\n\tmergeSchema: true,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['mve_gkey'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink1"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/RIO_Decking')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "CSV"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink2"
+						}
+					],
+					"transformations": [
+						{
+							"name": "DataTypeConversion"
+						},
+						{
+							"name": "Select1"
+						},
+						{
+							"name": "Aggregate1"
+						},
+						{
+							"name": "AlterRow1"
+						},
+						{
+							"name": "filter1"
+						}
+					],
+					"script": "source(output(\n\t\tgkey as long,\n\t\tuyv_gkey as long,\n\t\tunit_id as string,\n\t\ttime_stamp as string,\n\t\tdecking_type as string,\n\t\tnode_id as string,\n\t\tyard as string,\n\t\tfrom_pos_loctype as string,\n\t\tfrom_pos_locid as string,\n\t\tfrom_pos_loc_gkey as string,\n\t\tfrom_pos_slot as string,\n\t\tfrom_pos_name as string,\n\t\tfrom_pos_bin as string,\n\t\tfrom_pos_tier as string,\n\t\tto_pos_loctype as string,\n\t\tto_pos_locid as string,\n\t\tto_pos_loc_gkey as string,\n\t\tto_pos_slot as string,\n\t\tto_pos_name as string,\n\t\tto_pos_bin as string,\n\t\tto_pos_tier as string,\n\t\ttotal_score as string,\n\t\texecution_time as string,\n\t\tdetails as string,\n\t\tphase as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: false,\n\tvalidateSchema: true,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/deckinghistory/load','bronze/deckinghistory/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'rio',\n\tfolderPath: 'bronze/deckinghistory/load',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\''],\n\tmode: 'read') ~> CSV\nAggregate1 derive(time_stamp = :timestamp,\n\t\tYear = year(:timestamp),\n\t\tMonth = month(:timestamp),\n\t\tWeek = weekOfYear(:timestamp),\n\t\ttimestamp := coalesce(toTimestamp(split(time_stamp,\".\")[1],'dd-MM-yyyy HH:mm:ss'),toTimestamp(split(time_stamp,\".\")[1],'yyyy-MM-dd HH:mm:ss'),toTimestamp(split(time_stamp,\".\")[1],'yyyy-MM-dd HH:mm'),toTimestamp(split(time_stamp,\".\")[1],'dd/MM/yyyy HH:mm:ss'))) ~> DataTypeConversion\nCSV select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nSelect1 aggregate(groupBy(gkey),\n\teach(match(name!='gkey'), $$ = first($$))) ~> Aggregate1\nfilter1 alterRow(upsertIf(true())) ~> AlterRow1\nDataTypeConversion filter(not(isNull(gkey)) && not(isNull(time_stamp))) ~> filter1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'rio',\n\tfolderPath: 'silver/deckings',\n\tmergeSchema: false,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['gkey'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink2"
 				}
 			},
 			"dependsOn": [
@@ -64142,6 +64797,18 @@
 						},
 						{
 							"name": "derivedColumn7"
+						},
+						{
+							"name": "aggregate5"
+						},
+						{
+							"name": "aggregate6"
+						},
+						{
+							"name": "aggregate7"
+						},
+						{
+							"name": "select9"
 						}
 					],
 					"scriptLines": [
@@ -64267,7 +64934,7 @@
 						"     escapeChar: '\\\\',",
 						"     quoteChar: '\\\"',",
 						"     columnNamesAsHeader: true) ~> XpsEcUser",
-						"filter6 select(mapColumn(",
+						"aggregate6 select(mapColumn(",
 						"          mve_gkey,",
 						"          Unit_Nbr,",
 						"          Event_Type_Id,",
@@ -64361,7 +65028,8 @@
 						"          Stack_Violation,",
 						"          Date = Shift_Date,",
 						"          Year_Month,",
-						"          Year_Week",
+						"          Year_Week,",
+						"          gkey = aggregate5@gkey",
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select4",
@@ -64376,7 +65044,7 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select5",
-						"select5 alterRow(upsertIf(true())) ~> alterRow1",
+						"select9 alterRow(upsertIf(true())) ~> alterRow1",
 						"select6 alterRow(upsertIf(true())) ~> AlterRow2",
 						"select1 alterRow(upsertIf(true())) ~> alterRow3",
 						"filter5 select(mapColumn(",
@@ -64385,7 +65053,7 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select6",
-						"select2 filter(not(isNull(gkey)) && (decking_Type == 'PR-SC Scheduler - All Ranges Twin' ||decking_Type == 'PR-TT Scheduler - All Ranges' ||decking_Type == 'Gate Receival Assign Position' ||decking_Type == 'PR-TT Scheduler - All Ranges Twin' ||decking_Type == 'Bump Intruder - Twin' ||decking_Type == 'PR-SC Scheduler - All Ranges' ||decking_Type == 'Bump Intruder' || decking_Type == 'Vessel Discharge' || decking_Type == 'Vessel Discharge - Twin' || decking_Type == 'XD Drop if Floating Refine' || decking_Type == 'XD Refine Request' || decking_Type == 'XD Rehandle Request')) ~> filter5",
+						"aggregate5 filter(not(isNull(gkey)) && (decking_Type == 'PR-SC Scheduler - All Ranges Twin' ||decking_Type == 'PR-TT Scheduler - All Ranges' ||decking_Type == 'Gate Receival Assign Position' ||decking_Type == 'PR-TT Scheduler - All Ranges Twin' ||decking_Type == 'Bump Intruder - Twin' ||decking_Type == 'PR-SC Scheduler - All Ranges' ||decking_Type == 'Bump Intruder' || decking_Type == 'Vessel Discharge' || decking_Type == 'Vessel Discharge - Twin' || decking_Type == 'XD Drop if Floating Refine' || decking_Type == 'XD Refine Request' || decking_Type == 'XD Rehandle Request')) ~> filter5",
 						"join6 derive(Block_To_Block_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 3) != substring(DH_To_Position_Name_Short_5, 1, 3), true(), false()),",
 						"          Same_Block_Violation = iif( (substring(MH_To_Position_Name_Short_5, 1, 3) == substring(DH_To_Position_Name_Short_5, 1, 3)) && (substring(MH_To_Position_Name_Short_5, 5, 2) == substring(DH_To_Position_Name_Short_5, 5, 2)), false(), true()),",
 						"          Stack_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 6) != substring(DH_To_Position_Name_Short_5, 1, 6), true(), false())) ~> derivedColumn6",
@@ -64403,6 +65071,37 @@
 						"aggregate4 filter(not(isNull(user_id))) ~> filter7",
 						"select1 derive(Year_Month = (Year*100) + Month,",
 						"          Year_Week = (Year*100) + Week) ~> derivedColumn7",
+						"select2 aggregate(groupBy(gkey),",
+						"     each(match(name!=\"gkey\"), $$ = last($$))) ~> aggregate5",
+						"filter6 aggregate(groupBy(mve_gkey),",
+						"     each(match(name!=\"mve_gkey\"), $$ = last($$))) ~> aggregate6",
+						"select5 aggregate(groupBy(mve_gkey,",
+						"          Date),",
+						"     each(match(name!=\"mve_gkey\"&&name!=\"Date\"), $$ = last($$))) ~> aggregate7",
+						"aggregate7 select(mapColumn(",
+						"          mve_gkey,",
+						"          Date,",
+						"          D_H_Decking_Type,",
+						"          MH_ToPosName_Short_5Char,",
+						"          DH_ToPosName_Short_5Char,",
+						"          MH_Unit_Nbr,",
+						"          MH_Move_Kind,",
+						"          Category_Id,",
+						"          MH_T_Put_DateTime,",
+						"          MH_Put_CHE_Operator_Id,",
+						"          MH_Put_CHE_Id,",
+						"          Freight_Kind_Id,",
+						"          MaxDHTime,",
+						"          Location_Match_or_Not,",
+						"          operator_name,",
+						"          Block_To_Block_Violation,",
+						"          Same_Block_Violation,",
+						"          Stack_Violation,",
+						"          Year_Month,",
+						"          Year_Week",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select9",
 						"alterRow1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'delta',",
@@ -64412,11 +65111,11 @@
 						"     autoCompact: true,",
 						"     optimizedWrite: true,",
 						"     vacuum: 0,",
-						"     deletable: true,",
+						"     deletable: false,",
 						"     insertable: false,",
-						"     updateable: true,",
+						"     updateable: false,",
 						"     upsertable: true,",
-						"     keys:['mve_gkey'],",
+						"     keys:['mve_gkey','Date','operator_name'],",
 						"     umask: 0777,",
 						"     preCommands: [],",
 						"     postCommands: [],",
@@ -116513,7 +117212,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "53a0f615-df3b-4000-83d3-5e7ac4b6e65a"
+						"spark.autotune.trackingId": "fe0270b6-d26b-4a4a-870c-6cbdea26289a"
 					}
 				},
 				"metadata": {
@@ -116538,8 +117237,7 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56,
-						"automaticScaleJobs": true
+						"memory": 56
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -116566,7 +117264,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# TERMINAL CONFIGURATION\n",
@@ -116653,7 +117350,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COLUMN MAP  — ground truth from ATTRS/NAMES in converter\n",
@@ -116752,7 +117448,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FIXED SILVER SCHEMA\n",
@@ -116884,7 +117579,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# LOOKUP TABLES\n",
@@ -116908,7 +117602,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FILENAME DATETIME EXTRACTION\n",
@@ -116945,7 +117638,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COVERAGE VALIDATOR\n",
@@ -116973,7 +117665,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PARSER  — CRITICAL FIX\n",
@@ -117105,7 +117796,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# DISCOVER TXT FILES\n",
@@ -117134,7 +117824,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PROCESS EACH FILE\n",
@@ -120249,202 +120938,6 @@
 			},
 			"dependsOn": [],
 			"location": "westus"
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/RIO_Decking')]",
-			"type": "Microsoft.Synapse/workspaces/dataflows",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"linkedService": {
-								"referenceName": "linkedService1",
-								"type": "LinkedServiceReference"
-							},
-							"name": "CSV"
-						}
-					],
-					"sinks": [
-						{
-							"linkedService": {
-								"referenceName": "linkedService1",
-								"type": "LinkedServiceReference"
-							},
-							"name": "sink2"
-						}
-					],
-					"transformations": [
-						{
-							"name": "DataTypeConversion"
-						},
-						{
-							"name": "Select1"
-						},
-						{
-							"name": "Aggregate1"
-						},
-						{
-							"name": "AlterRow1"
-						},
-						{
-							"name": "filter1"
-						}
-					],
-					"script": "source(output(\n\t\tgkey as long,\n\t\tuyv_gkey as long,\n\t\tunit_id as string,\n\t\ttime_stamp as string,\n\t\tdecking_type as string,\n\t\tnode_id as string,\n\t\tyard as string,\n\t\tfrom_pos_loctype as string,\n\t\tfrom_pos_locid as string,\n\t\tfrom_pos_loc_gkey as string,\n\t\tfrom_pos_slot as string,\n\t\tfrom_pos_name as string,\n\t\tfrom_pos_bin as string,\n\t\tfrom_pos_tier as string,\n\t\tto_pos_loctype as string,\n\t\tto_pos_locid as string,\n\t\tto_pos_loc_gkey as string,\n\t\tto_pos_slot as string,\n\t\tto_pos_name as string,\n\t\tto_pos_bin as string,\n\t\tto_pos_tier as string,\n\t\ttotal_score as string,\n\t\texecution_time as string,\n\t\tdetails as string,\n\t\tphase as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: false,\n\tvalidateSchema: true,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/deckinghistory/load','bronze/deckinghistory/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'rio',\n\tfolderPath: 'bronze/deckinghistory/load',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\''],\n\tmode: 'read') ~> CSV\nAggregate1 derive(time_stamp = :timestamp,\n\t\tYear = year(:timestamp),\n\t\tMonth = month(:timestamp),\n\t\tWeek = weekOfYear(:timestamp),\n\t\ttimestamp := coalesce(toTimestamp(split(time_stamp,\".\")[1],'dd-MM-yyyy HH:mm:ss'),toTimestamp(split(time_stamp,\".\")[1],'yyyy-MM-dd HH:mm:ss'),toTimestamp(split(time_stamp,\".\")[1],'yyyy-MM-dd HH:mm'),toTimestamp(split(time_stamp,\".\")[1],'dd/MM/yyyy HH:mm:ss'))) ~> DataTypeConversion\nCSV select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nSelect1 aggregate(groupBy(gkey),\n\teach(match(name!='gkey'), $$ = first($$))) ~> Aggregate1\nfilter1 alterRow(upsertIf(true())) ~> AlterRow1\nDataTypeConversion filter(not(isNull(gkey)) && not(isNull(time_stamp))) ~> filter1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'rio',\n\tfolderPath: 'silver/deckings',\n\tmergeSchema: false,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['gkey'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink2"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/FLD_RIO')]",
-			"type": "Microsoft.Synapse/workspaces/dataflows",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"linkedService": {
-								"referenceName": "linkedService1",
-								"type": "LinkedServiceReference"
-							},
-							"name": "DeckingHistory"
-						}
-					],
-					"sinks": [
-						{
-							"linkedService": {
-								"referenceName": "linkedService2",
-								"type": "LinkedServiceReference"
-							},
-							"name": "fld"
-						}
-					],
-					"transformations": [
-						{
-							"name": "select2"
-						},
-						{
-							"name": "filter1"
-						},
-						{
-							"name": "derivedColumn1"
-						},
-						{
-							"name": "AlterRow1"
-						},
-						{
-							"name": "window1"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          gkey as long,",
-						"          uyv_gkey as long,",
-						"          unit_id as string,",
-						"          time_stamp as timestamp,",
-						"          decking_type as string,",
-						"          node_id as string,",
-						"          yard as string,",
-						"          from_pos_loctype as string,",
-						"          from_pos_locid as string,",
-						"          from_pos_loc_gkey as string,",
-						"          from_pos_slot as string,",
-						"          from_pos_name as string,",
-						"          from_pos_bin as string,",
-						"          from_pos_tier as string,",
-						"          to_pos_loctype as string,",
-						"          to_pos_locid as string,",
-						"          to_pos_loc_gkey as string,",
-						"          to_pos_slot as string,",
-						"          to_pos_name as string,",
-						"          to_pos_bin as string,",
-						"          to_pos_tier as string,",
-						"          total_score as string,",
-						"          execution_time as string,",
-						"          details as string,",
-						"          phase as string,",
-						"          Year as integer,",
-						"          Month as integer,",
-						"          Week as integer",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: true,",
-						"     moveFiles: ['/bronze/deckinghistory/load','bronze/deckinghistory/archive'],",
-						"     format: 'delta',",
-						"     fileSystem: 'rio',",
-						"     folderPath: 'silver/deckings') ~> DeckingHistory",
-						"DeckingHistory select(skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> select2",
-						"select2 filter((decking_type == 'Bump Intruder' || decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin' || decking_type == 'Gate Receival Assign Position') && to_pos_slot=='Fail!') ~> filter1",
-						"filter1 derive(Decking_Type_Actual = iif((decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin'), 'Vessel Discharge',decking_type),",
-						"          Year_Week = (Year * 100) + Week,",
-						"          Year_Month = (Year * 100) + Month,",
-						"          Date = toDate(time_stamp)) ~> derivedColumn1",
-						"window1 alterRow(upsertIf(true())) ~> AlterRow1",
-						"derivedColumn1 window(over(Date,",
-						"          unit_id,",
-						"          Decking_Type_Actual),",
-						"     asc(time_stamp, true),",
-						"     FLD_Actual_count = iif((rank() > 1), 0, 1)) ~> window1",
-						"AlterRow1 sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     input(",
-						"          gkey as long,",
-						"          uyv_gkey as long,",
-						"          unit_id as string,",
-						"          decking_type as string,",
-						"          from_pos_locid as string,",
-						"          from_pos_slot as string,",
-						"          from_pos_name as string,",
-						"          from_pos_tier as string,",
-						"          to_pos_locid as string,",
-						"          to_pos_slot as string,",
-						"          to_pos_name as string,",
-						"          to_pos_tier as string,",
-						"          total_score as string,",
-						"          execution_time as string,",
-						"          phase as string,",
-						"          freightKind as string,",
-						"          time_stamp as timestamp,",
-						"          Year as integer,",
-						"          Month as integer,",
-						"          Week as integer,",
-						"          Decking_Type_Actual as string,",
-						"          Year_Week as integer,",
-						"          Year_Month as integer,",
-						"          Date as date,",
-						"          fld_actual_count as integer",
-						"     ),",
-						"     format: 'delta',",
-						"     fileSystem: 'rio',",
-						"     folderPath: 'gold/fld',",
-						"     mergeSchema: false,",
-						"     autoCompact: true,",
-						"     optimizedWrite: true,",
-						"     vacuum: 0,",
-						"     deletable: false,",
-						"     insertable: false,",
-						"     updateable: false,",
-						"     upsertable: true,",
-						"     keys:['unit_id','gkey','uyv_gkey','Date'],",
-						"     umask: 0777,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> fld"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]",
-				"[concat(variables('workspaceId'), '/linkedServices/linkedService2')]"
-			]
 		}
 	]
 }
