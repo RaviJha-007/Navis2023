@@ -1,0 +1,25 @@
+{
+	"name": "SE_Trigger_Socar_Weekly",
+	"properties": {
+		"description": "Weekly scheduled trigger for SOCAR",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Socar",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2026-09-25T06:00:00",
+				"timeZone": "Arabian Standard Time"
+			}
+		}
+	}
+}
