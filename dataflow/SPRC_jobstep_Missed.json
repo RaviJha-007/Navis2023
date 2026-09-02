@@ -236,7 +236,7 @@
 				"AlterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
-				"     fileSystem: 'malta',",
+				"     fileSystem: 'sprc',",
 				"     folderPath: 'gold/jobstep_missed',",
 				"     mergeSchema: true,",
 				"     autoCompact: true,",
