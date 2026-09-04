@@ -1,0 +1,62 @@
+{
+	"name": "WeeklyOptimise_WI_XPS",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "58c200a7-27cf-4e0f-967e-9b18fd6ac44c"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"from datetime import datetime\n",
+					"\n",
+					"storage_account = \"navispowerbidatastorage2\"\n",
+					"silver_path = f\"abfss://workinstruction@{storage_account}.dfs.core.windows.net/silver_xps/\"\n",
+					"\n",
+					"print(f\"🔧 Weekly Maintenance — {datetime.now().strftime('%Y-%m-%d %H:%M')}\")\n",
+					"print(\"=\" * 60)\n",
+					"\n",
+					"# Check file count before\n",
+					"before = spark.sql(f\"DESCRIBE DETAIL delta.`{silver_path}`\").collect()[0][\"numFiles\"]\n",
+					"\n",
+					"# Optimize entire table (all partitions)\n",
+					"spark.sql(f\"OPTIMIZE delta.`{silver_path}`\")\n",
+					"\n",
+					"# Check file count after\n",
+					"after = spark.sql(f\"DESCRIBE DETAIL delta.`{silver_path}`\").collect()[0][\"numFiles\"]\n",
+					"\n",
+					"print(f\"  ✅ silver_xps (all partitions): {before} files → {after} files\")\n",
+					"\n",
+					"print(\"=\" * 60)\n",
+					"print(\"✅ Weekly maintenance complete!\")\n",
+					""
+				],
+				"execution_count": null
+			}
+		]
+	}
+}
