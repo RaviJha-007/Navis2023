@@ -1,5 +1,5 @@
 {
-	"name": "DailyOptimise",
+	"name": "WeeklyOptimise_WI",
 	"properties": {
 		"nbformat": 4,
 		"nbformat_minor": 2,
@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "0fa52697-092a-49fb-8a1b-22acbc234141"
+				"spark.autotune.trackingId": "54a151db-b48b-441f-a1a0-e5c59e17619c"
 			}
 		},
 		"metadata": {
