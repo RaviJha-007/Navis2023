@@ -12387,7 +12387,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"notebook": {
-								"referenceName": "DailyOptimise",
+								"referenceName": "WeeklyOptimise_WI",
 								"type": "NotebookReference"
 							},
 							"snapshot": true,
@@ -12398,6 +12398,27 @@
 							},
 							"numExecutors": null
 						}
+					},
+					{
+						"name": "Optimise_WI_XPS",
+						"type": "SynapseNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "WeeklyOptimise_WI_XPS",
+								"type": "NotebookReference"
+							},
+							"snapshot": true,
+							"conf": {}
+						}
 					}
 				],
 				"policy": {
@@ -12406,7 +12427,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/notebooks/DailyOptimise')]"
+				"[concat(variables('workspaceId'), '/notebooks/WeeklyOptimise_WI')]",
+				"[concat(variables('workspaceId'), '/notebooks/WeeklyOptimise_WI_XPS')]"
 			]
 		},
 		{
@@ -114137,7 +114159,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/DailyOptimise')]",
+			"name": "[concat(parameters('workspaceName'), '/WeeklyOptimise_WI')]",
 			"type": "Microsoft.Synapse/workspaces/notebooks",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -114157,7 +114179,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "bb012eea-fbfb-4d91-92d9-3c1f1e26d1a3"
+						"spark.autotune.trackingId": "51cefd85-d2c4-4207-bbcb-d048a7eaadf8"
 					}
 				},
 				"metadata": {
@@ -116302,7 +116324,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "54bdb281-8a85-4600-a10c-81603b0b9ca7"
+						"spark.autotune.trackingId": "e71b4c00-3d85-4337-90b5-7b908369fd4a"
 					}
 				},
 				"metadata": {
@@ -118051,7 +118073,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "af1c302e-4f1e-4565-934c-35278641ab2c"
+						"spark.autotune.trackingId": "1f410e9e-3d91-4dfe-a34a-14816d364946"
 					}
 				},
 				"metadata": {
@@ -122915,6 +122937,73 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/pipelines/WI_01_XPS')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WeeklyOptimise_WI_XPS')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "3a46e3c7-9927-463c-b7f1-0846c10ec2f9"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "python"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"from datetime import datetime\n",
+							"\n",
+							"storage_account = \"navispowerbidatastorage2\"\n",
+							"silver_path = f\"abfss://workinstruction@{storage_account}.dfs.core.windows.net/silver_xps/\"\n",
+							"\n",
+							"print(f\"🔧 Weekly Maintenance — {datetime.now().strftime('%Y-%m-%d %H:%M')}\")\n",
+							"print(\"=\" * 60)\n",
+							"\n",
+							"# Check file count before\n",
+							"before = spark.sql(f\"DESCRIBE DETAIL delta.`{silver_path}`\").collect()[0][\"numFiles\"]\n",
+							"\n",
+							"# Optimize entire table (all partitions)\n",
+							"spark.sql(f\"OPTIMIZE delta.`{silver_path}`\")\n",
+							"\n",
+							"# Check file count after\n",
+							"after = spark.sql(f\"DESCRIBE DETAIL delta.`{silver_path}`\").collect()[0][\"numFiles\"]\n",
+							"\n",
+							"print(f\"  ✅ silver_xps (all partitions): {before} files → {after} files\")\n",
+							"\n",
+							"print(\"=\" * 60)\n",
+							"print(\"✅ Weekly maintenance complete!\")\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
 		}
 	]
 }
