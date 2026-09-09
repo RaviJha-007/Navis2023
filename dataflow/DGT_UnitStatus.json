@@ -34,6 +34,15 @@
 				},
 				{
 					"name": "window2"
+				},
+				{
+					"name": "window3"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "derivedColumn4"
 				}
 			],
 			"scriptLines": [
@@ -82,11 +91,40 @@
 				"          Previous_Time_Of_event = lag(Time_Of_event,1)) ~> window1",
 				"filter1 sort(asc(Time_Of_event, true)) ~> sort1",
 				"derivedColumn1 filter(Cycle_Status!=\"\") ~> filter1",
-				"window1 derive(Cycle_Start_Flag = iif(Cycle_Status == \"START\" && (isNull(Previous_Cycle_Status) || Previous_Cycle_Status == \"END\"), 1, 0)) ~> derivedColumn2",
+				"window1 derive(Cycle_Start_Flag = iif((Cycle_Status == \"START\"), 1, 0)) ~> derivedColumn2",
 				"derivedColumn2 window(over(Date_Of_Event,",
 				"          Container_Nbr),",
 				"     asc(Time_Of_event, true),",
-				"     Cycle_Id = sum(Cycle_Start_Flag)) ~> window2"
+				"     Cycle_ID = sum(Cycle_Start_Flag)) ~> window2",
+				"window2 window(over(Date_Of_Event,",
+				"          Container_Nbr,",
+				"          Cycle_Id = Cycle_ID),",
+				"     asc(Time_Of_event, true),",
+				"     Cycle_Has_End = max(iif(Cycle_Status == \"END\", 1, 0)),",
+				"          Cycle_Has_Correction = max(iif(Cycle_Status == \"CORRECTION\", 1, 0))) ~> window3",
+				"window3 derive(Cycle_Flag = iif(\r",
+				"    isNull(Cycle_ID) || Cycle_ID == 0,\r",
+				"    \"Unable to Validate\",\r",
+				"    iif(\r",
+				"        Cycle_Has_End == 0,\r",
+				"        \"Open Cycle\",\r",
+				"        iif(\r",
+				"            Cycle_Has_Correction == 1,\r",
+				"            \"Yes\",\r",
+				"            \"No\"\r",
+				"        )\r",
+				"    )\r",
+				")) ~> derivedColumn3",
+				"derivedColumn3 derive(Valid_Correction_Flag = iif(\r",
+				"    Cycle_Flag == \"Yes\"\r",
+				"    && Cycle_Status == \"CORRECTION\",\r",
+				"    1,\r",
+				"    0\r",
+				"),",
+				"          From_Block = substring(:From_Pos, 1, 3),",
+				"          To_Block = substring(:To_Pos, 1, 3),",
+				"          From_Pos := iif(length(split(From_Position, \"-\")[3]) == 8, substring(split(From_Position, \"-\")[3], 0, 7), split(From_Position, \"-\")[3]),",
+				"          To_Pos := iif(length(split(To_Position, \"-\")[3]) == 8, substring(split(To_Position, \"-\")[3], 0, 7), split(To_Position, \"-\")[3])) ~> derivedColumn4"
 			]
 		}
 	}
