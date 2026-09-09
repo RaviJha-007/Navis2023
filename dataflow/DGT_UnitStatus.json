@@ -12,7 +12,15 @@
 					"name": "unitstatus"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "select1"
@@ -43,9 +51,6 @@
 				},
 				{
 					"name": "derivedColumn4"
-				},
-				{
-					"name": "derivedColumn5"
 				}
 			],
 			"scriptLines": [
@@ -124,9 +129,27 @@
 				"    1,\r",
 				"    0\r",
 				"),",
+				"          Correction_Type = iif(substring(:From_Pos, 1, 3) != substring(:To_Pos, 1, 3), \"Block_To_Block\", iif( not((substring(:From_Pos, 1, 3) == substring(:To_Pos, 1, 3)) && (substring(:From_Pos, 5, 2) == substring(:To_Pos, 5, 2))), \"Same_Block_Correction\", iif(substring(:From_Pos, 1, 6) != substring(:To_Pos, 1, 6), \"Stack_Correction\", toString(null())))),",
 				"          From_Pos := iif(length(split(From_Position, \"-\")[3]) == 8, substring(split(From_Position, \"-\")[3], 0, 7), split(From_Position, \"-\")[3]),",
 				"          To_Pos := iif(length(split(To_Position, \"-\")[3]) == 8, substring(split(To_Position, \"-\")[3], 0, 7), split(To_Position, \"-\")[3])) ~> derivedColumn4",
-				"derivedColumn4 derive(Block_To_Block_Violation = ERROR_FUNCTION('')) ~> derivedColumn5"
+				"derivedColumn4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'dgt',",
+				"     folderPath: 'gold/unit_correction_status',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
