@@ -1,0 +1,47 @@
+{
+	"name": "DGT_UnitStatus",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "unitstatus"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          {Container Nbr} as string,",
+				"          Event as string,",
+				"          {From Position} as string,",
+				"          {To Position} as string,",
+				"          {Current POD} as string,",
+				"          {Outbound Carrier} as string,",
+				"          {Carrier Service} as string,",
+				"          {Eq Class} as string,",
+				"          time_out as string,",
+				"          {Eq Length} as string,",
+				"          Time_Of_event as string,",
+				"          Status as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     moveFiles: ['bronze/unitstatus/load','bronze/unitstatus/archive'],",
+				"     format: 'delimited',",
+				"     fileSystem: 'dgt',",
+				"     folderPath: 'bronze/unitstatus/load',",
+				"     columnDelimiter: '\\t',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> unitstatus"
+			]
+		}
+	}
+}
