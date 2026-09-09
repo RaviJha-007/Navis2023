@@ -43,6 +43,9 @@
 				},
 				{
 					"name": "derivedColumn4"
+				},
+				{
+					"name": "derivedColumn5"
 				}
 			],
 			"scriptLines": [
@@ -121,10 +124,9 @@
 				"    1,\r",
 				"    0\r",
 				"),",
-				"          From_Block = substring(:From_Pos, 1, 3),",
-				"          To_Block = substring(:To_Pos, 1, 3),",
 				"          From_Pos := iif(length(split(From_Position, \"-\")[3]) == 8, substring(split(From_Position, \"-\")[3], 0, 7), split(From_Position, \"-\")[3]),",
-				"          To_Pos := iif(length(split(To_Position, \"-\")[3]) == 8, substring(split(To_Position, \"-\")[3], 0, 7), split(To_Position, \"-\")[3])) ~> derivedColumn4"
+				"          To_Pos := iif(length(split(To_Position, \"-\")[3]) == 8, substring(split(To_Position, \"-\")[3], 0, 7), split(To_Position, \"-\")[3])) ~> derivedColumn4",
+				"derivedColumn4 derive(Block_To_Block_Violation = ERROR_FUNCTION('')) ~> derivedColumn5"
 			]
 		}
 	}
