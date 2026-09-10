@@ -30,9 +30,6 @@
 			],
 			"transformations": [
 				{
-					"name": "join1"
-				},
-				{
 					"name": "filter1"
 				},
 				{
@@ -46,6 +43,9 @@
 				},
 				{
 					"name": "aggregate1"
+				},
+				{
+					"name": "lookup1"
 				}
 			],
 			"scriptLines": [
@@ -108,13 +108,8 @@
 				"     format: 'delta',",
 				"     fileSystem: 'dgt',",
 				"     folderPath: 'gold/sc_violation') ~> scviolations",
-				"aggregate1, scviolations join(trim(Container_Nbr) == trim(MH_Unit_Nbr),",
-				"     joinType:'right',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join1",
 				"unitcorrectionstatus filter(Event==\"UNIT_POSITION_CORRECTION\") ~> filter1",
-				"join1 derive(After_StackCheck_Location_Match = iif(not(isNull(Event)) || Event==\"\", \"Position Not Followed\", Location_Match_or_Not)) ~> derivedColumn1",
+				"lookup1 derive(After_StackCheck_Location_Match = iif((isNull(Container_Nbr) || Container_Nbr==\"\"),Location_Match_or_Not,\"Position Not Followed\")) ~> derivedColumn1",
 				"select1 alterRow(upsertIf(true())) ~> alterRow1",
 				"derivedColumn1 select(mapColumn(",
 				"          Container_Nbr,",
@@ -122,7 +117,7 @@
 				"          From_Position,",
 				"          To_Position,",
 				"          Time_Of_event,",
-				"          Date_Of_Event = aggregate1@Date_Of_Event,",
+				"          Date_Of_Event,",
 				"          Cycle_Flag,",
 				"          Valid_Correction_Flag,",
 				"          Correction_Type,",
@@ -152,6 +147,10 @@
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"filter1 aggregate(groupBy(Container_Nbr),",
 				"     each(match(name!='Container_Nbr'), $$ = last($$))) ~> aggregate1",
+				"scviolations, aggregate1 lookup(trim(toString(MH_Unit_Nbr)) == trim(toString(Container_Nbr)),",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
