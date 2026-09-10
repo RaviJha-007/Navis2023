@@ -43,6 +43,9 @@
 				},
 				{
 					"name": "select1"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -105,7 +108,7 @@
 				"     format: 'delta',",
 				"     fileSystem: 'dgt',",
 				"     folderPath: 'gold/sc_violation') ~> scviolations",
-				"filter1, scviolations join(trim(Container_Nbr) == trim(MH_Unit_Nbr),",
+				"aggregate1, scviolations join(trim(Container_Nbr) == trim(MH_Unit_Nbr),",
 				"     joinType:'right',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -119,7 +122,7 @@
 				"          From_Position,",
 				"          To_Position,",
 				"          Time_Of_event,",
-				"          Date_Of_Event,",
+				"          Date_Of_Event = aggregate1@Date_Of_Event,",
 				"          Cycle_Flag,",
 				"          Valid_Correction_Flag,",
 				"          Correction_Type,",
@@ -147,6 +150,8 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
+				"filter1 aggregate(groupBy(Container_Nbr),",
+				"     each(match(name!='Container_Nbr'), $$ = last($$))) ~> aggregate1",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
