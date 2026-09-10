@@ -1,0 +1,135 @@
+{
+	"name": "DGT_Post_stackCheck_SC_Violations",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "AzureBlobStorage1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "unitcorrectionstatus"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "scviolations"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "PostStackCheckViolations"
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Container_Nbr as string,",
+				"          Event as string,",
+				"          From_Position as string,",
+				"          To_Position as string,",
+				"          Current_POD as string,",
+				"          Outbound_Carrier as string,",
+				"          Carrier_Service as string,",
+				"          Eq_Class as string,",
+				"          time_out as timestamp,",
+				"          Eq_Length as string,",
+				"          Time_Of_event as timestamp,",
+				"          Status as string,",
+				"          Cycle_Status as string,",
+				"          Date_Of_Event as date,",
+				"          Previous_Cycle_Status as string,",
+				"          Previous_Time_Of_event as timestamp,",
+				"          Cycle_Start_Flag as integer,",
+				"          Cycle_ID as long,",
+				"          Cycle_Has_End as integer,",
+				"          Cycle_Has_Correction as integer,",
+				"          Cycle_Flag as string,",
+				"          Valid_Correction_Flag as integer,",
+				"          Correction_Type as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     format: 'delta',",
+				"     container: 'dgt',",
+				"     folderPath: 'gold/unit_correction_status') ~> unitcorrectionstatus",
+				"source(output(",
+				"          D_H_Decking_Type as string,",
+				"          MH_ToPosName_Short_5Char as string,",
+				"          DH_ToPosName_Short_5Char as string,",
+				"          MH_Unit_Nbr as string,",
+				"          MH_Move_Kind as string,",
+				"          Category_Id as string,",
+				"          MH_T_Put_DateTime as timestamp,",
+				"          MH_Put_CHE_Operator_Id as string,",
+				"          mve_gkey as long,",
+				"          MH_Put_CHE_Id as long,",
+				"          Freight_Kind_Id as string,",
+				"          MaxDHTime as timestamp,",
+				"          Location_Match_or_Not as string,",
+				"          operator_name as string,",
+				"          Block_To_Block_Violation as boolean,",
+				"          Same_Block_Violation as boolean,",
+				"          Stack_Violation as boolean,",
+				"          Date as date,",
+				"          Year_Month as integer,",
+				"          Year_Week as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'dgt',",
+				"     folderPath: 'gold/sc_violation') ~> scviolations",
+				"filter1, scviolations join(trim(Container_Nbr) == trim(MH_Unit_Nbr),",
+				"     joinType:'right',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"unitcorrectionstatus filter(Event==\"UNIT_POSITION_CORRECTION\") ~> filter1",
+				"join1 derive(After_StackCheck_Location_Match = iif(not(isNull(Event)) || Event==\"\", \"Position Not Followed\", Location_Match_or_Not)) ~> derivedColumn1",
+				"derivedColumn1 alterRow(upsertIf(true())) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'dgt',",
+				"     folderPath: 'gold/sc_violations_post_stack_check',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['mve_gkey','Date','operator_name'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> PostStackCheckViolations"
+			]
+		}
+	}
+}
