@@ -44,9 +44,6 @@
 					"name": "window2"
 				},
 				{
-					"name": "window3"
-				},
-				{
 					"name": "derivedColumn3"
 				},
 				{
@@ -54,6 +51,12 @@
 				},
 				{
 					"name": "select2"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "join1"
 				}
 			],
 			"scriptLines": [
@@ -105,13 +108,7 @@
 				"derivedColumn2 window(over(Container_Nbr),",
 				"     asc(Time_Of_event, true),",
 				"     Cycle_ID = sum(Cycle_Start_Flag)) ~> window2",
-				"window2 window(over(Container_Nbr,",
-				"          Cycle_ID),",
-				"     asc(Time_Of_event, true),",
-				"     rangeSpecified: true,",
-				"     Cycle_Has_End = max(iif(Cycle_Status==\"END\", 1, 0)),",
-				"          Cycle_Has_Correction = max(iif(Cycle_Status == \"CORRECTION\", 1, 0))) ~> window3",
-				"window3 derive(Cycle_Flag = iif(\r",
+				"aggregate1 derive(Cycle_Flag = iif(\r",
 				"    isNull(Cycle_ID) || Cycle_ID == 0,\r",
 				"    \"Unable to Validate\",\r",
 				"    iif(\r",
@@ -124,7 +121,7 @@
 				"        )\r",
 				"    )\r",
 				")) ~> derivedColumn3",
-				"derivedColumn3 derive(Valid_Correction_Flag = iif(\r",
+				"join1 derive(Valid_Correction_Flag = iif(\r",
 				"    Cycle_Flag == \"Yes\"\r",
 				"    && Cycle_Status == \"CORRECTION\",\r",
 				"    1,\r",
@@ -134,7 +131,7 @@
 				"          From_Pos := iif(length(split(From_Position, \"-\")[3]) == 8, substring(split(From_Position, \"-\")[3], 0, 7), split(From_Position, \"-\")[3]),",
 				"          To_Pos := iif(length(split(To_Position, \"-\")[3]) == 8, substring(split(To_Position, \"-\")[3], 0, 7), split(To_Position, \"-\")[3])) ~> derivedColumn4",
 				"derivedColumn4 select(mapColumn(",
-				"          Container_Nbr,",
+				"          Container_Nbr = select1@Container_Nbr,",
 				"          Event,",
 				"          From_Position,",
 				"          To_Position,",
@@ -151,7 +148,7 @@
 				"          Previous_Cycle_Status,",
 				"          Previous_Time_Of_event,",
 				"          Cycle_Start_Flag,",
-				"          Cycle_ID,",
+				"          Cycle_ID = window2@Cycle_ID,",
 				"          Cycle_Has_End,",
 				"          Cycle_Has_Correction,",
 				"          Cycle_Flag,",
@@ -160,6 +157,16 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
+				"window2 aggregate(groupBy(Container_Nbr,",
+				"          Cycle_ID),",
+				"     Cycle_Has_End = max(iif(Cycle_Status==\"END\", 1, 0)),",
+				"          Cycle_Has_Correction = max(iif(Cycle_Status == \"CORRECTION\", 1, 0))) ~> aggregate1",
+				"window2, derivedColumn3 join(select1@Container_Nbr == aggregate1@Container_Nbr",
+				"     && window2@Cycle_ID == aggregate1@Cycle_ID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
 				"select2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
