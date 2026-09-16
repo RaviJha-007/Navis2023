@@ -150,7 +150,7 @@
 				}
 			},
 			{
-				"name": "Unit Status",
+				"name": "DGT_UnitStatus",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -164,6 +164,74 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "DGT_UnitStatus",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "FLD_DGT",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "Decking",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "FLD_DGT",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "DGT_Post_stackCheck_SC_Violations",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "SC_ViolationsDGT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "DGT_UnitStatus",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "DGT_Post_stackCheck_SC_Violations",
 						"type": "DataFlowReference"
 					},
 					"compute": {
