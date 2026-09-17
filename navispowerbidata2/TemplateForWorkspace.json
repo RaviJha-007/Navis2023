@@ -25695,6 +25695,13 @@
 							"type": "PipelineReference"
 						},
 						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "DGT",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
 					}
 				],
 				"type": "ScheduleTrigger",
@@ -25733,7 +25740,8 @@
 				"[concat(variables('workspaceId'), '/pipelines/SPIA')]",
 				"[concat(variables('workspaceId'), '/pipelines/RSGT')]",
 				"[concat(variables('workspaceId'), '/pipelines/PNG')]",
-				"[concat(variables('workspaceId'), '/pipelines/CGSA')]"
+				"[concat(variables('workspaceId'), '/pipelines/CGSA')]",
+				"[concat(variables('workspaceId'), '/pipelines/DGT')]"
 			]
 		},
 		{
