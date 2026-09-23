@@ -186,7 +186,6 @@
 				"     format: 'delta',",
 				"     fileSystem: 'apmt-elz',",
 				"     folderPath: 'gold/conformities',",
-				"     overwrite: true,",
 				"     mergeSchema: true,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
