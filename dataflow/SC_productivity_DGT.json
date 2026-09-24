@@ -261,7 +261,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: ($Customer),",
-				"     folderPath: 'gold/itv_hours_moves',",
+				"     folderPath: 'gold/sc_hours_moves',",
 				"     mergeSchema: false,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
