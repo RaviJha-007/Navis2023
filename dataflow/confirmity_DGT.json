@@ -100,7 +100,7 @@
 				"          Date = :created_date,",
 				"          Week = iif(dayOfWeek(:created_date) == 1,  weekOfYear(:created_date) + 1, weekOfYear(:created_date)),",
 				"          stacking_array := split(StackingFactor, '/'),",
-				"          created_date := toDate(split(split(FileDate, \".\")[1],\"_\")[4], 'ddMMyyyy')) ~> derivedColumn1",
+				"          created_date := toDate(split(split(FileDate, \".\")[1],\"_\")[2], 'ddMMyyyy')) ~> derivedColumn1",
 				"filter1 sort(asc(Date, true),",
 				"     asc(CONTAINERNO, true)) ~> sort1",
 				"select3 filter(not(isDate(CONTAINERNO)) && not(isNull(CONTAINERNO)) && CONTAINERNO != '') ~> filter1",
