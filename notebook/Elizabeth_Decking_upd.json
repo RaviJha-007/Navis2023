@@ -1,0 +1,215 @@
+{
+	"name": "Elizabeth_Decking_upd",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "pbixpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 1,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "3",
+				"spark.autotune.trackingId": "0fadcb2e-4b95-41aa-b5f0-10a0190c01e1"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Synapse/workspaces/navispowerbidata2/bigDataPools/pbixpool",
+				"name": "pbixpool",
+				"type": "Spark",
+				"endpoint": "https://navispowerbidata2.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pbixpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"automaticScaleJobs": true
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"# ============================================================\n",
+					"# Notebook: Decking History Status Enrichment\n",
+					"# Environment: Azure Synapse Analytics (PySpark)\n",
+					"# ============================================================\n",
+					"\n",
+					"# ── 1. Configuration ─────────────────────────────────────────\n",
+					"storage_account = \"navispowerbidatastorage2\"\n",
+					"container       = \"apmt-elz\"\n",
+					"base_path       = f\"abfss://{container}@{storage_account}.dfs.core.windows.net\"\n",
+					"\n",
+					"moves_path    = f\"{base_path}/silver/moves\"\n",
+					"deckings_path = f\"{base_path}/silver/deckings\"\n",
+					"output_path   = f\"{base_path}/export/deckings_status\"\n",
+					"\n",
+					"# ── 2. Load Data ─────────────────────────────────────────────\n",
+					"df_moves    = spark.read.parquet(moves_path)\n",
+					"df_deckings = spark.read.parquet(deckings_path)\n",
+					"\n",
+					"# Preview schemas — review and adjust column names below if needed\n",
+					"print(\"=== Move History Schema ===\")\n",
+					"df_moves.printSchema()\n",
+					"\n",
+					"print(\"=== Decking History Schema ===\")\n",
+					"df_deckings.printSchema()\n",
+					""
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ── 3. Column Name Configuration ─────────────────────────────\n",
+					"# !! ADJUST THESE to match your actual column names !!\n",
+					"\n",
+					"DECKING_CONTAINER_COL  = \"unit_id\"    # container number in deckings\n",
+					"DECKING_TIMESTAMP_COL  = \"time_stamp\"  # timestamp in deckings\n",
+					"\n",
+					"MOVE_CONTAINER_COL     = \"Unit_Nbr\"    # container number in moves\n",
+					"MOVE_TIMESTAMP_COL     = \"t_put\"            # timestamp in moves\n",
+					"MOVE_STATUS_COL        = \"Freight_Kind_Id\"           # status column in moves\n",
+					"MOVE_CATEGORY_COL  = \"Category_Id\"\n",
+					"MOVE_KIND_COL      = \"Move_Kind\"\n",
+					"MOVE_GKEY_COL      = \"mve_gkey\""
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ── 4. Cast Timestamps (safety) ──────────────────────────────\n",
+					"from pyspark.sql import functions as F\n",
+					"from pyspark.sql.window import Window\n",
+					"\n",
+					"df_moves = df_moves.withColumn(\n",
+					"    MOVE_TIMESTAMP_COL,\n",
+					"    F.col(MOVE_TIMESTAMP_COL).cast(\"timestamp\")\n",
+					")\n",
+					"\n",
+					"df_deckings = df_deckings.withColumn(\n",
+					"    DECKING_TIMESTAMP_COL,\n",
+					"    F.col(DECKING_TIMESTAMP_COL).cast(\"timestamp\")\n",
+					")\n",
+					""
+				],
+				"execution_count": 12
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ── 5. Add Surrogate Key to Deckings ─────────────────────────\n",
+					"# Needed to preserve each individual decking row after the join\n",
+					"df_deckings = df_deckings.withColumn(\n",
+					"    \"_decking_id\",\n",
+					"    F.monotonically_increasing_id()\n",
+					")\n",
+					""
+				],
+				"execution_count": 13
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ── 6. Join Decking → Move History ───────────────────────────\n",
+					"# Join on container number, then filter: t_put > decking timestamp\n",
+					"\n",
+					"df_joined = df_deckings.alias(\"d\").join(\n",
+					"    df_moves.alias(\"m\"),\n",
+					"    on=(\n",
+					"        F.col(f\"d.{DECKING_CONTAINER_COL}\") == F.col(f\"m.{MOVE_CONTAINER_COL}\")\n",
+					"    ),\n",
+					"    how=\"left\"\n",
+					").filter(\n",
+					"    # Keep only move records that occurred AFTER the decking event\n",
+					"    # (null-safe: rows with no match are kept via left join)\n",
+					"    F.col(f\"m.{MOVE_TIMESTAMP_COL}\").isNull() |\n",
+					"    (F.col(f\"m.{MOVE_TIMESTAMP_COL}\") > F.col(f\"d.{DECKING_TIMESTAMP_COL}\"))\n",
+					")\n",
+					""
+				],
+				"execution_count": 14
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ── 7. Pick Earliest Qualifying Move per Decking Row ─────────\n",
+					"# Window: for each unique decking row, rank move records by t_put ascending\n",
+					"\n",
+					"window_spec = Window.partitionBy(\n",
+					"    F.col(\"d._decking_id\")           # one partition per decking row\n",
+					").orderBy(\n",
+					"    F.col(f\"m.{MOVE_TIMESTAMP_COL}\").asc_nulls_last()  # earliest t_put first\n",
+					")\n",
+					"\n",
+					"df_ranked = df_joined.withColumn(\"_move_rank\", F.row_number().over(window_spec))\n",
+					"\n",
+					"# Keep only rank 1 = the earliest qualifying move (or the null row if no match)\n",
+					"df_best_match = df_ranked.filter(F.col(\"_move_rank\") == 1)\n",
+					""
+				],
+				"execution_count": 15
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ── 8. Build Final Output ─────────────────────────────────────\n",
+					"decking_cols = [\n",
+					"    F.col(f\"d.{c}\").alias(c)\n",
+					"    for c in df_deckings.columns\n",
+					"    if c != \"_decking_id\"\n",
+					"]\n",
+					"\n",
+					"df_result = df_best_match.select(\n",
+					"    *decking_cols,\n",
+					"    F.col(f\"m.{MOVE_STATUS_COL}\").alias(\"status\"),\n",
+					"    F.col(f\"m.{MOVE_CATEGORY_COL}\").alias(\"Category_Id\"),   # ← new\n",
+					"    F.col(f\"m.{MOVE_KIND_COL}\").alias(\"Move_Kind\"),         # ← new\n",
+					"    F.col(f\"m.{MOVE_GKEY_COL}\").alias(\"mve_gkey\"),          # ← new\n",
+					")\n",
+					"\n",
+					"print(f\"Output row count: {df_result.count()}\")\n",
+					"df_result.show(10, truncate=False)\n",
+					""
+				],
+				"execution_count": 16
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ── 9. Write Output as CSV ────────────────────────────────────\n",
+					"df_result.coalesce(1).write \\\n",
+					"    .mode(\"overwrite\") \\\n",
+					"    .option(\"header\", \"true\") \\\n",
+					"    .csv(output_path)\n",
+					"\n",
+					"print(f\"✅ Written to: {output_path}\")\n",
+					""
+				],
+				"execution_count": 17
+			}
+		]
+	}
+}
