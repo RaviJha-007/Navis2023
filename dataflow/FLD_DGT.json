@@ -64,6 +64,7 @@
 				"          total_score as string,",
 				"          execution_time as string,",
 				"          phase as string,",
+				"          FreightKind as string,",
 				"          Year as integer,",
 				"          Month as integer,",
 				"          Week as integer",
@@ -99,6 +100,7 @@
 				"          to_pos_tier,",
 				"          total_score,",
 				"          execution_time,",
+				"          FreightKind,",
 				"          phase,",
 				"          Year,",
 				"          Month,",
@@ -144,7 +146,7 @@
 				"          Year_Month as integer,",
 				"          Date as date,",
 				"          fld_actual_count as integer,",
-				"          freight_kind as string",
+				"          FreightKind as string",
 				"     ),",
 				"     format: 'delta',",
 				"     fileSystem: 'dgt',",
@@ -187,6 +189,7 @@
 				"          Year_Week,",
 				"          Year_Month,",
 				"          Date,",
+				"          FreightKind,",
 				"          fld_actual_count = FLD_Actual_count",
 				"     )) ~> fld"
 			]
