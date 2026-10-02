@@ -66,7 +66,8 @@
 				"          time_stamp as timestamp,",
 				"          Year as integer,",
 				"          Month as integer,",
-				"          Week as integer",
+				"          Week as integer,",
+				"          FreightKind as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -102,7 +103,8 @@
 				"          time_stamp,",
 				"          Year,",
 				"          Month,",
-				"          Week",
+				"          Week,",
+				"          FreightKind",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
@@ -136,6 +138,7 @@
 				"          execution_time as string,",
 				"          phase as string,",
 				"          time_stamp as timestamp,",
+				"          FreightKind as string,",
 				"          Year as integer,",
 				"          Month as integer,",
 				"          Week as integer,",
@@ -186,7 +189,8 @@
 				"          Year_Week,",
 				"          Year_Month,",
 				"          Date,",
-				"          fld_actual_count = FLD_Actual_count",
+				"          fld_actual_count = FLD_Actual_count,",
+				"          FreightKind",
 				"     )) ~> fld"
 			]
 		}
