@@ -78,7 +78,7 @@
 				"     quoteChar: '',",
 				"     columnNamesAsHeader: true,",
 				"     skipLines: -2) ~> StackConfirmity",
-				"StackConfirmity derive(Pos_WO_Tier = (iif(isInteger(right({Current Position}, 1)), left({Current Position}, length({Current Position}) - 2), {Current Position})),",
+				"StackConfirmity derive(Pos_WO_Tier = (iif(isInteger(right({Current Position}, 1)), left({Current Position}, length({Current Position}) - 1), {Current Position})),",
 				"          Date = toDate(substring(FileDate, -12, 8), 'yyyyMMdd'),",
 				"          Week = iif(dayOfWeek(toDate(substring(FileDate, -12, 8), 'yyyyMMdd')) == 1,  weekOfYear(toDate(substring(FileDate, -12, 8), 'yyyyMMdd')) + 1, weekOfYear(toDate(substring(FileDate, -12, 8), 'yyyyMMdd'))),",
 				"          stacking_array := split({Stacking Factor}, '/')) ~> derivedColumn1",
