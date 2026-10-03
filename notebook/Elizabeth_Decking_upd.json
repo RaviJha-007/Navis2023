@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "0fadcb2e-4b95-41aa-b5f0-10a0190c01e1"
+				"spark.autotune.trackingId": "410ea504-1414-4493-a8aa-3315241a8733"
 			}
 		},
 		"metadata": {
@@ -65,19 +65,27 @@
 					"deckings_path = f\"{base_path}/silver/deckings\"\n",
 					"output_path   = f\"{base_path}/export/deckings_status\"\n",
 					"\n",
-					"# ── 2. Load Data ─────────────────────────────────────────────\n",
-					"df_moves    = spark.read.parquet(moves_path)\n",
-					"df_deckings = spark.read.parquet(deckings_path)\n",
+					"df_moves = (\n",
+					"    spark.read\n",
+					"    .format(\"delta\")\n",
+					"    .load(moves_path)\n",
+					")\n",
 					"\n",
-					"# Preview schemas — review and adjust column names below if needed\n",
+					"df_deckings = (\n",
+					"    spark.read\n",
+					"    .format(\"delta\")\n",
+					"    .load(deckings_path)\n",
+					")\n",
+					"\n",
 					"print(\"=== Move History Schema ===\")\n",
 					"df_moves.printSchema()\n",
 					"\n",
 					"print(\"=== Decking History Schema ===\")\n",
 					"df_deckings.printSchema()\n",
+					"\n",
 					""
 				],
-				"execution_count": 10
+				"execution_count": 12
 			},
 			{
 				"cell_type": "code",
@@ -95,7 +103,7 @@
 					"MOVE_KIND_COL      = \"Move_Kind\"\n",
 					"MOVE_GKEY_COL      = \"mve_gkey\""
 				],
-				"execution_count": 11
+				"execution_count": 13
 			},
 			{
 				"cell_type": "code",
@@ -115,7 +123,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 12
+				"execution_count": 14
 			},
 			{
 				"cell_type": "code",
@@ -128,7 +136,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 13
+				"execution_count": 15
 			},
 			{
 				"cell_type": "code",
@@ -150,7 +158,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 14
+				"execution_count": 16
 			},
 			{
 				"cell_type": "code",
@@ -170,7 +178,7 @@
 					"df_best_match = df_ranked.filter(F.col(\"_move_rank\") == 1)\n",
 					""
 				],
-				"execution_count": 15
+				"execution_count": 17
 			},
 			{
 				"cell_type": "code",
@@ -194,7 +202,7 @@
 					"df_result.show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 16
+				"execution_count": 18
 			},
 			{
 				"cell_type": "code",
@@ -208,7 +216,7 @@
 					"print(f\"✅ Written to: {output_path}\")\n",
 					""
 				],
-				"execution_count": 17
+				"execution_count": 19
 			}
 		]
 	}
