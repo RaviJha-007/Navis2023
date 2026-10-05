@@ -1,5 +1,5 @@
 {
-	"name": "DGT_JobStep_SC",
+	"name": "DGT_JobStep_DSCH_LOAD_SC",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
