@@ -118,7 +118,7 @@
 				"     folderPath: 'silver/moves') ~> dgt",
 				"filter1 derive(exec_delta_16 = iif(:exec_time > 16, true(), false()),",
 				"          t_execution_delta = :exec_time,",
-				"          t_execution_secs = (t_carry_complete - t_fetch)/1000,",
+				"          t_execution_secs = (t_carry_complete - t_dispatch)/1000,",
 				"          exec_time := (t_put - t_dispatch)/60000) ~> derivedColumn1",
 				"dgt filter(Carry_CHE_Kind==\"SC\") ~> filter1",
 				"derivedColumn1 select(mapColumn(",
