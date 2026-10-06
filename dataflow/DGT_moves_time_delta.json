@@ -136,6 +136,7 @@
 				"          t_carry_complete,",
 				"          t_put,",
 				"          t_fetch,",
+				"          t_dispatch,",
 				"          Category_Id,",
 				"          Freight_Kind_Id,",
 				"          pow,",
