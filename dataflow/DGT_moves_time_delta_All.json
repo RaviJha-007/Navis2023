@@ -206,6 +206,7 @@
 				"          eventTypeDescription,",
 				"          CHE_Name,",
 				"          Unit_Nbr,",
+				"          Carry_CHE_Id,",
 				"          Facility_Id,",
 				"          Yard_Id,",
 				"          Event_Type_Id,",
