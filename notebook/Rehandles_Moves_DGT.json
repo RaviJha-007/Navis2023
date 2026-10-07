@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "d5129be8-e8f4-41d1-86f3-b91e9d588a8b"
+				"spark.autotune.trackingId": "af41e4af-7ce6-4459-ab99-8144eae8dbaa"
 			}
 		},
 		"metadata": {
@@ -87,7 +87,7 @@
 					"print(\"Shift events :\", SHIFT_EVENTS)\n",
 					""
 				],
-				"execution_count": 18
+				"execution_count": 28
 			},
 			{
 				"cell_type": "code",
@@ -104,13 +104,13 @@
 					"# Y-DGT-AA10601A -> AA1 / 06 / 01 / A\n",
 					"# Y-DGT-EC10711B -> EC1 / 07 / 11 / B\n",
 					"LETTER_SECTION_PATTERN = (\n",
-					"    r\"^Y-DGT-([A-Z]{2}[0-9])([0-9]{2})([0-9]{2})([A-Z])$\"\n",
+					"    r\"^Y-D[GC]T-([A-Z]{2}[0-9])([0-9]{2})([0-9]{2})([A-Z])$\"\n",
 					")\n",
 					"\n",
 					"# Y-DGT-231H05A -> 231 / H / 05 / A\n",
 					"# Y-DGT-231G05A -> 231 / G / 05 / A\n",
 					"NUMBER_SECTION_PATTERN = (\n",
-					"    r\"^Y-DGT-([0-9]{3})([A-Z])([0-9]{2})([A-Z])$\"\n",
+					"    r\"^Y-D[GC]T-([0-9]{3})([A-Z])([0-9]{2})([A-Z])$\"\n",
 					")\n",
 					"\n",
 					"\n",
@@ -174,7 +174,7 @@
 					"    return df.drop(\"_normalized_from_position\")\n",
 					""
 				],
-				"execution_count": 19
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -227,7 +227,7 @@
 					"print(\"DGT parser tests passed.\")\n",
 					""
 				],
-				"execution_count": 20
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -271,7 +271,7 @@
 					").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 21
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -345,7 +345,7 @@
 					"print(\"Shifts:\", shifts.count())\n",
 					""
 				],
-				"execution_count": 22
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -449,7 +449,7 @@
 					"    return per_load, assigned\n",
 					""
 				],
-				"execution_count": 23
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -528,7 +528,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 24
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -607,7 +607,7 @@
 					").show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": 25
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -657,7 +657,7 @@
 					"print(\"Registered :\", TABLE_NAME)\n",
 					""
 				],
-				"execution_count": 26
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -696,7 +696,7 @@
 					").show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": 27
+				"execution_count": null
 			}
 		]
 	}
