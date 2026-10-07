@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "af41e4af-7ce6-4459-ab99-8144eae8dbaa"
+				"spark.autotune.trackingId": "b3446a85-74d4-4275-a65a-f331287c6c77"
 			}
 		},
 		"metadata": {
@@ -66,7 +66,7 @@
 					"\n",
 					"# A shift must be strictly before the load, and no more than\n",
 					"# two hours before it.\n",
-					"THRESHOLD_SECONDS = 1800\n",
+					"THRESHOLD_SECONDS = 7200\n",
 					"\n",
 					"# Preserve the event definition in the attached DGT notebook.\n",
 					"# Add \"UNIT_YARD_MOVE\" here only if DGT uses it for rehandles.\n",
@@ -87,7 +87,7 @@
 					"print(\"Shift events :\", SHIFT_EVENTS)\n",
 					""
 				],
-				"execution_count": 28
+				"execution_count": 38
 			},
 			{
 				"cell_type": "code",
@@ -174,7 +174,7 @@
 					"    return df.drop(\"_normalized_from_position\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 39
 			},
 			{
 				"cell_type": "code",
@@ -227,7 +227,7 @@
 					"print(\"DGT parser tests passed.\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 40
 			},
 			{
 				"cell_type": "code",
@@ -271,7 +271,7 @@
 					").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 41
 			},
 			{
 				"cell_type": "code",
@@ -345,7 +345,7 @@
 					"print(\"Shifts:\", shifts.count())\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 42
 			},
 			{
 				"cell_type": "code",
@@ -449,7 +449,7 @@
 					"    return per_load, assigned\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 43
 			},
 			{
 				"cell_type": "code",
@@ -528,7 +528,7 @@
 					")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 44
 			},
 			{
 				"cell_type": "code",
@@ -607,7 +607,7 @@
 					").show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 45
 			},
 			{
 				"cell_type": "code",
@@ -657,7 +657,7 @@
 					"print(\"Registered :\", TABLE_NAME)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 46
 			},
 			{
 				"cell_type": "code",
@@ -696,7 +696,7 @@
 					").show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 47
 			}
 		]
 	}
