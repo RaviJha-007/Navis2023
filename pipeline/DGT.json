@@ -360,6 +360,33 @@
 					},
 					"traceLevel": "Fine"
 				}
+			},
+			{
+				"name": "Rehandle_New",
+				"type": "SynapseNotebook",
+				"dependsOn": [
+					{
+						"activity": "Moves",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "Rehandles_Moves_DGT",
+						"type": "NotebookReference"
+					},
+					"snapshot": true
+				}
 			}
 		],
 		"annotations": []
