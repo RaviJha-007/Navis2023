@@ -26,6 +26,13 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "ItvWorkhours"
+				},
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "ScProd"
 				}
 			],
 			"transformations": [
@@ -70,6 +77,18 @@
 				},
 				{
 					"name": "filter1"
+				},
+				{
+					"name": "aggregate5"
+				},
+				{
+					"name": "derivedColumn13"
+				},
+				{
+					"name": "alterRow5"
+				},
+				{
+					"name": "select6"
 				}
 			],
 			"scriptLines": [
@@ -177,6 +196,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
 				"select3 derive(move_date = toDate(move_time),",
+				"          move_hour = toInteger(split(toString(move_time,'HH:mm:ss'),\":\")[1]),",
 				"          Year = year(move_time),",
 				"          Month = month(move_time),",
 				"          Week = weekOfYear(move_time),",
@@ -238,6 +258,37 @@
 				"     skipDuplicateMapOutputs: true) ~> select5",
 				"aggregate4 derive(Productive_Moves = Total_Moves-(Twin_Count/2)) ~> derivedColumn12",
 				"derivedColumn10 filter(not(isNull(move_time))) ~> filter1",
+				"derivedColumn11 aggregate(groupBy(CHE_Id,",
+				"          CHE_Kind,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          move_date,",
+				"          move_hour),",
+				"     Total_Moves = countDistinct(Move_Primary_key),",
+				"          Twin_Count = countIf(valid_twin_flag, Move_Primary_key),",
+				"          First_Lift = max(move_time),",
+				"          Last_Lift = min(move_time)) ~> aggregate5",
+				"aggregate5 derive(Productive_Moves = Total_Moves-(Twin_Count/2),",
+				"          Total_Work_Seconds = iif((isNull(Last_Lift) || isNull(First_Lift) || isNull(:LiftDiff) || :LiftDiff<=0 || :LiftDiff >=3600000),:WorkSeconds,:LiftDiff),",
+				"          WorkSeconds := iif(Total_Moves>=1,3600000,0),",
+				"          LiftDiff := toInteger(Last_Lift-First_Lift)) ~> derivedColumn13",
+				"select6 alterRow(upsertIf(true())) ~> alterRow5",
+				"derivedColumn13 select(mapColumn(",
+				"          CHE_Id,",
+				"          CHE_Kind,",
+				"          Year,",
+				"          Month,",
+				"          Week,",
+				"          move_date,",
+				"          move_hour,",
+				"          Total_Moves,",
+				"          Twin_Count,",
+				"          Productive_Moves,",
+				"          Total_Work_Seconds",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select6",
 				"alterRow3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -275,7 +326,26 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> ItvWorkhours"
+				"     skipDuplicateMapOutputs: true) ~> ItvWorkhours",
+				"alterRow5 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: ($Customer),",
+				"     folderPath: 'gold/sc_prod',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['move_date','CHE_Id','move_hour'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ScProd"
 			]
 		}
 	}
