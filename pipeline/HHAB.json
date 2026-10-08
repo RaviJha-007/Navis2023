@@ -95,7 +95,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "renomination_hhab",
+						"referenceName": "renomination_HHAB_New",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -143,8 +143,8 @@
 				}
 			},
 			{
-				"name": "Rehandle_HHAB",
-				"type": "ExecuteDataFlow",
+				"name": "Rehandle",
+				"type": "SynapseNotebook",
 				"dependsOn": [
 					{
 						"activity": "MoveSrc_HHAB",
@@ -162,15 +162,11 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataflow": {
-						"referenceName": "Rehandle_HHAB",
-						"type": "DataFlowReference"
+					"notebook": {
+						"referenceName": "Rehandles_Moves_HHAB",
+						"type": "NotebookReference"
 					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
+					"snapshot": true
 				}
 			}
 		],
