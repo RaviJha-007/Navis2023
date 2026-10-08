@@ -54,7 +54,6 @@
 				"     validateSchema: false,",
 				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: true,",
-				"     moveFiles: ['/bronze/renomination/load','/bronze/renomination/archive'],",
 				"     format: 'delimited',",
 				"     fileSystem: 'hhab',",
 				"     folderPath: 'bronze/renomination/load',",
