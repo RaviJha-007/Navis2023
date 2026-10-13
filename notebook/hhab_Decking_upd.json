@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "4f145071-ec59-4a88-b3ad-b3c5813aad41"
+				"spark.autotune.trackingId": "a8c15539-dead-4463-947b-3e09180d7488"
 			}
 		},
 		"metadata": {
@@ -85,7 +85,7 @@
 					"\n",
 					""
 				],
-				"execution_count": 12
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
@@ -103,7 +103,7 @@
 					"MOVE_KIND_COL      = \"Move_Kind\"\n",
 					"MOVE_GKEY_COL      = \"mve_gkey\""
 				],
-				"execution_count": 13
+				"execution_count": 10
 			},
 			{
 				"cell_type": "code",
@@ -123,7 +123,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 14
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
@@ -136,7 +136,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 15
+				"execution_count": 12
 			},
 			{
 				"cell_type": "code",
@@ -158,7 +158,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 16
+				"execution_count": 13
 			},
 			{
 				"cell_type": "code",
@@ -178,7 +178,7 @@
 					"df_best_match = df_ranked.filter(F.col(\"_move_rank\") == 1)\n",
 					""
 				],
-				"execution_count": 17
+				"execution_count": 14
 			},
 			{
 				"cell_type": "code",
@@ -202,21 +202,20 @@
 					"df_result.show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 18
+				"execution_count": 15
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					"# ── 9. Write Output as CSV ────────────────────────────────────\n",
-					"df_result.coalesce(1).write \\\n",
+					"# ── 9. Write Output as Delta ──────────────────────────────────\n",
+					"df_result.write \\\n",
+					"    .format(\"delta\") \\\n",
 					"    .mode(\"overwrite\") \\\n",
-					"    .option(\"header\", \"true\") \\\n",
-					"    .csv(output_path)\n",
+					"    .save(output_path)\n",
 					"\n",
-					"print(f\"✅ Written to: {output_path}\")\n",
-					""
+					"print(f\"✅ Written to Delta: {output_path}\")"
 				],
-				"execution_count": 19
+				"execution_count": 16
 			}
 		]
 	}
