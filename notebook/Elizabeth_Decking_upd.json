@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "d9caea82-53ae-47a9-8b63-8f5571ce11ff"
+				"spark.autotune.trackingId": "8dc8fb25-e847-4ff6-9bd2-30c2f96f32ab"
 			}
 		},
 		"metadata": {
@@ -63,7 +63,7 @@
 					"\n",
 					"moves_path    = f\"{base_path}/silver/moves\"\n",
 					"deckings_path = f\"{base_path}/silver/deckings\"\n",
-					"output_path   = f\"{base_path}/export/deckings_status\"\n",
+					"output_path   = f\"{base_path}/gold/deckings_status\"\n",
 					"\n",
 					"df_moves = (\n",
 					"    spark.read\n",
