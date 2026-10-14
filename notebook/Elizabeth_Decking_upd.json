@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "410ea504-1414-4493-a8aa-3315241a8733"
+				"spark.autotune.trackingId": "d9caea82-53ae-47a9-8b63-8f5571ce11ff"
 			}
 		},
 		"metadata": {
@@ -207,14 +207,13 @@
 			{
 				"cell_type": "code",
 				"source": [
-					"# ── 9. Write Output as CSV ────────────────────────────────────\n",
-					"df_result.coalesce(1).write \\\n",
+					"# ── 9. Write Output as Delta ──────────────────────────────────\n",
+					"df_result.write \\\n",
+					"    .format(\"delta\") \\\n",
 					"    .mode(\"overwrite\") \\\n",
-					"    .option(\"header\", \"true\") \\\n",
-					"    .csv(output_path)\n",
+					"    .save(output_path)\n",
 					"\n",
-					"print(f\"✅ Written to: {output_path}\")\n",
-					""
+					"print(f\"✅ Written to Delta: {output_path}\")"
 				],
 				"execution_count": 19
 			}
