@@ -128,6 +128,15 @@
 		"WI_XPS_Malta_properties_typeProperties_scope": {
 			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
+		"WI_XPS_SGTD_properties_WI_01_XPS_parameters_client_id": {
+			"value": "sgtd"
+		},
+		"WI_XPS_SGTD_properties_WI_01_XPS_parameters_file_system": {
+			"value": "sgtd"
+		},
+		"WI_XPS_SGTD_properties_typeProperties_scope": {
+			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
+		},
 		"sc_trigger_properties_typeProperties_scope": {
 			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
@@ -135,6 +144,9 @@
 			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
 		"sc_trigger_cmsa_properties_typeProperties_scope": {
+			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
+		},
+		"sc_trigger_contecar_properties_typeProperties_scope": {
 			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
 		"sc_trigger_dpw_peru_properties_typeProperties_scope": {
@@ -159,15 +171,6 @@
 			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
 		"tauranga_times_properties_typeProperties_scope": {
-			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
-		},
-		"WI_XPS_SGTD_properties_WI_01_XPS_parameters_client_id": {
-			"value": "sgtd"
-		},
-		"WI_XPS_SGTD_properties_WI_01_XPS_parameters_file_system": {
-			"value": "sgtd"
-		},
-		"WI_XPS_SGTD_properties_typeProperties_scope": {
 			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		}
 	}

@@ -174,6 +174,18 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
+		"WI_XPS_SGTD_properties_WI_01_XPS_parameters_client_id": {
+			"type": "string",
+			"defaultValue": "sgtd"
+		},
+		"WI_XPS_SGTD_properties_WI_01_XPS_parameters_file_system": {
+			"type": "string",
+			"defaultValue": "sgtd"
+		},
+		"WI_XPS_SGTD_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
+		},
 		"sc_trigger_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
@@ -183,6 +195,10 @@
 			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
 		"sc_trigger_cmsa_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
+		},
+		"sc_trigger_contecar_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
@@ -215,18 +231,6 @@
 			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
 		"tauranga_times_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
-		},
-		"WI_XPS_SGTD_properties_WI_01_XPS_parameters_client_id": {
-			"type": "string",
-			"defaultValue": "sgtd"
-		},
-		"WI_XPS_SGTD_properties_WI_01_XPS_parameters_file_system": {
-			"type": "string",
-			"defaultValue": "sgtd"
-		},
-		"WI_XPS_SGTD_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		}
@@ -6348,7 +6352,6 @@
 				"[concat(variables('workspaceId'), '/dataflows/MoveSrc_HHAB')]",
 				"[concat(variables('workspaceId'), '/dataflows/Decking_HHAB')]",
 				"[concat(variables('workspaceId'), '/dataflows/renomination_HHAB_New')]",
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
 				"[concat(variables('workspaceId'), '/dataflows/violations_HHAB')]",
 				"[concat(variables('workspaceId'), '/notebooks/Rehandles_Moves_HHAB')]",
 				"[concat(variables('workspaceId'), '/notebooks/hhab_Decking_upd')]"
@@ -15629,6 +15632,52 @@
 				"[concat(variables('workspaceId'), '/dataflows/LadenUnladen_TimeDistance_DualyCycle_contecar')]",
 				"[concat(variables('workspaceId'), '/dataflows/contecar_moves_time_delta')]",
 				"[concat(variables('workspaceId'), '/dataflows/FLD_contecar')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/contecar_conformity')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "confirmity_contecar",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "confirmity_contecar",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"StackConfirmity": {},
+									"Conformity": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/confirmity_contecar')]"
 			]
 		},
 		{
@@ -25904,6 +25953,40 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/WI_XPS_SGTD')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "WI_01_XPS",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"client_id": "[parameters('WI_XPS_SGTD_properties_WI_01_XPS_parameters_client_id')]",
+							"file_system": "[parameters('WI_XPS_SGTD_properties_WI_01_XPS_parameters_file_system')]"
+						}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/sgtd/blobs/bronze/workinstruction_xps/load",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('WI_XPS_SGTD_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/WI_01_XPS')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/WeeklyTrigger')]",
 			"type": "Microsoft.Synapse/workspaces/triggers",
 			"apiVersion": "2019-06-01-preview",
@@ -26035,6 +26118,37 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/pipelines/CMSA_stack_confirmity')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sc_trigger_contecar')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "contecar_conformity",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/contecar/blobs/bronze/stackconformity/load/",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('sc_trigger_contecar_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/contecar_conformity')]"
 			]
 		},
 		{
@@ -126493,7 +126607,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "06e83d75-89e4-409b-9a65-4f0aa368fa45"
+						"spark.autotune.trackingId": "bbb67c6e-2692-44e3-8793-6594fb7d285f"
 					}
 				},
 				"metadata": {
@@ -126518,8 +126632,7 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56,
-						"automaticScaleJobs": true
+						"memory": 56
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -126546,7 +126659,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# TERMINAL CONFIGURATION\n",
@@ -126670,7 +126782,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COLUMN MAP  — ground truth from ATTRS/NAMES in converter\n",
@@ -126769,7 +126880,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FIXED SILVER SCHEMA\n",
@@ -126901,7 +127011,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# LOOKUP TABLES\n",
@@ -126925,7 +127034,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FILENAME DATETIME EXTRACTION\n",
@@ -126962,7 +127070,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COVERAGE VALIDATOR\n",
@@ -126990,7 +127097,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PARSER  — CRITICAL FIX\n",
@@ -127122,7 +127228,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# DISCOVER TXT FILES\n",
@@ -127151,7 +127256,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PROCESS EACH FILE\n",
@@ -127769,7 +127873,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "357a6142-2e65-44d4-9b5c-0fec7abfd2ff"
+						"spark.autotune.trackingId": "315705bc-9afa-4360-9dc7-592b882674fd"
 					}
 				},
 				"metadata": {
@@ -127794,8 +127898,7 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56,
-						"automaticScaleJobs": true
+						"memory": 56
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -127822,7 +127925,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# TERMINAL CONFIGURATION\n",
@@ -127946,7 +128048,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COLUMN MAP  — ground truth from ATTRS/NAMES in converter\n",
@@ -128045,7 +128146,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FIXED SILVER SCHEMA\n",
@@ -128177,7 +128277,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# LOOKUP TABLES\n",
@@ -128201,7 +128300,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FILENAME DATETIME EXTRACTION\n",
@@ -128238,7 +128336,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COVERAGE VALIDATOR\n",
@@ -128266,7 +128363,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PARSER  — CRITICAL FIX\n",
@@ -128398,7 +128494,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# DISCOVER TXT FILES\n",
@@ -128427,7 +128522,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PROCESS EACH FILE\n",
@@ -130997,7 +131091,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "a14592dd-e432-4bc7-b7c7-16237f2f4a2b"
+						"spark.autotune.trackingId": "a8c15539-dead-4463-947b-3e09180d7488"
 					}
 				},
 				"metadata": {
@@ -131022,15 +131116,13 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56,
-						"automaticScaleJobs": true
+						"memory": 56
 					},
 					"sessionKeepAliveTimeout": 30
 				},
 				"cells": [
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# Notebook: Decking History Status Enrichment\n",
@@ -131071,7 +131163,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ── 3. Column Name Configuration ─────────────────────────────\n",
 							"# !! ADJUST THESE to match your actual column names !!\n",
@@ -131091,7 +131182,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ── 4. Cast Timestamps (safety) ──────────────────────────────\n",
 							"from pyspark.sql import functions as F\n",
@@ -131113,7 +131203,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ── 5. Add Surrogate Key to Deckings ─────────────────────────\n",
 							"# Needed to preserve each individual decking row after the join\n",
@@ -131128,7 +131217,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ── 6. Join Decking → Move History ───────────────────────────\n",
 							"# Join on container number, then filter: t_put > decking timestamp\n",
@@ -131152,7 +131240,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ── 7. Pick Earliest Qualifying Move per Decking Row ─────────\n",
 							"# Window: for each unique decking row, rank move records by t_put ascending\n",
@@ -131174,7 +131261,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ── 8. Build Final Output ─────────────────────────────────────\n",
 							"decking_cols = [\n",
@@ -131200,7 +131286,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ── 9. Write Output as Delta ──────────────────────────────────\n",
 							"df_result.write \\\n",
@@ -131936,40 +132021,6 @@
 			},
 			"dependsOn": [],
 			"location": "westus"
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/WI_XPS_SGTD')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "WI_01_XPS",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"client_id": "[parameters('WI_XPS_SGTD_properties_WI_01_XPS_parameters_client_id')]",
-							"file_system": "[parameters('WI_XPS_SGTD_properties_WI_01_XPS_parameters_file_system')]"
-						}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/sgtd/blobs/bronze/workinstruction_xps/load",
-					"blobPathEndsWith": ".txt",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('WI_XPS_SGTD_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/WI_01_XPS')]"
-			]
 		}
 	]
 }
