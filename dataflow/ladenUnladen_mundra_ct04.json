@@ -33,6 +33,9 @@
 				},
 				{
 					"name": "alterRow1"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -127,8 +130,10 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 alterRow(upsertIf(true()),",
+				"aggregate1 alterRow(upsertIf(true()),",
 				"     insertIf(true())) ~> alterRow1",
+				"select1 aggregate(groupBy(ecEventGkey),",
+				"     each(match(name!='ecEventGkey'), $$ = first($$))) ~> aggregate1",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
