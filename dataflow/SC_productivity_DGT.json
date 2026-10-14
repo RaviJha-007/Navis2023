@@ -344,7 +344,7 @@
 				"     insertable: false,",
 				"     updateable: false,",
 				"     upsertable: true,",
-				"     keys:['move_date','CHE_Id','move_hour'],",
+				"     keys:['move_date','CHE_Id','PowSelector','move_hour'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
