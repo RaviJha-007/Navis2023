@@ -1,0 +1,17 @@
+{
+	"name": "DGT_SC_prod_views",
+	"properties": {
+		"content": {
+			"query": "\ncreate or ALTER  view  che_map\nas\nselect cheID, CHE_Name\nFROM\n    OPENROWSET(\n        BULK 'silver/ecevents',\n        data_source = 'dgt',\n        FORMAT = 'DELTA'\n    ) AS [che_map]\n    GROUP by cheID, CHE_Name;\n\ncreate or alter view sc_prod_wo_pool\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/sc_prod',\n        data_source = 'dgt',\n        FORMAT = 'DELTA'\n    ) AS [sc_prod_wo_pool];\n\ncreate view sc_prod\nas\n(\nSELECT sp.*, sc_map.CHE_Name, sc_map.Pool from dbo.sc_prod_wo_pool sp\nLEFT JOIN \n(SELECT cheID, CHE_Name, MAX(Pool) as Pool\n FROM [dbo].[sc_info] sc\n  INNER join dbo.che_map ch\n  on LOWER(sc.Handler_id) = LOWER(ch.CHE_Name) \n  group by Handler_id, cheID, CHE_Name) sc_map\n    on sp.CHE_Id = sc_map.cheID\n)\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dgt",
+				"poolName": "Built-in"
+			},
+			"resultLimit": -1
+		},
+		"type": "SqlQuery"
+	}
+}
