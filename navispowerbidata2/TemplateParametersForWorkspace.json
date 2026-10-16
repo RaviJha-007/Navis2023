@@ -137,6 +137,15 @@
 		"WI_XPS_SGTD_properties_typeProperties_scope": {
 			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
+		"WI_XPS_VICT_properties_WI_01_XPS_parameters_client_id": {
+			"value": "VICT"
+		},
+		"WI_XPS_VICT_properties_WI_01_XPS_parameters_file_system": {
+			"value": "vict"
+		},
+		"WI_XPS_VICT_properties_typeProperties_scope": {
+			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
+		},
 		"sc_trigger_properties_typeProperties_scope": {
 			"value": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},

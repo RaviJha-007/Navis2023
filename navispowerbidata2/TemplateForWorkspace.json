@@ -186,6 +186,18 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		},
+		"WI_XPS_VICT_properties_WI_01_XPS_parameters_client_id": {
+			"type": "string",
+			"defaultValue": "VICT"
+		},
+		"WI_XPS_VICT_properties_WI_01_XPS_parameters_file_system": {
+			"type": "string",
+			"defaultValue": "vict"
+		},
+		"WI_XPS_VICT_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
+		},
 		"sc_trigger_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
@@ -25987,6 +25999,40 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/WI_XPS_VICT')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "WI_01_XPS",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"client_id": "[parameters('WI_XPS_VICT_properties_WI_01_XPS_parameters_client_id')]",
+							"file_system": "[parameters('WI_XPS_VICT_properties_WI_01_XPS_parameters_file_system')]"
+						}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/vict/blobs/bronze/workinstruction_xps/load",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('WI_XPS_VICT_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/WI_01_XPS')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/WeeklyTrigger')]",
 			"type": "Microsoft.Synapse/workspaces/triggers",
 			"apiVersion": "2019-06-01-preview",
@@ -29939,10 +29985,10 @@
 						"     allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     ignoreNoFilesFound: true,",
-						"     moveFiles: ['bronze/unitstatus/load','bronze/unitstatus/archive'],",
+						"     moveFiles: ['bronze/unit_position_correction/load','bronze/unit_position_correction/archive'],",
 						"     format: 'delimited',",
 						"     fileSystem: 'dgt',",
-						"     folderPath: 'bronze/unitstatus/load',",
+						"     folderPath: 'bronze/unit_position_correction/load',",
 						"     columnDelimiter: ',',",
 						"     escapeChar: '\\\\',",
 						"     quoteChar: '\\\"',",
@@ -69998,7 +70044,7 @@
 						"     insertable: false,",
 						"     updateable: false,",
 						"     upsertable: true,",
-						"     keys:['move_date','CHE_Id'],",
+						"     keys:['move_date','CHE_Id','PowSelector'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
@@ -70036,7 +70082,7 @@
 						"     insertable: false,",
 						"     updateable: false,",
 						"     upsertable: true,",
-						"     keys:['move_date','CHE_Id','move_hour'],",
+						"     keys:['move_date','CHE_Id','PowSelector','move_hour'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
@@ -90224,6 +90270,9 @@
 						},
 						{
 							"name": "alterRow1"
+						},
+						{
+							"name": "aggregate1"
 						}
 					],
 					"scriptLines": [
@@ -90318,8 +90367,10 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select1",
-						"select1 alterRow(upsertIf(true()),",
+						"aggregate1 alterRow(upsertIf(true()),",
 						"     insertIf(true())) ~> alterRow1",
+						"select1 aggregate(groupBy(ecEventGkey),",
+						"     each(match(name!='ecEventGkey'), $$ = first($$))) ~> aggregate1",
 						"alterRow1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'delta',",
@@ -111954,6 +112005,9 @@
 						},
 						{
 							"name": "derivedColumn7"
+						},
+						{
+							"name": "aggregate5"
 						}
 					],
 					"scriptLines": [
@@ -112191,7 +112245,7 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select5",
-						"select5 alterRow(upsertIf(true())) ~> alterRow1",
+						"aggregate5 alterRow(upsertIf(true())) ~> alterRow1",
 						"select2 filter(not(isNull(gkey)) && (decking_Type == 'Bump Intruder' || decking_Type == 'Vessel Discharge' || decking_Type == 'Vessel Discharge - Twin' || decking_Type == 'XD Drop if Floating Refine' || decking_Type == 'XD Refine Request' || decking_Type == 'XD Rehandle Request')) ~> filter5",
 						"join6 derive(Block_To_Block_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 3) != substring(DH_To_Position_Name_Short_5, 1, 3), true(), false()),",
 						"          Same_Block_Violation = iif( (substring(MH_To_Position_Name_Short_5, 1, 3) == substring(DH_To_Position_Name_Short_5, 1, 3)) && (substring(MH_To_Position_Name_Short_5, 5, 2) == substring(DH_To_Position_Name_Short_5, 5, 2)), false(), true()),",
@@ -112210,6 +112264,9 @@
 						"aggregate4 filter(not(isNull(user_id))) ~> filter7",
 						"select1 derive(Year_Month = (Year*100) + Month,",
 						"          Year_Week = (Year*100) + Week) ~> derivedColumn7",
+						"select5 aggregate(groupBy(mve_gkey,",
+						"          gkey),",
+						"     each(match(not(in([\"gkey\",\"mve_gkey\"],name))), $$ = last($$))) ~> aggregate5",
 						"alterRow1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'delta',",
@@ -116048,6 +116105,9 @@
 						},
 						{
 							"name": "derivedColumn6"
+						},
+						{
+							"name": "aggregate4"
 						}
 					],
 					"scriptLines": [
@@ -116317,7 +116377,7 @@
 						"     matchType:'exact',",
 						"     ignoreSpaces: false,",
 						"     broadcast: 'auto')~> join6",
-						"select4 select(mapColumn(",
+						"aggregate4 select(mapColumn(",
 						"          each(match(true()),",
 						"               regexReplace($$,' ','_') = $$)",
 						"     ),",
@@ -116347,8 +116407,36 @@
 						"join6 derive(Block_To_Block_Violation = iif(substring({MH ToPosName Short 5Char}, 1, 2) != substring({DH ToPosName Short 5Char}, 1, 2), true(), false()),",
 						"          Same_Block_Violation = iif(substring({MH ToPosName Short 5Char}, 1, 4) != substring({DH ToPosName Short 5Char}, 1, 4), true(), false()),",
 						"          Stack_Violation = iif(substring({MH ToPosName Short 5Char}, 1, 5) != substring({DH ToPosName Short 5Char}, 1, 5), true(), false())) ~> derivedColumn6",
+						"select4 aggregate(groupBy(mve_gkey,",
+						"          gkey),",
+						"     each(match(not(in([\"mve_gkey\",\"gkey\"],name))), $$ = last($$))) ~> aggregate4",
 						"alterRow1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
+						"     input(",
+						"          MH_Event_Type_Id as string,",
+						"          D_H_Decking_Type as string,",
+						"          gkey as integer,",
+						"          Year_Month as integer,",
+						"          Year_Week as integer,",
+						"          MH_ToPosName_Short_5Char as string,",
+						"          DH_ToPosName_Short_5Char as string,",
+						"          MH_Unit_Nbr as string,",
+						"          MH_Move_Kind as string,",
+						"          Category_Id as string,",
+						"          MH_T_Put_DateTime as timestamp,",
+						"          MH_Put_CHE_Operator_Id as string,",
+						"          mve_gkey as integer,",
+						"          MH_Put_CHE_Id as string,",
+						"          Freight_Kind_Id as string,",
+						"          MaxDHTime as timestamp,",
+						"          Block_To_Block_Violation as boolean,",
+						"          Same_Block_Violation as boolean,",
+						"          Stack_Violation as boolean,",
+						"          Location_Match_or_Not as string,",
+						"          user_id as string,",
+						"          User_Name as string,",
+						"          Shift_Date as date",
+						"     ),",
 						"     format: 'delta',",
 						"     fileSystem: 'mundra-ct04',",
 						"     folderPath: 'gold/violation',",
@@ -116360,7 +116448,7 @@
 						"     insertable: false,",
 						"     updateable: false,",
 						"     upsertable: true,",
-						"     keys:['mve_gkey'],",
+						"     keys:['mve_gkey','gkey'],",
 						"     umask: 0777,",
 						"     preCommands: [],",
 						"     postCommands: [],",
@@ -118838,6 +118926,26 @@
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DGT_SC_prod_views')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "\ncreate or ALTER  view  che_map\nas\nselect cheID, CHE_Name\nFROM\n    OPENROWSET(\n        BULK 'silver/ecevents',\n        data_source = 'dgt',\n        FORMAT = 'DELTA'\n    ) AS [che_map]\n    GROUP by cheID, CHE_Name;\n\ncreate or alter view sc_prod_wo_pool\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/sc_prod',\n        data_source = 'dgt',\n        FORMAT = 'DELTA'\n    ) AS [sc_prod_wo_pool];\n\ncreate view sc_prod\nas\n(\nSELECT sp.*, sc_map.CHE_Name, sc_map.Pool from dbo.sc_prod_wo_pool sp\nLEFT JOIN \n(SELECT cheID, CHE_Name, MAX(Pool) as Pool\n FROM [dbo].[sc_info] sc\n  INNER join dbo.che_map ch\n  on LOWER(sc.Handler_id) = LOWER(ch.CHE_Name) \n  group by Handler_id, cheID, CHE_Name) sc_map\n    on sp.CHE_Id = sc_map.cheID\n)\n\ncreate or alter view sc_productivity_wo_pool\nas\nselect *\nFROM\n    OPENROWSET(\n        BULK 'gold/sc_productivity',\n        data_source = 'dgt',\n        FORMAT = 'DELTA'\n    ) AS [sc_productivity_wo_pool];\n\ncreate view sc_productivity\nas\n(\nSELECT sp.*, sc_map.CHE_Name, sc_map.Pool from dbo.sc_productivity_wo_pool sp\nLEFT JOIN \n(SELECT cheID, CHE_Name, MAX(Pool) as Pool\n FROM [dbo].[sc_info] sc\n  INNER join dbo.che_map ch\n  on LOWER(sc.Handler_id) = LOWER(ch.CHE_Name) \n  group by Handler_id, cheID, CHE_Name) sc_map\n    on sp.CHE_Id = sc_map.cheID\n)",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "dgt",
+						"poolName": "Built-in"
+					},
+					"resultLimit": -1
 				},
 				"type": "SqlQuery"
 			},
@@ -121392,7 +121500,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "410ea504-1414-4493-a8aa-3315241a8733"
+						"spark.autotune.trackingId": "8dc8fb25-e847-4ff6-9bd2-30c2f96f32ab"
 					}
 				},
 				"metadata": {
@@ -121437,7 +121545,7 @@
 							"\n",
 							"moves_path    = f\"{base_path}/silver/moves\"\n",
 							"deckings_path = f\"{base_path}/silver/deckings\"\n",
-							"output_path   = f\"{base_path}/export/deckings_status\"\n",
+							"output_path   = f\"{base_path}/gold/deckings_status\"\n",
 							"\n",
 							"df_moves = (\n",
 							"    spark.read\n",
@@ -121588,14 +121696,13 @@
 					{
 						"cell_type": "code",
 						"source": [
-							"# ── 9. Write Output as CSV ────────────────────────────────────\n",
-							"df_result.coalesce(1).write \\\n",
+							"# ── 9. Write Output as Delta ──────────────────────────────────\n",
+							"df_result.write \\\n",
+							"    .format(\"delta\") \\\n",
 							"    .mode(\"overwrite\") \\\n",
-							"    .option(\"header\", \"true\") \\\n",
-							"    .csv(output_path)\n",
+							"    .save(output_path)\n",
 							"\n",
-							"print(f\"✅ Written to: {output_path}\")\n",
-							""
+							"print(f\"✅ Written to Delta: {output_path}\")"
 						],
 						"outputs": [],
 						"execution_count": 19
@@ -126607,7 +126714,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "bbb67c6e-2692-44e3-8793-6594fb7d285f"
+						"spark.autotune.trackingId": "ac963197-ae5b-42bf-9c98-710a998baead"
 					}
 				},
 				"metadata": {
@@ -126649,13 +126756,13 @@
 							"# PARAMETERS  — set per pipeline run\n",
 							"# ============================================================\n",
 							"\n",
-							"client_id   = \"Malta\"\n",
-							"file_system = \"malta\"\n",
+							"client_id   = \"VICT\"\n",
+							"file_system = \"vict\"\n",
 							"# file_name   = \"WI_Load_06082026_1029.txt\"   # injected by pipeline\n",
 							""
 						],
 						"outputs": [],
-						"execution_count": 71
+						"execution_count": 1
 					},
 					{
 						"cell_type": "code",
@@ -126744,6 +126851,25 @@
 							"        \"42U0\":\"4250\",\"42U1\":\"4250\",\"42U5\":\"4250\",\"45G0\":\"4500\",\"45G1\":\"4500\",\"45P3\":\"4560\",\n",
 							"        \"45R0\":\"4530\",\"45R1\":\"4530\",\"45R4\":\"4530\",\"45U0\":\"4550\",\"45U1\":\"4520\",\"4EG1\":\"4550\",\n",
 							"        \"L5G0\":\"9500\",\"L5G1\":\"9500\",\"LEG0\":\"9500\",\"LEG1\":\"9500\"},\n",
+							"    },\n",
+							"    #For VICT, the WC is different for 20,40 and 45 units and based on services. May be add the logic for that later if needed.\n",
+							"    \"VICT\": {\n",
+							"    \"client_key\": 105,   \n",
+							"    \"weight_class_thresholds\": [\n",
+							"        (0,     \"WC1\"),\n",
+							"        (10000, \"WC2\"),\n",
+							"        (18000, \"WC3\"),\n",
+							"        (25000, \"WC4\"),\n",
+							"        (29000, \"WC5\"),\n",
+							"    ],\n",
+							"    \"equip_class_map\": {\n",
+							"        \"2200\":\"2200\",\"2210\":\"2200\",\"2270\":\"2270\",\"4260\":\"4260\",\"4400\":\"4500\",\"4500\":\"4500\",\n",
+							"        \"4510\":\"4500\",\"4530\":\"4530\",\"22G0\":\"2200\",\"22G1\":\"2200\",\"22G2\":\"2200\",\"22P3\":\"2260\",\n",
+							"        \"22R1\":\"2230\",\"22T0\":\"2270\",\"22T6\":\"2270\",\"22U0\":\"2250\",\"22U1\":\"2250\",\"22V0\":\"2200\",\n",
+							"        \"25G1\":\"2500\",\"42G0\":\"4200\",\"42G1\":\"4200\",\"42P0\":\"4260\",\"42P2\":\"4260\",\"42P3\":\"4260\",\n",
+							"        \"42U0\":\"4250\",\"42U1\":\"4250\",\"42U5\":\"4250\",\"45G0\":\"4500\",\"45G1\":\"4500\",\"45P3\":\"4560\",\n",
+							"        \"45R0\":\"4530\",\"45R1\":\"4530\",\"45R4\":\"4530\",\"45U0\":\"4550\",\"45U1\":\"4520\",\"4EG1\":\"4550\",\n",
+							"        \"L5G0\":\"9500\",\"L5G1\":\"9500\",\"LEG0\":\"9500\",\"LEG1\":\"9500\"},\n",
 							"    }\n",
 							"}\n",
 							"\n",
@@ -126778,7 +126904,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 72
+						"execution_count": 2
 					},
 					{
 						"cell_type": "code",
@@ -126876,7 +127002,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 73
+						"execution_count": 3
 					},
 					{
 						"cell_type": "code",
@@ -127007,7 +127133,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 74
+						"execution_count": 4
 					},
 					{
 						"cell_type": "code",
@@ -127030,7 +127156,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 75
+						"execution_count": 5
 					},
 					{
 						"cell_type": "code",
@@ -127066,7 +127192,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 76
+						"execution_count": 6
 					},
 					{
 						"cell_type": "code",
@@ -127093,7 +127219,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 77
+						"execution_count": 7
 					},
 					{
 						"cell_type": "code",
@@ -127224,7 +127350,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 78
+						"execution_count": 8
 					},
 					{
 						"cell_type": "code",
@@ -127252,7 +127378,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 79
+						"execution_count": 9
 					},
 					{
 						"cell_type": "code",
@@ -127773,7 +127899,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 80
+						"execution_count": 10
 					},
 					{
 						"cell_type": "code",
@@ -127873,7 +127999,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "315705bc-9afa-4360-9dc7-592b882674fd"
+						"spark.autotune.trackingId": "34a1f971-b333-4c5d-9f9d-71c4173e6dfb"
 					}
 				},
 				"metadata": {
@@ -127915,13 +128041,13 @@
 							"# PARAMETERS  — set per pipeline run\n",
 							"# ============================================================\n",
 							"\n",
-							"client_id   = \"sgtd\"\n",
-							"file_system = \"sgtd\"\n",
+							"client_id   = \"VICT\"\n",
+							"file_system = \"vict\"\n",
 							"# file_name   = \"WI_Load_06082026_1029.txt\"   # injected by pipeline\n",
 							""
 						],
 						"outputs": [],
-						"execution_count": 12
+						"execution_count": 2
 					},
 					{
 						"cell_type": "code",
@@ -128010,6 +128136,25 @@
 							"        \"42U0\":\"4250\",\"42U1\":\"4250\",\"42U5\":\"4250\",\"45G0\":\"4500\",\"45G1\":\"4500\",\"45P3\":\"4560\",\n",
 							"        \"45R0\":\"4530\",\"45R1\":\"4530\",\"45R4\":\"4530\",\"45U0\":\"4550\",\"45U1\":\"4520\",\"4EG1\":\"4550\",\n",
 							"        \"L5G0\":\"9500\",\"L5G1\":\"9500\",\"LEG0\":\"9500\",\"LEG1\":\"9500\"},\n",
+							"    },\n",
+							"    #For SGTD, the WC is different for 20,40 and 45 units. May be add the logic for that later if needed.\n",
+							"    \"VICT\": {\n",
+							"    \"client_key\": 105,   \n",
+							"    \"weight_class_thresholds\": [\n",
+							"        (0,     \"WC1\"),\n",
+							"        (10000, \"WC2\"),\n",
+							"        (18000, \"WC3\"),\n",
+							"        (25000, \"WC4\"),\n",
+							"        (29000, \"WC5\"),\n",
+							"    ],\n",
+							"    \"equip_class_map\": {\n",
+							"        \"2200\":\"2200\",\"2210\":\"2200\",\"2270\":\"2270\",\"4260\":\"4260\",\"4400\":\"4500\",\"4500\":\"4500\",\n",
+							"        \"4510\":\"4500\",\"4530\":\"4530\",\"22G0\":\"2200\",\"22G1\":\"2200\",\"22G2\":\"2200\",\"22P3\":\"2260\",\n",
+							"        \"22R1\":\"2230\",\"22T0\":\"2270\",\"22T6\":\"2270\",\"22U0\":\"2250\",\"22U1\":\"2250\",\"22V0\":\"2200\",\n",
+							"        \"25G1\":\"2500\",\"42G0\":\"4200\",\"42G1\":\"4200\",\"42P0\":\"4260\",\"42P2\":\"4260\",\"42P3\":\"4260\",\n",
+							"        \"42U0\":\"4250\",\"42U1\":\"4250\",\"42U5\":\"4250\",\"45G0\":\"4500\",\"45G1\":\"4500\",\"45P3\":\"4560\",\n",
+							"        \"45R0\":\"4530\",\"45R1\":\"4530\",\"45R4\":\"4530\",\"45U0\":\"4550\",\"45U1\":\"4520\",\"4EG1\":\"4550\",\n",
+							"        \"L5G0\":\"9500\",\"L5G1\":\"9500\",\"LEG0\":\"9500\",\"LEG1\":\"9500\"},\n",
 							"    }\n",
 							"}\n",
 							"\n",
@@ -128029,7 +128174,7 @@
 							")\n",
 							"silver_path = (\n",
 							"    f\"abfss://workinstruction@{storage_account}\"\n",
-							"    f\".dfs.core.windows.net/silver_xps/\"\n",
+							"    f\".dfs.core.windows.net/silver_xps_test/\"\n",
 							")\n",
 							"gold_path = (\n",
 							"    f\"abfss://workinstruction@{storage_account}\"\n",
@@ -128044,7 +128189,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 13
+						"execution_count": 3
 					},
 					{
 						"cell_type": "code",
@@ -128142,7 +128287,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 14
+						"execution_count": 4
 					},
 					{
 						"cell_type": "code",
@@ -128273,7 +128418,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 15
+						"execution_count": 5
 					},
 					{
 						"cell_type": "code",
@@ -128296,7 +128441,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 16
+						"execution_count": 6
 					},
 					{
 						"cell_type": "code",
@@ -128332,7 +128477,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 17
+						"execution_count": 7
 					},
 					{
 						"cell_type": "code",
@@ -128359,7 +128504,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 18
+						"execution_count": 8
 					},
 					{
 						"cell_type": "code",
@@ -128490,7 +128635,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 19
+						"execution_count": 9
 					},
 					{
 						"cell_type": "code",
@@ -128518,7 +128663,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 20
+						"execution_count": 10
 					},
 					{
 						"cell_type": "code",
@@ -129039,7 +129184,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 21
+						"execution_count": 11
 					},
 					{
 						"cell_type": "code",
@@ -131714,7 +131859,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "13bdaf11-a16b-41b2-a45a-976bc050763d"
+						"spark.autotune.trackingId": "f6df2c2b-e56a-4348-af69-dedd0558ddfb"
 					}
 				},
 				"metadata": {
@@ -131774,12 +131919,30 @@
 							"# Write directly to the Delta location in your storage\n",
 							"spark.sql(\"\"\"\n",
 							"    INSERT INTO delta.`abfss://workinstruction@navispowerbidatastorage2.dfs.core.windows.net/dimension/dim_client`\n",
-							"    VALUES (101, 'Malta', current_timestamp(), true)\n",
+							"    VALUES (105, 'VICT', current_timestamp(), true)\n",
 							"\"\"\")\n",
 							""
 						],
 						"outputs": [],
-						"execution_count": 47
+						"execution_count": 1
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"spark.sql(\"\"\"\n",
+							"    INSERT INTO delta.`abfss://workinstruction@navispowerbidatastorage2.dfs.core.windows.net/dimension/dim_crane_terminal`\n",
+							"    VALUES -- Client 105 - Terminal 1\n",
+							"    ('QC01',  'Berth 4,5',     'Terminal 1',     105),\n",
+							"    ('QC02',  'Berth 4,5',     'Terminal 1',     105),\n",
+							"    ('QC03',  'Berth 4,5',     'Terminal 1',     105),\n",
+							"    ('QC04',  'Berth 4,5',     'Terminal 1',     105),\n",
+							"    ('QC05',  'Berth 4,5',     'Terminal 1',     105),\n",
+							"    ('QC06',  'Berth 4,5',     'Terminal 1',     105),\n",
+							"    ('QC07',  'Berth 4,5',     'Terminal 1',     105);\n",
+							"    \"\"\")"
+						],
+						"outputs": [],
+						"execution_count": 2
 					}
 				]
 			},
