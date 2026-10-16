@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "315705bc-9afa-4360-9dc7-592b882674fd"
+				"spark.autotune.trackingId": "34a1f971-b333-4c5d-9f9d-71c4173e6dfb"
 			}
 		},
 		"metadata": {
@@ -60,12 +60,12 @@
 					"# PARAMETERS  — set per pipeline run\n",
 					"# ============================================================\n",
 					"\n",
-					"client_id   = \"sgtd\"\n",
-					"file_system = \"sgtd\"\n",
+					"client_id   = \"VICT\"\n",
+					"file_system = \"vict\"\n",
 					"# file_name   = \"WI_Load_06082026_1029.txt\"   # injected by pipeline\n",
 					""
 				],
-				"execution_count": 12
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -154,6 +154,25 @@
 					"        \"42U0\":\"4250\",\"42U1\":\"4250\",\"42U5\":\"4250\",\"45G0\":\"4500\",\"45G1\":\"4500\",\"45P3\":\"4560\",\n",
 					"        \"45R0\":\"4530\",\"45R1\":\"4530\",\"45R4\":\"4530\",\"45U0\":\"4550\",\"45U1\":\"4520\",\"4EG1\":\"4550\",\n",
 					"        \"L5G0\":\"9500\",\"L5G1\":\"9500\",\"LEG0\":\"9500\",\"LEG1\":\"9500\"},\n",
+					"    },\n",
+					"    #For SGTD, the WC is different for 20,40 and 45 units. May be add the logic for that later if needed.\n",
+					"    \"VICT\": {\n",
+					"    \"client_key\": 105,   \n",
+					"    \"weight_class_thresholds\": [\n",
+					"        (0,     \"WC1\"),\n",
+					"        (10000, \"WC2\"),\n",
+					"        (18000, \"WC3\"),\n",
+					"        (25000, \"WC4\"),\n",
+					"        (29000, \"WC5\"),\n",
+					"    ],\n",
+					"    \"equip_class_map\": {\n",
+					"        \"2200\":\"2200\",\"2210\":\"2200\",\"2270\":\"2270\",\"4260\":\"4260\",\"4400\":\"4500\",\"4500\":\"4500\",\n",
+					"        \"4510\":\"4500\",\"4530\":\"4530\",\"22G0\":\"2200\",\"22G1\":\"2200\",\"22G2\":\"2200\",\"22P3\":\"2260\",\n",
+					"        \"22R1\":\"2230\",\"22T0\":\"2270\",\"22T6\":\"2270\",\"22U0\":\"2250\",\"22U1\":\"2250\",\"22V0\":\"2200\",\n",
+					"        \"25G1\":\"2500\",\"42G0\":\"4200\",\"42G1\":\"4200\",\"42P0\":\"4260\",\"42P2\":\"4260\",\"42P3\":\"4260\",\n",
+					"        \"42U0\":\"4250\",\"42U1\":\"4250\",\"42U5\":\"4250\",\"45G0\":\"4500\",\"45G1\":\"4500\",\"45P3\":\"4560\",\n",
+					"        \"45R0\":\"4530\",\"45R1\":\"4530\",\"45R4\":\"4530\",\"45U0\":\"4550\",\"45U1\":\"4520\",\"4EG1\":\"4550\",\n",
+					"        \"L5G0\":\"9500\",\"L5G1\":\"9500\",\"LEG0\":\"9500\",\"LEG1\":\"9500\"},\n",
 					"    }\n",
 					"}\n",
 					"\n",
@@ -173,7 +192,7 @@
 					")\n",
 					"silver_path = (\n",
 					"    f\"abfss://workinstruction@{storage_account}\"\n",
-					"    f\".dfs.core.windows.net/silver_xps/\"\n",
+					"    f\".dfs.core.windows.net/silver_xps_test/\"\n",
 					")\n",
 					"gold_path = (\n",
 					"    f\"abfss://workinstruction@{storage_account}\"\n",
@@ -187,7 +206,7 @@
 					"print(f\"🔑 Gold      : {gold_path}\")\n",
 					""
 				],
-				"execution_count": 13
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -284,7 +303,7 @@
 					"    print(f\"✅ Column map loaded: {len(COLUMN_MAP)} fields, no duplicates\")\n",
 					""
 				],
-				"execution_count": 14
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -414,7 +433,7 @@
 					"    print(f\"✅ Silver schema: {len(SILVER_COLUMNS)} columns, no duplicates\")\n",
 					""
 				],
-				"execution_count": 15
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -436,7 +455,7 @@
 					"print(f\"✅ equip_class_lookup  : {len(ec_rows)} ISO codes\")\n",
 					""
 				],
-				"execution_count": 16
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
@@ -471,7 +490,7 @@
 					"    print(f\"   {ok} {fname:<40} → {dt}  sort={srt}\")\n",
 					""
 				],
-				"execution_count": 17
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -497,7 +516,7 @@
 					"        print(f\"\\nℹ️  All-null fields (kept as null in Delta): {zero}\")\n",
 					""
 				],
-				"execution_count": 18
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -627,7 +646,7 @@
 					"print(\"✅ Parser ready\")\n",
 					""
 				],
-				"execution_count": 19
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
@@ -654,7 +673,7 @@
 					"    print(f\"   • {f.name:<50} datetime={dt_str}  sort={srt}\")\n",
 					""
 				],
-				"execution_count": 20
+				"execution_count": 10
 			},
 			{
 				"cell_type": "code",
@@ -1174,7 +1193,7 @@
 					"    raise RuntimeError(\"❌ No files processed.\")\n",
 					""
 				],
-				"execution_count": 21
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
