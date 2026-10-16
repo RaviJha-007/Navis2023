@@ -95,6 +95,9 @@
 				},
 				{
 					"name": "derivedColumn7"
+				},
+				{
+					"name": "aggregate5"
 				}
 			],
 			"scriptLines": [
@@ -332,7 +335,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
-				"select5 alterRow(upsertIf(true())) ~> alterRow1",
+				"aggregate5 alterRow(upsertIf(true())) ~> alterRow1",
 				"select2 filter(not(isNull(gkey)) && (decking_Type == 'Bump Intruder' || decking_Type == 'Vessel Discharge' || decking_Type == 'Vessel Discharge - Twin' || decking_Type == 'XD Drop if Floating Refine' || decking_Type == 'XD Refine Request' || decking_Type == 'XD Rehandle Request')) ~> filter5",
 				"join6 derive(Block_To_Block_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 3) != substring(DH_To_Position_Name_Short_5, 1, 3), true(), false()),",
 				"          Same_Block_Violation = iif( (substring(MH_To_Position_Name_Short_5, 1, 3) == substring(DH_To_Position_Name_Short_5, 1, 3)) && (substring(MH_To_Position_Name_Short_5, 5, 2) == substring(DH_To_Position_Name_Short_5, 5, 2)), false(), true()),",
@@ -351,6 +354,9 @@
 				"aggregate4 filter(not(isNull(user_id))) ~> filter7",
 				"select1 derive(Year_Month = (Year*100) + Month,",
 				"          Year_Week = (Year*100) + Week) ~> derivedColumn7",
+				"select5 aggregate(groupBy(mve_gkey,",
+				"          gkey),",
+				"     each(match(not(in([\"gkey\",\"mve_gkey\"],name))), $$ = last($$))) ~> aggregate5",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
