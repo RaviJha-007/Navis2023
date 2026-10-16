@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "13bdaf11-a16b-41b2-a45a-976bc050763d"
+				"spark.autotune.trackingId": "f6df2c2b-e56a-4348-af69-dedd0558ddfb"
 			}
 		},
 		"metadata": {
@@ -78,11 +78,28 @@
 					"# Write directly to the Delta location in your storage\n",
 					"spark.sql(\"\"\"\n",
 					"    INSERT INTO delta.`abfss://workinstruction@navispowerbidatastorage2.dfs.core.windows.net/dimension/dim_client`\n",
-					"    VALUES (101, 'Malta', current_timestamp(), true)\n",
+					"    VALUES (105, 'VICT', current_timestamp(), true)\n",
 					"\"\"\")\n",
 					""
 				],
-				"execution_count": 47
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"spark.sql(\"\"\"\n",
+					"    INSERT INTO delta.`abfss://workinstruction@navispowerbidatastorage2.dfs.core.windows.net/dimension/dim_crane_terminal`\n",
+					"    VALUES -- Client 105 - Terminal 1\n",
+					"    ('QC01',  'Berth 4,5',     'Terminal 1',     105),\n",
+					"    ('QC02',  'Berth 4,5',     'Terminal 1',     105),\n",
+					"    ('QC03',  'Berth 4,5',     'Terminal 1',     105),\n",
+					"    ('QC04',  'Berth 4,5',     'Terminal 1',     105),\n",
+					"    ('QC05',  'Berth 4,5',     'Terminal 1',     105),\n",
+					"    ('QC06',  'Berth 4,5',     'Terminal 1',     105),\n",
+					"    ('QC07',  'Berth 4,5',     'Terminal 1',     105);\n",
+					"    \"\"\")"
+				],
+				"execution_count": 2
 			}
 		]
 	}
