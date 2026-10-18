@@ -72,7 +72,7 @@
 				"     format: 'delta',",
 				"     fileSystem: 'malta',",
 				"     folderPath: 'silver/deckings') ~> DeckingHistory",
-				"DeckingHistory filter((decking_type == 'Bump Intruder' || decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin' || decking_type == 'Gate Receival Assign Position') && to_pos_slot=='FAILED TO DECK !') ~> filter1",
+				"DeckingHistory filter((trim(decking_type)  == 'Bump Intruder' || trim(decking_type) == 'Vessel Discharge' || trim(decking_type) == 'Vessel Discharge - Twin' || trim(decking_type) == 'Gate Receival(Flip) Assign Position') && to_pos_slot=='FAILED TO DECK !') ~> filter1",
 				"filter1 derive(Decking_Type_Actual = iif((decking_type == 'Vessel Discharge' || decking_type == 'Vessel Discharge - Twin'), 'Vessel Discharge',decking_type),",
 				"          Year_Week = (Year * 100) + Week,",
 				"          Year_Month = (Year * 100) + Month,",
