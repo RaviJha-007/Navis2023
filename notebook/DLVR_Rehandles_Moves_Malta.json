@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "bd190e0a-5204-44ad-bf86-e1ee78bc542d"
+				"spark.autotune.trackingId": "af3ef1c8-64b8-46ec-a21d-8b1a5ab66b38"
 			}
 		},
 		"metadata": {
@@ -167,7 +167,7 @@
 					"# CELL 4 — deliver Delta Table (Filtered)\n",
 					"# ============================================================\n",
 					"\n",
-					"RELEVANT_EVENTS = ['UNIT_DELIVER','UNIT_PAYLOAD_DELIVER' 'UNIT_YARD_SHIFT', 'UNIT_YARD_MOVE']\n",
+					"RELEVANT_EVENTS = ['UNIT_DELIVER','UNIT_PAYLOAD_DELIVER','UNIT_YARD_SHIFT', 'UNIT_YARD_MOVE']\n",
 					"\n",
 					"df_moves = spark.read.format(\"delta\").load(MOVES_PATH) \\\n",
 					"    .filter(\n",
