@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "f34ebb97-5b58-4d8c-8838-b8bd3410712e"
+				"spark.autotune.trackingId": "effcf46e-bc69-4ce0-ba31-d9c32db0c8f4"
 			}
 		},
 		"metadata": {
@@ -77,7 +77,7 @@
 					"print(f\"✅ Output Target: {OUTPUT_DELTA}\")\n",
 					""
 				],
-				"execution_count": 1
+				"execution_count": 23
 			},
 			{
 				"cell_type": "code",
@@ -101,7 +101,7 @@
 					"# print(f\"   → Section=1Z, Bay=025, Row=03, Tier=B (tier 2)\")\n",
 					""
 				],
-				"execution_count": 2
+				"execution_count": 24
 			},
 			{
 				"cell_type": "code",
@@ -156,7 +156,7 @@
 					"    print(f\"  {t} → {tier_letter_to_number(t)}\")\n",
 					""
 				],
-				"execution_count": 3
+				"execution_count": 25
 			},
 			{
 				"cell_type": "code",
@@ -182,7 +182,7 @@
 					"print(f\"✅ Records delivered (UNIT_DELIVER/UNIT_PAYLOAD_DELIVER/UNIT_YARD_SHIFT/UNIT_YARD_MOVE only): {df_moves.count():,}\")\n",
 					""
 				],
-				"execution_count": 4
+				"execution_count": 26
 			},
 			{
 				"cell_type": "code",
@@ -258,7 +258,7 @@
 					"#     print(f\"  {pos:25s} → stack={result[0]}, section={result[1]}, tier={result[5]}\")\n",
 					""
 				],
-				"execution_count": 5
+				"execution_count": 27
 			},
 			{
 				"cell_type": "code",
@@ -309,7 +309,7 @@
 					").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 6
+				"execution_count": 28
 			},
 			{
 				"cell_type": "code",
@@ -588,7 +588,7 @@
 					"print(f\"   OUTPUT ROWS              : {len(results):,}\")\n",
 					""
 				],
-				"execution_count": 7
+				"execution_count": 29
 			},
 			{
 				"cell_type": "code",
@@ -620,7 +620,7 @@
 					"print(f\"✅ Yard Report (conformities) loaded & deduped: {df_yard.count():,} rows\")\n",
 					""
 				],
-				"execution_count": 8
+				"execution_count": 30
 			},
 			{
 				"cell_type": "code",
@@ -685,7 +685,7 @@
 					"\n",
 					""
 				],
-				"execution_count": 9
+				"execution_count": 31
 			},
 			{
 				"cell_type": "code",
@@ -697,21 +697,18 @@
 					"\n",
 					"def attach_gc(df, unit_col, time_col, gc_alias, yard_df,\n",
 					"              mode=GC_MATCH_MODE, max_days=MAX_LOOKBACK_DAYS):\n",
-					"    \"\"\"\n",
-					"    Left join df → yard_df on container + date proximity.\n",
-					"    Guarantees NO row explosion — row_number() keeps exactly\n",
-					"    one yard row per move row even if multiple candidates match.\n",
-					"    \n",
-					"    mode=\"prior\"   : same day (delta=0) or earlier, within max_days\n",
-					"    mode=\"closest\" : nearest by absolute day delta, within max_days\n",
-					"    \"\"\"\n",
-					"    # Cast timestamp → date for the join\n",
+					"\n",
+					"    # Cast timestamp → date\n",
 					"    df = df.withColumn(f\"__{gc_alias}_date\", F.to_date(F.col(time_col)))\n",
 					"\n",
-					"    # Left join on container only first\n",
-					"    df_joined = df.join(\n",
+					"    # Split null-container rows out before joining\n",
+					"    df_no_unit  = df.filter(F.col(unit_col).isNull())\n",
+					"    df_has_unit = df.filter(F.col(unit_col).isNotNull())\n",
+					"\n",
+					"    # Left join only rows that have a container number\n",
+					"    df_joined = df_has_unit.join(\n",
 					"        yard_df,\n",
-					"        df[unit_col] == yard_df[\"yr_container\"],\n",
+					"        df_has_unit[unit_col] == yard_df[\"yr_container\"],\n",
 					"        how=\"left\"\n",
 					"    )\n",
 					"\n",
@@ -721,35 +718,59 @@
 					"        F.datediff(F.col(f\"__{gc_alias}_date\"), F.col(\"yr_date\"))\n",
 					"    )\n",
 					"\n",
-					"    # Filter by mode\n",
+					"    # ── Key fix: mark valid candidates but DON'T filter them out ──\n",
+					"    # Instead set yr_gc to null for out-of-window rows so the move\n",
+					"    # row is never dropped — it just gets a null GC\n",
 					"    if mode == \"prior\":\n",
-					"        df_joined = df_joined.filter(\n",
-					"            F.col(\"_day_delta\").isNull() |   # keep nulls (no yard match)\n",
-					"            ((F.col(\"_day_delta\") >= 0) & (F.col(\"_day_delta\") <= max_days))\n",
+					"        is_valid = (\n",
+					"            F.col(\"yr_date\").isNull() |                          # no yard match\n",
+					"            F.col(f\"__{gc_alias}_date\").isNull() |               # no move date\n",
+					"            ((F.col(\"_day_delta\") >= 0) &\n",
+					"             (F.col(\"_day_delta\") <= max_days))                  # within window\n",
 					"        )\n",
 					"    else:  # \"closest\"\n",
-					"        df_joined = df_joined.filter(\n",
-					"            F.col(\"_day_delta\").isNull() |\n",
+					"        is_valid = (\n",
+					"            F.col(\"yr_date\").isNull() |\n",
+					"            F.col(f\"__{gc_alias}_date\").isNull() |\n",
 					"            (F.abs(F.col(\"_day_delta\")) <= max_days)\n",
 					"        )\n",
 					"\n",
-					"    # Rank — best date match wins per (container, move_date)\n",
+					"    # Null out the GC for out-of-window rows rather than dropping them\n",
+					"    df_joined = df_joined.withColumn(\n",
+					"        \"yr_gc\",\n",
+					"        F.when(is_valid, F.col(\"yr_gc\")).otherwise(F.lit(None))\n",
+					"    )\n",
+					"\n",
+					"    # Rank — valid (non-null GC) rows first, then closest date\n",
 					"    sort_col = (\n",
-					"        F.col(\"_day_delta\").asc()          # prior: 0 (same day) → 1 → 2 ...\n",
+					"        F.col(\"_day_delta\").asc()\n",
 					"        if mode == \"prior\"\n",
-					"        else F.abs(F.col(\"_day_delta\")).asc()  # closest: smallest abs delta\n",
+					"        else F.abs(F.col(\"_day_delta\")).asc()\n",
 					"    )\n",
 					"\n",
 					"    w_gc = Window.partitionBy(\n",
 					"        unit_col, f\"__{gc_alias}_date\"\n",
-					"    ).orderBy(sort_col)\n",
+					"    ).orderBy(\n",
+					"        F.col(\"yr_gc\").asc_nulls_last(),   # non-null GC wins over null\n",
+					"        sort_col\n",
+					"    )\n",
 					"\n",
 					"    df_joined = df_joined \\\n",
 					"        .withColumn(\"_rn\", F.row_number().over(w_gc)) \\\n",
 					"        .filter(F.col(\"_rn\") == 1) \\\n",
-					"        .drop(\"_rn\", \"_day_delta\", \"yr_container\", \"yr_date\", f\"__{gc_alias}_date\")\n",
+					"        .drop(\"_rn\", \"_day_delta\", \"yr_container\", \"yr_date\",\n",
+					"              f\"__{gc_alias}_date\")\n",
 					"\n",
-					"    return df_joined.withColumnRenamed(\"yr_gc\", gc_alias)\n",
+					"    df_joined = df_joined.withColumnRenamed(\"yr_gc\", gc_alias)\n",
+					"\n",
+					"    # Recombine with null-unit rows (GC stays null for them)\n",
+					"    df_no_unit = df_no_unit \\\n",
+					"        .withColumn(gc_alias, F.lit(None).cast(\"string\")) \\\n",
+					"        .drop(f\"__{gc_alias}_date\")\n",
+					"\n",
+					"    return df_joined.unionByName(df_no_unit)\n",
+					"\n",
+					"\n",
 					"\n",
 					"\n",
 					"# ── Attach shift_GC (looks up shift container on shift date) ─\n",
@@ -778,7 +799,7 @@
 					").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 10
+				"execution_count": 32
 			},
 			{
 				"cell_type": "code",
@@ -803,7 +824,7 @@
 					"    print(f\"❌ Failed to write to Gold: {str(e)}\")\n",
 					"    raise"
 				],
-				"execution_count": 11
+				"execution_count": 33
 			},
 			{
 				"cell_type": "code",
