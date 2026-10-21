@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "a9c83a07-7b87-4bf9-a105-670c7ef00c1d"
+				"spark.autotune.trackingId": "f34ebb97-5b58-4d8c-8838-b8bd3410712e"
 			}
 		},
 		"metadata": {
@@ -61,7 +61,7 @@
 					"STORAGE_ACCOUNT  = \"navispowerbidatastorage2\"\n",
 					"CONTAINER        = \"malta\"                          # ← Update for MFT\n",
 					"DELTA_MOVES_PATH = \"silver/moves\"\n",
-					"OUTPUT_PATH      = \"gold/dlvr_rehandles_report\"\n",
+					"OUTPUT_PATH      = \"gold/dlvr_rehandles_report_2\"\n",
 					"\n",
 					"THRESHOLD_SECONDS = 7200      # 2 hours window for matching\n",
 					"\n",
@@ -77,7 +77,7 @@
 					"print(f\"✅ Output Target: {OUTPUT_DELTA}\")\n",
 					""
 				],
-				"execution_count": 34
+				"execution_count": 1
 			},
 			{
 				"cell_type": "code",
@@ -101,7 +101,7 @@
 					"# print(f\"   → Section=1Z, Bay=025, Row=03, Tier=B (tier 2)\")\n",
 					""
 				],
-				"execution_count": 35
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -156,7 +156,7 @@
 					"    print(f\"  {t} → {tier_letter_to_number(t)}\")\n",
 					""
 				],
-				"execution_count": 36
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -182,7 +182,7 @@
 					"print(f\"✅ Records delivered (UNIT_DELIVER/UNIT_PAYLOAD_DELIVER/UNIT_YARD_SHIFT/UNIT_YARD_MOVE only): {df_moves.count():,}\")\n",
 					""
 				],
-				"execution_count": 37
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -258,7 +258,7 @@
 					"#     print(f\"  {pos:25s} → stack={result[0]}, section={result[1]}, tier={result[5]}\")\n",
 					""
 				],
-				"execution_count": 38
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -309,39 +309,7 @@
 					").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 39
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					"# ============================================================\n",
-					"# CELL 6b — Load Yard Report (Conformities) & Dedupe\n",
-					"# ============================================================\n",
-					"from pyspark.sql.window import Window\n",
-					"\n",
-					"df_yard = spark.read.format(\"delta\").load(YARD_REPORT_PATH) \\\n",
-					"    .select(\n",
-					"        F.col(\"ContainerNo\").alias(\"yr_container\"),\n",
-					"        F.col(\"Date\").cast(\"date\").alias(\"yr_date\"),\n",
-					"        F.col(\"Group_Code\").alias(\"yr_gc\")\n",
-					"    ) \\\n",
-					"    .filter(\n",
-					"        F.col(\"yr_container\").isNotNull() &\n",
-					"        F.col(\"yr_gc\").isNotNull() &\n",
-					"        F.col(\"yr_date\").isNotNull()\n",
-					"    )\n",
-					"\n",
-					"# Dedupe to one GC per (container, date) — defensive in case of duplicates\n",
-					"w_yard = Window.partitionBy(\"yr_container\", \"yr_date\").orderBy(F.col(\"yr_date\").desc())\n",
-					"df_yard = df_yard \\\n",
-					"    .withColumn(\"_rn\", F.row_number().over(w_yard)) \\\n",
-					"    .filter(F.col(\"_rn\") == 1) \\\n",
-					"    .drop(\"_rn\")\n",
-					"\n",
-					"print(f\"✅ Yard Report (conformities) loaded & deduped: {df_yard.count():,} rows\")\n",
-					""
-				],
-				"execution_count": null
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
@@ -620,7 +588,39 @@
 					"print(f\"   OUTPUT ROWS              : {len(results):,}\")\n",
 					""
 				],
-				"execution_count": 40
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ============================================================\n",
+					"# CELL 6b — Load Yard Report (Conformities) & Dedupe\n",
+					"# ============================================================\n",
+					"from pyspark.sql.window import Window\n",
+					"\n",
+					"df_yard = spark.read.format(\"delta\").load(YARD_REPORT_PATH) \\\n",
+					"    .select(\n",
+					"        F.col(\"ContainerNo\").alias(\"yr_container\"),\n",
+					"        F.col(\"Date\").cast(\"date\").alias(\"yr_date\"),\n",
+					"        F.col(\"Group_Code\").alias(\"yr_gc\")\n",
+					"    ) \\\n",
+					"    .filter(\n",
+					"        F.col(\"yr_container\").isNotNull() &\n",
+					"        F.col(\"yr_gc\").isNotNull() &\n",
+					"        F.col(\"yr_date\").isNotNull()\n",
+					"    )\n",
+					"\n",
+					"# Dedupe to one GC per (container, date) — defensive in case of duplicates\n",
+					"w_yard = Window.partitionBy(\"yr_container\", \"yr_date\").orderBy(F.col(\"yr_gc\").asc())\n",
+					"df_yard = df_yard \\\n",
+					"    .withColumn(\"_rn\", F.row_number().over(w_yard)) \\\n",
+					"    .filter(F.col(\"_rn\") == 1) \\\n",
+					"    .drop(\"_rn\")\n",
+					"\n",
+					"print(f\"✅ Yard Report (conformities) loaded & deduped: {df_yard.count():,} rows\")\n",
+					""
+				],
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -675,12 +675,114 @@
 					"    StructField(\"has_rehandle\",           BooleanType(),   True),\n",
 					"    StructField(\"tier_difference\",        IntegerType(),   True),\n",
 					"    StructField(\"time_diff_seconds\",      IntegerType(),   True),\n",
-					"    StructField(\"section_changed\",        BooleanType(),   True),\n",
+					"    StructField(\"section_changed\",        BooleanType(),   True)\n",
+					"\n",
 					"])\n",
 					"\n",
 					"# ─── Convert Python list → Spark DataFrame ───────────────────\n",
 					"df_results = spark.createDataFrame(results, schema=schema)\n",
 					"\n",
+					"\n",
+					""
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ============================================================\n",
+					"# CELL 7b — Attach Group Codes (shift_GC and deliver_GC)\n",
+					"# ============================================================\n",
+					"from pyspark.sql.window import Window\n",
+					"\n",
+					"def attach_gc(df, unit_col, time_col, gc_alias, yard_df,\n",
+					"              mode=GC_MATCH_MODE, max_days=MAX_LOOKBACK_DAYS):\n",
+					"    \"\"\"\n",
+					"    Left join df → yard_df on container + date proximity.\n",
+					"    Guarantees NO row explosion — row_number() keeps exactly\n",
+					"    one yard row per move row even if multiple candidates match.\n",
+					"    \n",
+					"    mode=\"prior\"   : same day (delta=0) or earlier, within max_days\n",
+					"    mode=\"closest\" : nearest by absolute day delta, within max_days\n",
+					"    \"\"\"\n",
+					"    # Cast timestamp → date for the join\n",
+					"    df = df.withColumn(f\"__{gc_alias}_date\", F.to_date(F.col(time_col)))\n",
+					"\n",
+					"    # Left join on container only first\n",
+					"    df_joined = df.join(\n",
+					"        yard_df,\n",
+					"        df[unit_col] == yard_df[\"yr_container\"],\n",
+					"        how=\"left\"\n",
+					"    )\n",
+					"\n",
+					"    # Day delta: positive = yard date is before or on move date\n",
+					"    df_joined = df_joined.withColumn(\n",
+					"        \"_day_delta\",\n",
+					"        F.datediff(F.col(f\"__{gc_alias}_date\"), F.col(\"yr_date\"))\n",
+					"    )\n",
+					"\n",
+					"    # Filter by mode\n",
+					"    if mode == \"prior\":\n",
+					"        df_joined = df_joined.filter(\n",
+					"            F.col(\"_day_delta\").isNull() |   # keep nulls (no yard match)\n",
+					"            ((F.col(\"_day_delta\") >= 0) & (F.col(\"_day_delta\") <= max_days))\n",
+					"        )\n",
+					"    else:  # \"closest\"\n",
+					"        df_joined = df_joined.filter(\n",
+					"            F.col(\"_day_delta\").isNull() |\n",
+					"            (F.abs(F.col(\"_day_delta\")) <= max_days)\n",
+					"        )\n",
+					"\n",
+					"    # Rank — best date match wins per (container, move_date)\n",
+					"    sort_col = (\n",
+					"        F.col(\"_day_delta\").asc()          # prior: 0 (same day) → 1 → 2 ...\n",
+					"        if mode == \"prior\"\n",
+					"        else F.abs(F.col(\"_day_delta\")).asc()  # closest: smallest abs delta\n",
+					"    )\n",
+					"\n",
+					"    w_gc = Window.partitionBy(\n",
+					"        unit_col, f\"__{gc_alias}_date\"\n",
+					"    ).orderBy(sort_col)\n",
+					"\n",
+					"    df_joined = df_joined \\\n",
+					"        .withColumn(\"_rn\", F.row_number().over(w_gc)) \\\n",
+					"        .filter(F.col(\"_rn\") == 1) \\\n",
+					"        .drop(\"_rn\", \"_day_delta\", \"yr_container\", \"yr_date\", f\"__{gc_alias}_date\")\n",
+					"\n",
+					"    return df_joined.withColumnRenamed(\"yr_gc\", gc_alias)\n",
+					"\n",
+					"\n",
+					"# ── Attach shift_GC (looks up shift container on shift date) ─\n",
+					"df_results = attach_gc(\n",
+					"    df_results,\n",
+					"    unit_col = \"shift_unit_nbr\",\n",
+					"    time_col = \"shift_time\",\n",
+					"    gc_alias = \"shift_GC\",\n",
+					"    yard_df  = df_yard\n",
+					")\n",
+					"\n",
+					"# ── Attach deliver_GC (looks up deliver container on deliver date) ─\n",
+					"df_results = attach_gc(\n",
+					"    df_results,\n",
+					"    unit_col = \"deliver_unit_nbr\",\n",
+					"    time_col = \"deliver_time\",\n",
+					"    gc_alias = \"deliver_GC\",\n",
+					"    yard_df  = df_yard\n",
+					")\n",
+					"\n",
+					"print(\"✅ shift_GC and deliver_GC attached\")\n",
+					"df_results.select(\n",
+					"    \"shift_unit_nbr\", \"shift_GC\",\n",
+					"    \"deliver_unit_nbr\", \"deliver_GC\",\n",
+					"    \"category\"\n",
+					").show(10, truncate=False)\n",
+					""
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"source": [
 					"# ─── Write to Gold Delta ──────────────────────────────────────\n",
 					"try:\n",
 					"    if DeltaTable.isDeltaTable(spark, OUTPUT_DELTA):\n",
@@ -699,10 +801,9 @@
 					"\n",
 					"except Exception as e:\n",
 					"    print(f\"❌ Failed to write to Gold: {str(e)}\")\n",
-					"    raise\n",
-					""
+					"    raise"
 				],
-				"execution_count": 41
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
