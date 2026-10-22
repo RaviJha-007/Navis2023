@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "579e44da-5ae3-4575-991b-af4d1c4fa89d"
+				"spark.autotune.trackingId": "67c9f250-41f2-4698-b0ae-77672f8dce9d"
 			}
 		},
 		"metadata": {
@@ -77,7 +77,7 @@
 					"print(f\"Write mode: {WRITE_MODE}\")\n",
 					""
 				],
-				"execution_count": 25
+				"execution_count": 35
 			},
 			{
 				"cell_type": "code",
@@ -90,7 +90,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 26
+				"execution_count": 36
 			},
 			{
 				"cell_type": "code",
@@ -135,7 +135,7 @@
 					"DEFAULT_PARSER = \"MFT\"\n",
 					""
 				],
-				"execution_count": 27
+				"execution_count": 37
 			},
 			{
 				"cell_type": "code",
@@ -227,7 +227,7 @@
 					"    return _parse(pos, facility_id)\n",
 					""
 				],
-				"execution_count": 28
+				"execution_count": 38
 			},
 			{
 				"cell_type": "code",
@@ -294,7 +294,7 @@
 					"}\n",
 					""
 				],
-				"execution_count": 29
+				"execution_count": 39
 			},
 			{
 				"cell_type": "code",
@@ -306,7 +306,7 @@
 					"bronze.printSchema()\n",
 					""
 				],
-				"execution_count": 30
+				"execution_count": 40
 			},
 			{
 				"cell_type": "code",
@@ -330,16 +330,49 @@
 					"\n",
 					"silver = (\n",
 					"    silver\n",
+					"    # ── Primary key ───────────────────────────────────────────────────────────\n",
 					"    .withColumn(\"mve_gkey\",            F.col(\"mve_gkey\").cast(\"bigint\"))\n",
-					"    .withColumn(\"dist_carry\",          F.col(\"dist_carry\").cast(\"decimal(18,3)\"))\n",
-					"    .withColumn(\"dist_start\",          F.col(\"dist_start\").cast(\"decimal(18,3)\"))\n",
-					"    .withColumn(\"goods_and_ctr_wt_kg\", F.col(\"goods_and_ctr_wt_kg\").cast(\"decimal(18,3)\"))\n",
-					"    # CHE IDs — source is bigint in N4, cast to string for silver\n",
+					"\n",
+					"    # ── GKEY / visit key columns → BIGINT ─────────────────────────────────────\n",
+					"    .withColumn(\"carrier_visit_key\",   F.col(\"carrier_visit_key\").cast(\"bigint\"))\n",
+					"    .withColumn(\"fm_pos_gkey\",         F.col(\"fm_pos_gkey\").cast(\"bigint\"))\n",
+					"    .withColumn(\"to_pos_gkey\",         F.col(\"to_pos_gkey\").cast(\"bigint\"))\n",
+					"    .withColumn(\"ufv_gkey\",            F.col(\"ufv_gkey\").cast(\"bigint\"))\n",
+					"    .withColumn(\"active_ufv\",          F.col(\"active_ufv\").cast(\"bigint\"))\n",
+					"\n",
+					"    # ── CHE IDs → STRING (source is bigint in N4, not arithmetic) ────────────\n",
 					"    .withColumn(\"fetch_che_id\",        F.col(\"fetch_che_id\").cast(\"string\"))\n",
 					"    .withColumn(\"carry_che_id\",        F.col(\"carry_che_id\").cast(\"string\"))\n",
 					"    .withColumn(\"put_che_id\",          F.col(\"put_che_id\").cast(\"string\"))\n",
 					"    .withColumn(\"qc_che_id\",           F.col(\"qc_che_id\").cast(\"string\"))\n",
+					"\n",
+					"    # ── Twin lift flags → BIT (Yes/No string → 1/0) ───────────────────────────\n",
+					"    # Cannot use .cast(\"boolean\") directly — source values are \"Yes\"/\"No\" strings\n",
+					"    .withColumn(\"twin_fetch\",\n",
+					"        F.when(F.upper(F.col(\"twin_fetch\")) == \"YES\", F.lit(1))\n",
+					"         .when(F.upper(F.col(\"twin_fetch\")) == \"NO\",  F.lit(0))\n",
+					"         .otherwise(None)\n",
+					"         .cast(\"byte\")\n",
+					"    )\n",
+					"    .withColumn(\"twin_carry\",\n",
+					"        F.when(F.upper(F.col(\"twin_carry\")) == \"YES\", F.lit(1))\n",
+					"         .when(F.upper(F.col(\"twin_carry\")) == \"NO\",  F.lit(0))\n",
+					"         .otherwise(None)\n",
+					"         .cast(\"byte\")\n",
+					"    )\n",
+					"    .withColumn(\"twin_put\",\n",
+					"        F.when(F.upper(F.col(\"twin_put\")) == \"YES\", F.lit(1))\n",
+					"         .when(F.upper(F.col(\"twin_put\")) == \"NO\",  F.lit(0))\n",
+					"         .otherwise(None)\n",
+					"         .cast(\"byte\")\n",
+					"    )\n",
+					"\n",
+					"    # ── Decimal columns ────────────────────────────────────────────────────────\n",
+					"    .withColumn(\"dist_carry\",          F.col(\"dist_carry\").cast(\"decimal(18,3)\"))\n",
+					"    .withColumn(\"dist_start\",          F.col(\"dist_start\").cast(\"decimal(18,3)\"))\n",
+					"    .withColumn(\"goods_and_ctr_wt_kg\", F.col(\"goods_and_ctr_wt_kg\").cast(\"decimal(18,3)\"))\n",
 					")\n",
+					"\n",
 					"\n",
 					"\n",
 					"silver_fields = {f.name for f in silver.schema.fields}\n",
@@ -416,7 +449,7 @@
 					"print(f\"Silver columns: {len(final_cols)}\")\n",
 					""
 				],
-				"execution_count": 31
+				"execution_count": 41
 			},
 			{
 				"cell_type": "code",
@@ -457,7 +490,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 32
+				"execution_count": 42
 			},
 			{
 				"cell_type": "code",
@@ -475,7 +508,7 @@
 					"print(f\"✅  Written {total:,} rows → {SILVER_PATH}\")\n",
 					""
 				],
-				"execution_count": 33
+				"execution_count": 43
 			},
 			{
 				"cell_type": "code",
@@ -487,7 +520,7 @@
 					"result.printSchema()\n",
 					""
 				],
-				"execution_count": 34
+				"execution_count": 44
 			}
 		]
 	}
