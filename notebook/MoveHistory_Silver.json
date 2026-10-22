@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "f069565a-8019-4494-91b3-5745da2cb811"
+				"spark.autotune.trackingId": "579e44da-5ae3-4575-991b-af4d1c4fa89d"
 			}
 		},
 		"metadata": {
@@ -77,7 +77,7 @@
 					"print(f\"Write mode: {WRITE_MODE}\")\n",
 					""
 				],
-				"execution_count": 15
+				"execution_count": 25
 			},
 			{
 				"cell_type": "code",
@@ -90,7 +90,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 16
+				"execution_count": 26
 			},
 			{
 				"cell_type": "code",
@@ -135,7 +135,7 @@
 					"DEFAULT_PARSER = \"MFT\"\n",
 					""
 				],
-				"execution_count": 17
+				"execution_count": 27
 			},
 			{
 				"cell_type": "code",
@@ -227,7 +227,7 @@
 					"    return _parse(pos, facility_id)\n",
 					""
 				],
-				"execution_count": 18
+				"execution_count": 28
 			},
 			{
 				"cell_type": "code",
@@ -294,7 +294,7 @@
 					"}\n",
 					""
 				],
-				"execution_count": 19
+				"execution_count": 29
 			},
 			{
 				"cell_type": "code",
@@ -306,7 +306,7 @@
 					"bronze.printSchema()\n",
 					""
 				],
-				"execution_count": 20
+				"execution_count": 30
 			},
 			{
 				"cell_type": "code",
@@ -334,7 +334,13 @@
 					"    .withColumn(\"dist_carry\",          F.col(\"dist_carry\").cast(\"decimal(18,3)\"))\n",
 					"    .withColumn(\"dist_start\",          F.col(\"dist_start\").cast(\"decimal(18,3)\"))\n",
 					"    .withColumn(\"goods_and_ctr_wt_kg\", F.col(\"goods_and_ctr_wt_kg\").cast(\"decimal(18,3)\"))\n",
+					"    # CHE IDs — source is bigint in N4, cast to string for silver\n",
+					"    .withColumn(\"fetch_che_id\",        F.col(\"fetch_che_id\").cast(\"string\"))\n",
+					"    .withColumn(\"carry_che_id\",        F.col(\"carry_che_id\").cast(\"string\"))\n",
+					"    .withColumn(\"put_che_id\",          F.col(\"put_che_id\").cast(\"string\"))\n",
+					"    .withColumn(\"qc_che_id\",           F.col(\"qc_che_id\").cast(\"string\"))\n",
 					")\n",
+					"\n",
 					"\n",
 					"silver_fields = {f.name for f in silver.schema.fields}\n",
 					"for ts in TIMESTAMP_COLS:\n",
@@ -410,7 +416,7 @@
 					"print(f\"Silver columns: {len(final_cols)}\")\n",
 					""
 				],
-				"execution_count": 21
+				"execution_count": 31
 			},
 			{
 				"cell_type": "code",
@@ -451,7 +457,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 22
+				"execution_count": 32
 			},
 			{
 				"cell_type": "code",
@@ -469,7 +475,7 @@
 					"print(f\"✅  Written {total:,} rows → {SILVER_PATH}\")\n",
 					""
 				],
-				"execution_count": 23
+				"execution_count": 33
 			},
 			{
 				"cell_type": "code",
@@ -481,7 +487,7 @@
 					"result.printSchema()\n",
 					""
 				],
-				"execution_count": 24
+				"execution_count": 34
 			}
 		]
 	}
