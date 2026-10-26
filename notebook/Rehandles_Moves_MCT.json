@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "63c736d9-e21d-4d00-a668-1adb002e74a0"
+				"spark.autotune.trackingId": "25a8f944-4e0f-4148-bf1b-cf295a8a663b"
 			}
 		},
 		"metadata": {
@@ -87,7 +87,7 @@
 					"print(\"Shift events :\", SHIFT_EVENTS)\n",
 					""
 				],
-				"execution_count": 50
+				"execution_count": 65
 			},
 			{
 				"cell_type": "code",
@@ -210,7 +210,7 @@
 					"    return df.drop(\"_norm\")\n",
 					""
 				],
-				"execution_count": 51
+				"execution_count": 66
 			},
 			{
 				"cell_type": "code",
@@ -263,7 +263,7 @@
 					"print(\"MCT parser tests passed.\")\n",
 					""
 				],
-				"execution_count": 52
+				"execution_count": 67
 			},
 			{
 				"cell_type": "code",
@@ -307,7 +307,7 @@
 					").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 53
+				"execution_count": 68
 			},
 			{
 				"cell_type": "code",
@@ -384,7 +384,7 @@
 					"print(\"Shifts:\", shifts.count())\n",
 					""
 				],
-				"execution_count": 54
+				"execution_count": 69
 			},
 			{
 				"cell_type": "code",
@@ -579,7 +579,7 @@
 					"    return per_load, assigned\n",
 					""
 				],
-				"execution_count": 55
+				"execution_count": 70
 			},
 			{
 				"cell_type": "code",
@@ -597,25 +597,25 @@
 					"\n",
 					"test_loads = spark.createDataFrame(\n",
 					"    [\n",
-					"        (101, \"169A-03\", datetime(2026, 1, 1, 10, 10), \"SGSIN\", \"SVC-A\", 22000.0),\n",
-					"        (102, \"169A-03\", datetime(2026, 1, 1, 10, 40), \"SGSIN\", \"SVC-A\", 22000.0),\n",
-					"        (103, \"785B-06\", datetime(2026, 1, 1, 10, 10), \"SGSIN\", \"SVC-A\", 22000.0),\n",
+					"        (101, \"169A-03\", datetime(2026, 1, 1, 10, 10), \"SGSIN\", \"CVK-A\", \"SVC-A\", 22000.0),\n",
+					"        (102, \"169A-03\", datetime(2026, 1, 1, 10, 40), \"SGSIN\", \"CVK-A\", \"SVC-A\", 22000.0),\n",
+					"        (103, \"785B-06\", datetime(2026, 1, 1, 10, 10), \"SGSIN\", \"CVK-A\", \"SVC-A\", 22000.0),\n",
 					"    ],\n",
 					"    \"mve_gkey_load long, load_from_stack string, load_time timestamp,\"\n",
-					"    \"load_pod string, load_carrier_service string, load_weight_kg double\",\n",
+					"    \"load_pod string, load_carrier_visit_key string, load_carrier_service string, load_weight_kg double\",\n",
 					")\n",
 					"\n",
 					"test_shifts = spark.createDataFrame(\n",
 					"    [\n",
-					"        # 201 → load 101: different carrier\n",
-					"        (201, \"169A-03\", datetime(2026, 1, 1, 9, 50),  \"SGSIN\", \"SVC-B\", 22000.0),\n",
-					"        # 202 → load 101: same carrier, different POD\n",
-					"        (202, \"169A-03\", datetime(2026, 1, 1, 10, 5),  \"CNSHA\", \"SVC-A\", 22000.0),\n",
+					"        # 201 → load 101: different carrier_visit_key\n",
+					"        (201, \"169A-03\", datetime(2026, 1, 1, 9, 50),  \"SGSIN\", \"CVK-B\", \"SVC-B\", 22000.0),\n",
+					"        # 202 → load 101: same carrier_visit_key, different POD\n",
+					"        (202, \"169A-03\", datetime(2026, 1, 1, 10, 5),  \"CNSHA\", \"CVK-A\", \"SVC-A\", 22000.0),\n",
 					"        # 203 → load 102: all same\n",
-					"        (203, \"169A-03\", datetime(2026, 1, 1, 10, 30), \"SGSIN\", \"SVC-A\", 22000.0),\n",
+					"        (203, \"169A-03\", datetime(2026, 1, 1, 10, 30), \"SGSIN\", \"CVK-A\", \"SVC-A\", 22000.0),\n",
 					"    ],\n",
 					"    \"mve_gkey_shift long, shift_from_stack string, shift_time timestamp,\"\n",
-					"    \"shift_pod string, shift_carrier_service string, shift_weight_kg double\",\n",
+					"    \"shift_pod string, shift_carrier_visit_key string, shift_carrier_service string, shift_weight_kg double\",\n",
 					")\n",
 					"\n",
 					"test_per_load, test_assigned = assign_rehandles(test_loads, test_shifts)\n",
@@ -681,7 +681,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 56
+				"execution_count": 71
 			},
 			{
 				"cell_type": "code",
@@ -757,7 +757,7 @@
 					").count().orderBy(F.desc(\"count\")).show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 72
 			},
 			{
 				"cell_type": "code",
@@ -807,7 +807,7 @@
 					"print(\"Registered :\", TABLE_NAME)\n",
 					""
 				],
-				"execution_count": 48
+				"execution_count": 73
 			},
 			{
 				"cell_type": "code",
@@ -846,7 +846,7 @@
 					").show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": 49
+				"execution_count": 74
 			}
 		]
 	}
