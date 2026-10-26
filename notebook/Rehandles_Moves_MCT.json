@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "3148c351-ea1c-44ad-bdf6-0828dcbdc81b"
+				"spark.autotune.trackingId": "656be7d7-d289-456b-a6c9-fe0e0d5d9baa"
 			}
 		},
 		"metadata": {
@@ -87,7 +87,7 @@
 					"print(\"Shift events :\", SHIFT_EVENTS)\n",
 					""
 				],
-				"execution_count": 76
+				"execution_count": 88
 			},
 			{
 				"cell_type": "code",
@@ -210,7 +210,7 @@
 					"    return df.drop(\"_norm\")\n",
 					""
 				],
-				"execution_count": 77
+				"execution_count": 89
 			},
 			{
 				"cell_type": "code",
@@ -263,7 +263,7 @@
 					"print(\"MCT parser tests passed.\")\n",
 					""
 				],
-				"execution_count": 78
+				"execution_count": 90
 			},
 			{
 				"cell_type": "code",
@@ -307,7 +307,7 @@
 					").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 79
+				"execution_count": 91
 			},
 			{
 				"cell_type": "code",
@@ -384,7 +384,7 @@
 					"print(\"Shifts:\", shifts.count())\n",
 					""
 				],
-				"execution_count": 80
+				"execution_count": 92
 			},
 			{
 				"cell_type": "code",
@@ -580,7 +580,7 @@
 					"    return per_load, assigned\n",
 					""
 				],
-				"execution_count": 81
+				"execution_count": 93
 			},
 			{
 				"cell_type": "code",
@@ -682,7 +682,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 82
+				"execution_count": 94
 			},
 			{
 				"cell_type": "code",
@@ -758,7 +758,7 @@
 					").count().orderBy(F.desc(\"count\")).show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": 83
+				"execution_count": 95
 			},
 			{
 				"cell_type": "code",
@@ -808,7 +808,7 @@
 					"print(\"Registered :\", TABLE_NAME)\n",
 					""
 				],
-				"execution_count": 84
+				"execution_count": 96
 			},
 			{
 				"cell_type": "code",
@@ -847,7 +847,7 @@
 					").show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": 85
+				"execution_count": 97
 			}
 		]
 	}
