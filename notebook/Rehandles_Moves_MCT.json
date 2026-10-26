@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "25a8f944-4e0f-4148-bf1b-cf295a8a663b"
+				"spark.autotune.trackingId": "3148c351-ea1c-44ad-bdf6-0828dcbdc81b"
 			}
 		},
 		"metadata": {
@@ -87,7 +87,7 @@
 					"print(\"Shift events :\", SHIFT_EVENTS)\n",
 					""
 				],
-				"execution_count": 65
+				"execution_count": 76
 			},
 			{
 				"cell_type": "code",
@@ -210,7 +210,7 @@
 					"    return df.drop(\"_norm\")\n",
 					""
 				],
-				"execution_count": 66
+				"execution_count": 77
 			},
 			{
 				"cell_type": "code",
@@ -263,7 +263,7 @@
 					"print(\"MCT parser tests passed.\")\n",
 					""
 				],
-				"execution_count": 67
+				"execution_count": 78
 			},
 			{
 				"cell_type": "code",
@@ -307,7 +307,7 @@
 					").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 68
+				"execution_count": 79
 			},
 			{
 				"cell_type": "code",
@@ -384,7 +384,7 @@
 					"print(\"Shifts:\", shifts.count())\n",
 					""
 				],
-				"execution_count": 69
+				"execution_count": 80
 			},
 			{
 				"cell_type": "code",
@@ -569,6 +569,7 @@
 					"                    F.col(\"mve_gkey_shift\"),\n",
 					"                    F.col(\"rehandle_reason\"),\n",
 					"                    F.col(\"shift_pod\"),\n",
+					"                    F.col(\"shift_carrier_visit_key\"),\n",
 					"                    F.col(\"shift_carrier_service\"),\n",
 					"                    F.col(\"shift_weight_kg\"),\n",
 					"                )\n",
@@ -579,7 +580,7 @@
 					"    return per_load, assigned\n",
 					""
 				],
-				"execution_count": 70
+				"execution_count": 81
 			},
 			{
 				"cell_type": "code",
@@ -681,7 +682,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 71
+				"execution_count": 82
 			},
 			{
 				"cell_type": "code",
@@ -757,7 +758,7 @@
 					").count().orderBy(F.desc(\"count\")).show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": 72
+				"execution_count": 83
 			},
 			{
 				"cell_type": "code",
@@ -807,7 +808,7 @@
 					"print(\"Registered :\", TABLE_NAME)\n",
 					""
 				],
-				"execution_count": 73
+				"execution_count": 84
 			},
 			{
 				"cell_type": "code",
@@ -846,7 +847,7 @@
 					").show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": 74
+				"execution_count": 85
 			}
 		]
 	}
