@@ -17,13 +17,6 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "DeckingHistory"
-				},
-				{
-					"linkedService": {
-						"referenceName": "linkedService2",
-						"type": "LinkedServiceReference"
-					},
-					"name": "XpsEcUser"
 				}
 			],
 			"sinks": [
@@ -102,13 +95,7 @@
 					"name": "derivedColumn6"
 				},
 				{
-					"name": "select8"
-				},
-				{
 					"name": "filter6"
-				},
-				{
-					"name": "aggregate4"
 				},
 				{
 					"name": "filter7"
@@ -215,23 +202,6 @@
 				"     format: 'delta',",
 				"     fileSystem: 'apmt-elz',",
 				"     folderPath: 'silver/deckings') ~> DeckingHistory",
-				"source(output(",
-				"          gkey as string,",
-				"          user_id as string,",
-				"          name as string,",
-				"          yard as string",
-				"     ),",
-				"     useSchema: false,",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false,",
-				"     format: 'delimited',",
-				"     fileSystem: 'cmatk',",
-				"     folderPath: 'bronze/xpsecuser',",
-				"     columnDelimiter: ',',",
-				"     escapeChar: '\\\\',",
-				"     quoteChar: '\\\"',",
-				"     columnNamesAsHeader: true) ~> XpsEcUser",
 				"filter6 select(mapColumn(",
 				"          mve_gkey,",
 				"          Unit_Nbr,",
@@ -350,18 +320,8 @@
 				"derivedColumn4 derive(Block_To_Block_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 4) != substring(DH_To_Position_Name_Short_5, 1, 4), true(), false()),",
 				"          Same_Block_Violation = iif( (substring(MH_To_Position_Name_Short_5, 1, 4) == substring(DH_To_Position_Name_Short_5, 1, 4)) && (substring(MH_To_Position_Name_Short_5, 5, 2) != substring(DH_To_Position_Name_Short_5, 5, 2)), true(), false()),",
 				"          Stack_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 6) == substring(DH_To_Position_Name_Short_5, 1, 6) && substring(MH_To_Position_Name_Short_5, 7, 1) != substring(DH_To_Position_Name_Short_5, 7, 1), true(), false())) ~> derivedColumn6",
-				"XpsEcUser select(mapColumn(",
-				"          gkey,",
-				"          user_id,",
-				"          name,",
-				"          yard",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select8",
 				"MoveHistory filter(Put_CHE_Kind == \"RTG\" && not(isNull(mve_gkey))) ~> filter6",
-				"select8 aggregate(groupBy(user_id),",
-				"     each(match(name!='user_id'), $$ = last($$))) ~> aggregate4",
-				"aggregate4 filter(not(isNull(user_id))) ~> filter7",
+				" filter(not(isNull(user_id))) ~> filter7",
 				"select1 derive(Year_Month = (Year*100) + Month,",
 				"          Year_Week = (Year*100) + Week) ~> derivedColumn7",
 				"alterRow1 sink(allowSchemaDrift: true,",
