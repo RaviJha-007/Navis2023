@@ -98,9 +98,6 @@
 					"name": "filter6"
 				},
 				{
-					"name": "filter7"
-				},
-				{
 					"name": "derivedColumn7"
 				}
 			],
@@ -321,7 +318,6 @@
 				"          Same_Block_Violation = iif( (substring(MH_To_Position_Name_Short_5, 1, 4) == substring(DH_To_Position_Name_Short_5, 1, 4)) && (substring(MH_To_Position_Name_Short_5, 5, 2) != substring(DH_To_Position_Name_Short_5, 5, 2)), true(), false()),",
 				"          Stack_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 6) == substring(DH_To_Position_Name_Short_5, 1, 6) && substring(MH_To_Position_Name_Short_5, 7, 1) != substring(DH_To_Position_Name_Short_5, 7, 1), true(), false())) ~> derivedColumn6",
 				"MoveHistory filter(Put_CHE_Kind == \"RTG\" && not(isNull(mve_gkey))) ~> filter6",
-				" filter(not(isNull(user_id))) ~> filter7",
 				"select1 derive(Year_Month = (Year*100) + Month,",
 				"          Year_Week = (Year*100) + Week) ~> derivedColumn7",
 				"alterRow1 sink(allowSchemaDrift: true,",
