@@ -87,7 +87,7 @@
 				"     validateSchema: false,",
 				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: true,",
-				"     moveFiles: ['bronze/stackconformitycsvs/load','bronze/stackconformitycsvs/archive'],",
+				"     moveFiles: ['bronze/yardinventory/load','bronze/yardinventory/archive'],",
 				"     rowUrlColumn: 'FileDate',",
 				"     format: 'delimited',",
 				"     fileSystem: 'dgt',",
