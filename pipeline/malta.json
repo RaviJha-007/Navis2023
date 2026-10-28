@@ -458,6 +458,39 @@
 					},
 					"traceLevel": "Fine"
 				}
+			},
+			{
+				"name": "DLVR_GC_Malta",
+				"type": "SynapseNotebook",
+				"dependsOn": [
+					{
+						"activity": "MoveSrc_malta",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Decking_malta",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "DLVR_Rehandles_Moves_GC_Malta",
+						"type": "NotebookReference"
+					},
+					"snapshot": true
+				}
 			}
 		],
 		"annotations": []
