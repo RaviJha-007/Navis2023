@@ -138,6 +138,70 @@
 					},
 					"traceLevel": "Fine"
 				}
+			},
+			{
+				"name": "rtg_violation",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "Decking",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "MoveHistory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "APMT_ELZ_RTG_violations",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "Elizabeth_Decking_upd",
+				"type": "SynapseNotebook",
+				"dependsOn": [
+					{
+						"activity": "Decking",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "Elizabeth_Decking_upd",
+						"type": "NotebookReference"
+					},
+					"snapshot": true
+				}
 			}
 		],
 		"annotations": []
