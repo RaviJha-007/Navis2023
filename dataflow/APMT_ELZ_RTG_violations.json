@@ -99,6 +99,12 @@
 				},
 				{
 					"name": "derivedColumn7"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "filter7"
 				}
 			],
 			"scriptLines": [
@@ -236,7 +242,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1 filter(From_Location != 'YARD' && Unit_Nbr != '' && not(isNull(Unit_Nbr))  && !startsWith(split(To_Position_Name, \"-\")[3], 'CR') && t_put > addDays(time_stamp, -15)) ~> filter2",
+				"join1 filter(Unit_Nbr != '' && not(isNull(Unit_Nbr))  && !startsWith(split(To_Position_Name, \"-\")[3], 'CR') && t_put > addDays(time_stamp, -15)) ~> filter2",
 				"filter2 derive(MH_t_put_4 = add(t_put , -4*60*60*1000),",
 				"          DH_timestamp_within_4 = iif((time_stamp >= add(t_put , -4*60*60*1000)) && (time_stamp <= t_put), 1, 0),",
 				"          MH_To_Position_Name_Short = split(To_Position_Name, \"-\")[3],",
@@ -268,7 +274,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
-				"join2 derive({Location Match or Not} = iif((MH_To_Position_Name_Short_5) == (DH_To_Position_Name_Short_5), 'Position Followed', 'Position Not Followed'),",
+				"filter7 derive({Location Match or Not} = iif((MH_To_Position_Name_Short_5) == (DH_To_Position_Name_Short_5), 'Position Followed', 'Position Not Followed'),",
 				"          {T Put Time} = MaxDHTime,",
 				"          {T Put Hour} = hour(MaxDHTime),",
 				"          {T Put Minute} = minute(MaxDHTime),",
@@ -313,13 +319,18 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select6",
-				"select2 filter(not(isNull(gkey)) ) ~> filter5",
+				"select2 filter(not(isNull(gkey))) ~> filter5",
 				"derivedColumn4 derive(Block_To_Block_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 4) != substring(DH_To_Position_Name_Short_5, 1, 4), true(), false()),",
 				"          Same_Block_Violation = iif( (substring(MH_To_Position_Name_Short_5, 1, 4) == substring(DH_To_Position_Name_Short_5, 1, 4)) && (substring(MH_To_Position_Name_Short_5, 5, 2) != substring(DH_To_Position_Name_Short_5, 5, 2)), true(), false()),",
 				"          Stack_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 6) == substring(DH_To_Position_Name_Short_5, 1, 6) && substring(MH_To_Position_Name_Short_5, 7, 1) != substring(DH_To_Position_Name_Short_5, 7, 1), true(), false())) ~> derivedColumn6",
 				"MoveHistory filter(Put_CHE_Kind == \"RTG\" && not(isNull(mve_gkey))) ~> filter6",
 				"select1 derive(Year_Month = (Year*100) + Month,",
 				"          Year_Week = (Year*100) + Week) ~> derivedColumn7",
+				"join2 window(over(gkey),",
+				"     asc(select1@t_put, false),",
+				"     asc(select1@mve_gkey, false),",
+				"     MH_Rank = rowNumber()) ~> window1",
+				"window1 filter(MH_Rank == 1) ~> filter7",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
