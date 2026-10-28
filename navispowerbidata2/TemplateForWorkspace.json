@@ -82722,7 +82722,7 @@
 						"     validateSchema: false,",
 						"     inferDriftedColumnTypes: true,",
 						"     ignoreNoFilesFound: true,",
-						"     moveFiles: ['bronze/stackconformitycsvs/load','bronze/stackconformitycsvs/archive'],",
+						"     moveFiles: ['bronze/yardinventory/load','bronze/yardinventory/archive'],",
 						"     rowUrlColumn: 'FileDate',",
 						"     format: 'delimited',",
 						"     fileSystem: 'dgt',",
@@ -123984,7 +123984,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "9ebe6122-2d74-4ad4-a92c-d4294b3937a4"
+						"spark.autotune.trackingId": "96863230-3a61-49e1-b0c9-ddad1fd3d932"
 					}
 				},
 				"metadata": {
@@ -124009,15 +124009,13 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56,
-						"automaticScaleJobs": true
+						"memory": 56
 					},
 					"sessionKeepAliveTimeout": 30
 				},
 				"cells": [
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"\n",
 							"\n",
@@ -124049,7 +124047,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# CELL 2 — Terminal Configuration\n",
@@ -124287,7 +124284,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# CELL 6 — Rehandle Matching (Full Output: delivers + Pairs + Housekeeping)\n",
@@ -124568,7 +124564,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# CELL 6b — Load Yard Report (Conformities) & Dedupe\n",
@@ -124602,7 +124597,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# CELL 7 — Write to Gold Delta Table\n",
@@ -124669,7 +124663,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# CELL 7b — Attach Group Codes (shift_GC and deliver_GC)\n",
@@ -124777,7 +124770,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ─── Write to Gold Delta ──────────────────────────────────────\n",
 							"try:\n",
@@ -129970,7 +129962,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "f0fba77d-7d96-4532-bcc9-d43f205ebdda"
+						"spark.autotune.trackingId": "8124a48f-1143-4fc0-b7b7-e79c8905b76b"
 					}
 				},
 				"metadata": {
@@ -129995,13 +129987,15 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56
+						"memory": 56,
+						"automaticScaleJobs": true
 					},
 					"sessionKeepAliveTimeout": 30
 				},
 				"cells": [
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"\n",
 							"\n",
@@ -130029,6 +130023,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# CELL 2 — Terminal Configuration\n",
@@ -130266,6 +130261,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# CELL 6 — Rehandle Matching (Full Output: LOADs + Pairs + Housekeeping)\n",
@@ -130545,6 +130541,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# CELL 7 — Write to Gold Delta Table\n",
