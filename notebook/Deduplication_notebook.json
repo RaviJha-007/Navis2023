@@ -1,0 +1,98 @@
+{
+	"name": "Deduplication_notebook",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "pbixpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 1,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "3",
+				"spark.autotune.trackingId": "045081fa-fe68-440b-9089-16a9e2ff6790"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Synapse/workspaces/navispowerbidata2/bigDataPools/pbixpool",
+				"name": "pbixpool",
+				"type": "Spark",
+				"endpoint": "https://navispowerbidata2.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pbixpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"automaticScaleJobs": true
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql import SparkSession\n",
+					"\n",
+					"spark = SparkSession.builder.getOrCreate()\n",
+					"\n",
+					"path = \"abfss://dgt@navispowerbidatastorage2.dfs.core.windows.net/gold/conformities\"\n",
+					"\n",
+					"# 1. Read and check before\n",
+					"df = spark.read.format(\"delta\").load(path)\n",
+					"total = df.count()\n",
+					"distinct = df.dropDuplicates().count()\n",
+					"print(f\"Rows: {total} | Distinct rows: {distinct} | Duplicates: {total - distinct}\")\n",
+					"\n",
+					"# 2. Stop if there's nothing to clean\n",
+					"if total == distinct:\n",
+					"    print(\"No exact duplicates found. Nothing to do.\")\n",
+					"else:\n",
+					"    # 3. Deduplicate and materialise BEFORE overwriting the same path\n",
+					"    clean = df.dropDuplicates().cache()\n",
+					"    clean_count = clean.count()\n",
+					"\n",
+					""
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"    # 4. Overwrite the table\n",
+					"    (clean.write\n",
+					"          .format(\"delta\")\n",
+					"          .mode(\"overwrite\")\n",
+					"          .option(\"overwriteSchema\", \"true\")\n",
+					"          .save(path))\n",
+					"\n",
+					"    # 5. Verify\n",
+					"    after = spark.read.format(\"delta\").load(path)\n",
+					"    print(f\"After: {after.count()} rows (expected {clean_count})\")\n",
+					"    clean.unpersist()\n",
+					""
+				],
+				"execution_count": 4
+			}
+		]
+	}
+}
