@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 32",
+	"properties": {
+		"content": {
+			"query": "create or alter view conformities as select * FROM OPENROWSET( BULK 'gold/conformities', data_source = 'dgt', FORMAT = 'DELTA' ) AS [conformities];",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dgt",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
