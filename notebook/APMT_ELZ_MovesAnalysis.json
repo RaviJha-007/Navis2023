@@ -1,0 +1,187 @@
+{
+	"name": "APMT_ELZ_MovesAnalysis",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "pbixpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 1,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "3",
+				"spark.autotune.trackingId": "7497d9fb-d8a0-47cc-b297-f587f131143c"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Synapse/workspaces/navispowerbidata2/bigDataPools/pbixpool",
+				"name": "pbixpool",
+				"type": "Spark",
+				"endpoint": "https://navispowerbidata2.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pbixpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"automaticScaleJobs": true
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
+				"source": [
+					"import pandas as pd\n",
+					"from notebookutils import mssparkutils\n",
+					"from pyspark.sql import functions as F\n",
+					"\n",
+					"folder = \"abfss://apmt-elz@navispowerbidatastorage2.dfs.core.windows.net/bronze/moves_xlsx/\"\n",
+					"\n",
+					"files = [f for f in mssparkutils.fs.ls(folder)\n",
+					"         if not f.isDir and f.name.lower().endswith((\".csv\", \".xlsx\"))]\n",
+					"print(f\"{len(files)} file(s):\", [f.name for f in files])\n",
+					"\n",
+					"def read_one(f):\n",
+					"    local = f\"/tmp/{f.name}\"\n",
+					"    mssparkutils.fs.cp(f.path, f\"file:{local}\")\n",
+					"    if f.name.lower().endswith(\".csv\"):\n",
+					"        raw = pd.read_csv(local, header=None, dtype=str, encoding=\"utf-8-sig\")\n",
+					"    else:\n",
+					"        raw = pd.read_excel(local, header=None, dtype=str)\n",
+					"    # header row = first row whose first cell is \"Time Completed\" (works with or without the logo/title rows)\n",
+					"    hdr = raw.index[raw.iloc[:, 0].astype(str).str.strip() == \"Time Completed\"][0]\n",
+					"    pdf = raw.iloc[hdr + 1:].copy()\n",
+					"    pdf.columns = [str(c).strip() for c in raw.iloc[hdr]]\n",
+					"    pdf = pdf.loc[:, [c for c in pdf.columns if c and c != \"nan\"]].dropna(how=\"all\")\n",
+					"    # normalise timestamps per file (Excel date cells vs \"15-Oct-2026 00:01\" text)\n",
+					"    ts = pd.to_datetime(pdf[\"Time Completed\"], errors=\"coerce\", dayfirst=True)\n",
+					"    pdf[\"Time Completed\"] = ts.dt.strftime(\"%Y-%m-%d %H:%M:%S\")\n",
+					"    pdf[\"source_file\"] = f.name\n",
+					"    return pdf\n",
+					"\n",
+					"pdf_all = pd.concat([read_one(f) for f in files], ignore_index=True)\n",
+					"pdf_all.columns = [c.replace(\".\", \"_\").replace(\" \", \"_\") for c in pdf_all.columns]\n",
+					"pdf_all = pdf_all.astype(object).where(pdf_all.notna(), None)\n",
+					"\n",
+					"schema = \", \".join(f\"`{c}` string\" for c in pdf_all.columns)\n",
+					"df = spark.createDataFrame(pdf_all, schema=schema)\n",
+					"\n",
+					"df = (df.withColumn(\"Time_Completed\", F.to_timestamp(\"Time_Completed\"))\n",
+					"        .withColumn(\"Dist_Carry\", F.col(\"Dist_Carry\").cast(\"double\").cast(\"int\"))\n",
+					"        .withColumn(\"Dist_Start\", F.col(\"Dist_Start\").cast(\"double\").cast(\"int\")))\n",
+					"\n",
+					"# drop rows duplicated across overlapping exports\n",
+					"# before = df.count()\n",
+					"# df = df.dropDuplicates([c for c in df.columns if c != \"source_file\"]).cache()\n",
+					"# after = df.count()\n",
+					"key_cols = [\"Unit_Nbr\", \"Time_Completed\", \"Event_ID\", \"From_Position\", \"To_Position\"]\n",
+					"\n",
+					"df = df.withColumn(\n",
+					"    \"move_key\",\n",
+					"    F.sha2(F.concat_ws(\"||\", *[F.coalesce(F.col(c).cast(\"string\"), F.lit(\"\")) for c in key_cols]), 256)\n",
+					")\n",
+					"\n",
+					"before = df.count()\n",
+					"# keep the newest file's copy if an export overlaps\n",
+					"from pyspark.sql import Window\n",
+					"w = Window.partitionBy(\"move_key\").orderBy(F.col(\"source_file\").desc())\n",
+					"df = (df.withColumn(\"rn\", F.row_number().over(w))\n",
+					"        .filter(\"rn = 1\").drop(\"rn\")\n",
+					"        .cache())\n",
+					"after = df.count()\n",
+					"print(f\"Rows: {before} -> {after} ({before - after} duplicates removed)\")\n",
+					"\n",
+					"\n",
+					"# display(df.groupBy(\"source_file\").count())\n",
+					"# print(f\"Rows: {before} -> {after} after removing {before - after} duplicates\")\n",
+					"# print(\"Null timestamps:\", df.filter(F.col(\"Time_Completed\").isNull()).count())  # should be 0\n",
+					"df.printSchema()\n",
+					"display(df.limit(20))\n",
+					""
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
+				"source": [
+					"from pyspark.sql import functions as F\n",
+					"\n",
+					"d = F.to_date(\"Time_Completed\")\n",
+					"isodow = ((F.dayofweek(d) + 5) % 7) + 1\n",
+					"iso_year = F.year(F.date_add(d, 4 - isodow))\n",
+					"\n",
+					"INF_LIMIT = 10000\n",
+					"is_inf  = F.col(\"Dist_Carry\") >= INF_LIMIT\n",
+					"is_zero = F.col(\"Dist_Carry\") == 0\n",
+					"\n",
+					"summary = (\n",
+					"    df.withColumn(\"Move_Date\", d)\n",
+					"      .withColumn(\"ISO_Year\", iso_year)\n",
+					"      .withColumn(\"ISO_Week\", F.weekofyear(\"Move_Date\"))\n",
+					"      .groupBy(\"Move_Date\", \"ISO_Year\", \"ISO_Week\",\n",
+					"               \"Unit_Frght_Kind\", \"Unit_Category\", \"Move_Kind\", \"Event_ID\")\n",
+					"      .agg(F.sum(\"Dist_Carry\").alias(\"Total_Dist_Carry\"),\n",
+					"           F.count(\"*\").alias(\"Move_Count\"),\n",
+					"           F.sum(F.when(is_inf, 1).otherwise(0)).alias(\"Infinity_Count\"),\n",
+					"           F.sum(F.when(is_inf, F.col(\"Dist_Carry\")).otherwise(0)).alias(\"Infinity_Sum\"),\n",
+					"           F.sum(F.when(is_zero, 1).otherwise(0)).alias(\"Zero_Count\"))\n",
+					"      .withColumn(\"ISO_Week_Label\",\n",
+					"                  F.concat(F.col(\"ISO_Year\"), F.lit(\"-W\"), F.lpad(F.col(\"ISO_Week\").cast(\"string\"), 2, \"0\")))\n",
+					"      .select(\"Move_Date\", \"ISO_Week_Label\", \"ISO_Year\", \"ISO_Week\",\n",
+					"              \"Unit_Frght_Kind\", \"Unit_Category\", \"Move_Kind\", \"Event_ID\",\n",
+					"              \"Total_Dist_Carry\", \"Move_Count\",\n",
+					"              \"Infinity_Count\", \"Infinity_Sum\", \"Zero_Count\")\n",
+					"      .orderBy(\"Move_Date\", \"Unit_Frght_Kind\", \"Unit_Category\", \"Move_Kind\", \"Event_ID\")\n",
+					")\n",
+					"\n",
+					"# Checks: each total must match the raw data\n",
+					"print(\"Summary rows:\", summary.count())\n",
+					"print(\"Total_Dist_Carry:\", summary.agg(F.sum(\"Total_Dist_Carry\")).first()[0],\n",
+					"      \"| raw:\", df.agg(F.sum(\"Dist_Carry\")).first()[0])\n",
+					"print(\"Infinity_Count:\", summary.agg(F.sum(\"Infinity_Count\")).first()[0],\n",
+					"      \"| raw:\", df.filter(F.col(\"Dist_Carry\") >= INF_LIMIT).count())\n",
+					"print(\"Zero_Count:\", summary.agg(F.sum(\"Zero_Count\")).first()[0],\n",
+					"      \"| raw:\", df.filter(F.col(\"Dist_Carry\") == 0).count())\n",
+					"\n",
+					"display(summary)\n",
+					""
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"print(\"Summary rows:\", summary.count())\n",
+					""
+				],
+				"execution_count": 5
+			}
+		]
+	}
+}
