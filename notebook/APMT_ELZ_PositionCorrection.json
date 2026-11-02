@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "997056c1-c1df-4ade-93e4-64976439157e"
+				"spark.autotune.trackingId": "e7758cc7-a977-4488-9ef2-41a578a18cca"
 			}
 		},
 		"metadata": {
@@ -127,7 +127,7 @@
 					"from delta.tables import DeltaTable\n",
 					"\n",
 					"root         = \"abfss://apmt-elz@navispowerbidatastorage2.dfs.core.windows.net/\"\n",
-					"load_folder  = root + \"bronze/Rehandle_Moves/load/\"\n",
+					"load_folder  = root + \"bronze/Rehandle_Moves/load\"\n",
 					"arch_folder  = root + \"bronze/Rehandle_Moves/archive/\"\n",
 					"target       = root + \"silver/unit_position_correction\"\n",
 					"#log          = root + \"Rehandle_Moves_delta/processed_files\"\n",
@@ -227,7 +227,7 @@
 					"    return df.withColumn(\"rn\", F.row_number().over(w)).filter(\"rn = 1\").drop(\"rn\")\n",
 					""
 				],
-				"execution_count": 1
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -243,39 +243,38 @@
 					"    df = to_spark(pdf_all).cache()\n",
 					"    print(\"Rows read:\", len(pdf_all), \"-> after dedup:\", df.count())\n",
 					"\n",
-					"        # 2) create the table on first run, otherwise upsert\n",
-					"if DeltaTable.isDeltaTable(spark, target):\n",
-					"    (DeltaTable.forPath(spark, target).alias(\"t\")\n",
-					"        .merge(df.alias(\"s\"), \"t.hash_key = s.hash_key\")\n",
-					"        .whenMatchedUpdateAll(condition=\"s.file_sort_ts > t.file_sort_ts\")\n",
-					"        .whenNotMatchedInsertAll()\n",
-					"        .execute())\n",
-					"else:\n",
-					"    df.write.format(\"delta\").save(target)\n",
+					"    # 2) create the table on first run, otherwise upsert\n",
+					"    if DeltaTable.isDeltaTable(spark, target):\n",
+					"        (DeltaTable.forPath(spark, target).alias(\"t\")\n",
+					"            .merge(df.alias(\"s\"), \"t.hash_key = s.hash_key\")\n",
+					"            .whenMatchedUpdateAll(condition=\"s.file_sort_ts > t.file_sort_ts\")\n",
+					"            .whenNotMatchedInsertAll()\n",
+					"            .execute())\n",
+					"    else:\n",
+					"        df.write.format(\"delta\").save(target)\n",
 					"\n",
-					"\n",
-					"    # # 3) record in the processed log\n",
-					"    # (spark.createDataFrame([(f.name,) for f in files], \"source_file string\")\n",
-					"    #       .withColumn(\"loaded_at\", F.current_timestamp())\n",
-					"    #       .write.mode(\"append\").format(\"delta\").save(log))\n",
-					"\n",
-					"    # 4) move to archive only after the merge succeeded\n",
+					"    # 3) move to archive only after the merge succeeded\n",
 					"    existing = {x.name for x in mssparkutils.fs.ls(arch_folder)}\n",
 					"    stamp = datetime.now().strftime(\"%Y%m%d%H%M%S\")\n",
 					"    for f in files:\n",
-					"        dest_name = f\"{stamp}_{f.name}\" if f.name in existing else f.name   # avoid overwriting\n",
+					"        if f.name in existing:\n",
+					"            base, ext = f.name.rsplit(\".\", 1)\n",
+					"            dest_name = f\"{base}__dup{stamp}.{ext}\"\n",
+					"        else:\n",
+					"            dest_name = f.name\n",
 					"        mssparkutils.fs.mv(f.path, arch_folder + dest_name, True)\n",
+					"        existing.add(dest_name)\n",
 					"        print(\"archived:\", dest_name)\n",
 					"\n",
 					"    df.unpersist()\n",
 					"\n",
-					"    # 5) quick check\n",
+					"    # 4) quick check\n",
 					"    t = spark.read.format(\"delta\").load(target)\n",
 					"    print(\"Total rows in table:\", t.count())\n",
 					"    t.groupBy(\"source_file\").count().orderBy(F.desc(\"count\")).show(10, False)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 5
 			}
 		]
 	}
