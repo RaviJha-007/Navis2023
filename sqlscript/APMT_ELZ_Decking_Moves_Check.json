@@ -1,0 +1,17 @@
+{
+	"name": "APMT_ELZ_Decking_Moves_Check",
+	"properties": {
+		"content": {
+			"query": "SELECT \n    COUNT(*) AS record_count, \n    CAST(time_stamp AS DATE) AS date \nFROM \n    OPENROWSET(\n        BULK 'silver/deckings', \n        data_source = 'apmt-elz', \n        FORMAT = 'DELTA'\n    ) AS [decking_status_temp] \nWHERE \n    CAST(time_stamp AS DATE) >= '2026-10-01'\nGROUP BY \n    CAST(time_stamp AS DATE)\nORDER BY \n    date\nGO\nSELECT \n    COUNT(*) AS record_count, \n\n    CAST(t_put AS DATE) AS date \nFROM \n    OPENROWSET(\n        BULK 'silver/moves', \n        data_source = 'apmt-elz', \n        FORMAT = 'DELTA'\n    ) AS [decking_status_temp] \nWHERE \n    t_put >= '2026-10-01'\nGROUP BY \n    CAST(t_put AS DATE)\nORDER BY \n    date;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "apmt-elz",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
