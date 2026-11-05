@@ -54624,7 +54624,7 @@
 						"          MH_To_Position_Name_Short_5 = iif(length(split(To_Position_Name, \"-\")[3]) == 8, substring(split(To_Position_Name, \"-\")[3], 0, 7), split(To_Position_Name, \"-\")[3]),",
 						"          DH_To_Position_Name_Short = split(to_pos_name, \"-\")[3],",
 						"          DH_To_Position_Name_Short_5 = iif(length(split(to_pos_name, \"-\")[3]) == 8, substring(split(to_pos_name, \"-\")[3], 0, 7), split(to_pos_name, \"-\")[3])) ~> derivedColumn3",
-						"derivedColumn3 filter(DH_timestamp_within_4 == 1 && DH_To_Position_Name_Short != \"FLD\" && not(like(DH_To_Position_Name_Short, \"Fail%\"))) ~> filter3",
+						"derivedColumn3 filter(DH_timestamp_within_4 == 1 && DH_To_Position_Name_Short != \"FLD\" && not(like(DH_To_Position_Name_Short, \"Fail%\") && DH_To_Position_Name_Short != 'FAILED TO DECK !')) ~> filter3",
 						"filter3 aggregate(groupBy(Unit_Nbr,",
 						"          Move_Kind,",
 						"          Category_Id,",
@@ -54695,8 +54695,8 @@
 						"aggregate5 alterRow(upsertIf(true())) ~> alterRow1",
 						"select2 filter(not(isNull(gkey)) && (decking_Type == 'Bump Intruder' || decking_Type == 'Vessel Discharge' || decking_Type == 'Vessel Discharge - Twin' || decking_Type == 'XD Drop if Floating Refine' || decking_Type == 'XD Refine Request' || decking_Type == 'XD Rehandle Request')) ~> filter5",
 						"join6 derive(Block_To_Block_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 2) != substring(DH_To_Position_Name_Short_5, 1, 2), true(), false()),",
-						"          Same_Block_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 6) != substring(DH_To_Position_Name_Short_5, 1, 6), true(), false()),",
-						"          Stack_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 9) != substring(DH_To_Position_Name_Short_5, 1, 9), true(), false())) ~> derivedColumn6",
+						"          Same_Block_Violation = iif( (substring(MH_To_Position_Name_Short_5, 1, 2) == substring(DH_To_Position_Name_Short_5, 1, 2)) && (substring(MH_To_Position_Name_Short_5, 3, 4) != substring(DH_To_Position_Name_Short_5, 3, 4)), true(), false()),",
+						"          Stack_Violation = iif(substring(MH_To_Position_Name_Short_5, 1, 6) == substring(DH_To_Position_Name_Short_5, 1, 6) && substring(MH_To_Position_Name_Short_5, 7, 3) != substring(DH_To_Position_Name_Short_5, 7, 3), true(), false())) ~> derivedColumn6",
 						"XpsEcUser select(mapColumn(",
 						"          GKEY,",
 						"          USER_ID,",
@@ -79639,6 +79639,58 @@
 						}
 					],
 					"script": "source(output(\n\t\t{Complex Id} as string,\n\t\t{Facility Id} as string,\n\t\t{Carrier Visit Id} as string,\n\t\tPhase as string,\n\t\t{Visit Nbr} as string,\n\t\t{Carrier Mode} as string,\n\t\tATA as string,\n\t\tATD as string,\n\t\tETA as string,\n\t\tETD as string,\n\t\t{Operator Line Id} as string,\n\t\t{Operator Line Role} as string,\n\t\t{Operator Line Name} as string,\n\t\t{Time First Availabilty} as string,\n\t\t{Time Discharge Complete} as string,\n\t\t{Service Id} as string,\n\t\t{Service Name} as string,\n\t\t{Vessel Id} as string,\n\t\t{IB VYG} as string,\n\t\t{OB VYG} as string,\n\t\t{Carrier Name} as string,\n\t\t{Vessel Class} as string,\n\t\t{Published ETA} as string,\n\t\t{Published ETD} as string,\n\t\t{Start Work} as string,\n\t\t{End Work} as string,\n\t\t{Begin Receive_Date} as string,\n\t\t{Cargo Cutoff Date} as string,\n\t\t{Hazard Cutoff Date} as string,\n\t\t{Reefer Cutoff Date} as string,\n\t\t{Labor On Board Date} as string,\n\t\t{Labor Off Board Date} as string,\n\t\t{Off Port Arrival Date} as string,\n\t\t{Off Port Departure} as string,\n\t\t{Pilot On Board Date} as string,\n\t\t{Pilot Off Board Date} as string,\n\t\t{Est BBK Discharge} as string,\n\t\t{Est BBK Load} as string,\n\t\t{Est Load} as string,\n\t\t{Est Discharge} as string,\n\t\t{Est Restow} as string,\n\t\t{Est Shift} as string,\n\t\tvvFlexString01 as string,\n\t\tvvFlexString02 as string,\n\t\tvvFlexString03 as string,\n\t\tvvFlexString04 as string,\n\t\tvvFlexString05 as string,\n\t\tvvFlexString06 as string,\n\t\tvvFlexString07 as string,\n\t\tvvFlexString08 as string,\n\t\tvvFlexDate01 as string,\n\t\tvvFlexDate02 as string,\n\t\tvvFlexDate03 as string,\n\t\tvvFlexDate04 as string,\n\t\tvvFlexDate05 as string,\n\t\tvvFlexDate06 as string,\n\t\tvvFlexDate07 as string,\n\t\tvvFlexDate08 as string,\n\t\t{Carrier Visit Key} as string,\n\t\t{Vessel Classification} as string,\n\t\t{Vessel Class Length Overall cm} as string,\n\t\t{Vessel Class Beam cm} as string,\n\t\t{Vessel TEU Capacity} as string,\n\t\t{Lloyds Code} as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/vesselvisits/load','bronze/vesselvisits/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'mct',\n\tfolderPath: 'bronze/vesselvisits/load/',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\''],\n\tmode: 'read') ~> vesselvisits\nSelect2 select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nderivedColumn1 aggregate(groupBy(Hash_Col),\n\teach(match(name!='Hash_Col'), $$ = first($$))) ~> Aggregate1\nvesselvisits select(mapColumn(\n\t\teach(match(/* All input columns */true()),\n\t\t\t/* Input name */$$ = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nfilter1 alterRow(upsertIf(true())) ~> AlterRow1\nAggregate1 filter(not(isNull(Hash_Col))) ~> filter1\nSelect1 derive(Hash_Col = md5(\r\n    toString(Carrier_Visit_Key) + \r\n    coalesce(ATA, '') + \r\n    coalesce(ATD, '') + \r\n    coalesce(ETA, '') + \r\n    coalesce(ETD, '') +\r\n    coalesce(Phase, '')\r\n),\n\t\tLoadedDate = currentTimestamp()) ~> derivedColumn1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'mct',\n\tfolderPath: 'silver/vesselvisits_1',\n\tmergeSchema: false,\n\tautoCompact: false,\n\toptimizedWrite: false,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['Hash_Col'],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> VesselVisit"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/VesselVisits_MICT_Updated')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "vesselvisits"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "VesselVisit"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Select1"
+						},
+						{
+							"name": "Aggregate1"
+						},
+						{
+							"name": "Select2"
+						},
+						{
+							"name": "AlterRow1"
+						},
+						{
+							"name": "filter1"
+						},
+						{
+							"name": "derivedColumn1"
+						}
+					],
+					"script": "source(output(\n\t\t{Complex Id} as string,\n\t\t{Facility Id} as string,\n\t\t{Carrier Visit Id} as string,\n\t\tPhase as string,\n\t\t{Visit Nbr} as string,\n\t\t{Carrier Mode} as string,\n\t\tATA as string,\n\t\tATD as string,\n\t\tETA as string,\n\t\tETD as string,\n\t\t{Operator Line Id} as string,\n\t\t{Operator Line Role} as string,\n\t\t{Operator Line Name} as string,\n\t\t{Time First Availabilty} as string,\n\t\t{Time Discharge Complete} as string,\n\t\t{Service Id} as string,\n\t\t{Service Name} as string,\n\t\t{Vessel Id} as string,\n\t\t{IB VYG} as string,\n\t\t{OB VYG} as string,\n\t\t{Carrier Name} as string,\n\t\t{Vessel Class} as string,\n\t\t{Published ETA} as string,\n\t\t{Published ETD} as string,\n\t\t{Start Work} as string,\n\t\t{End Work} as string,\n\t\t{Begin Receive_Date} as string,\n\t\t{Cargo Cutoff Date} as string,\n\t\t{Hazard Cutoff Date} as string,\n\t\t{Reefer Cutoff Date} as string,\n\t\t{Labor On Board Date} as string,\n\t\t{Labor Off Board Date} as string,\n\t\t{Off Port Arrival Date} as string,\n\t\t{Off Port Departure} as string,\n\t\t{Pilot On Board Date} as string,\n\t\t{Pilot Off Board Date} as string,\n\t\t{Est BBK Discharge} as string,\n\t\t{Est BBK Load} as string,\n\t\t{Est Load} as short,\n\t\t{Est Discharge} as short,\n\t\t{Est Restow} as string,\n\t\t{Est Shift} as string,\n\t\tVvFlexstring01 as string,\n\t\tVvFlexstring02 as string,\n\t\tVvFlexstring03 as string,\n\t\tVvFlexstring04 as string,\n\t\tVvFlexstring05 as string,\n\t\tVvFlexstring06 as string,\n\t\tVvFlexstring07 as string,\n\t\tVvFlexstring08 as string,\n\t\tVvFlexDate01 as string,\n\t\tVvFlexDate02 as string,\n\t\tVvFlexDate03 as string,\n\t\tVvFlexDate04 as string,\n\t\tVvFlexDate05 as string,\n\t\tVvFlexDate06 as string,\n\t\tVvFlexDate07 as string,\n\t\tVvFlexDate08 as string,\n\t\t{Carrier Visit Key} as string,\n\t\t{Vessel Classification} as string,\n\t\t{Vessel Class Length Overall cm} as string,\n\t\t{Vessel Class Beam cm} as string,\n\t\t{Vessel TEU Capacity} as string,\n\t\t{Lloyds Code} as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/vesselvisits/load','bronze/vesselvisits/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'mict',\n\tfolderPath: 'bronze/vesselvisits/load/',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\''],\n\tmode: 'read') ~> vesselvisits\nSelect2 select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nderivedColumn1 aggregate(groupBy(Hash_Col),\n\teach(match(name!='Hash_Col'), $$ = first($$))) ~> Aggregate1\nvesselvisits select(mapColumn(\n\t\teach(match(/* All input columns */true()),\n\t\t\t/* Input name */$$ = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nfilter1 alterRow(upsertIf(true())) ~> AlterRow1\nAggregate1 filter(not(isNull(Hash_Col))) ~> filter1\nSelect1 derive(Hash_Col = md5(\r\n    toString(Carrier_Visit_Key) + \r\n    coalesce(ATA, '') + \r\n    coalesce(ATD, '') + \r\n    coalesce(ETA, '') + \r\n    coalesce(ETD, '') +\r\n    coalesce(Phase, '')\r\n),\n\t\tLoadedDate = currentTimestamp()) ~> derivedColumn1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'mict',\n\tfolderPath: 'silver/vesselvisits2',\n\tmergeSchema: false,\n\tautoCompact: false,\n\toptimizedWrite: false,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['Hash_Col'],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> VesselVisit"
 				}
 			},
 			"dependsOn": [
@@ -128568,6 +128620,179 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/Elizabeth_ Conformity')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "pbixpool",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "56g",
+					"driverCores": 8,
+					"executorMemory": "56g",
+					"executorCores": 8,
+					"numExecutors": 1,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "true",
+						"spark.dynamicAllocation.minExecutors": "1",
+						"spark.dynamicAllocation.maxExecutors": "3",
+						"spark.autotune.trackingId": "8fa76c7a-92a1-43be-a646-dea02db4ba24"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Synapse/workspaces/navispowerbidata2/bigDataPools/pbixpool",
+						"name": "pbixpool",
+						"type": "Spark",
+						"endpoint": "https://navispowerbidata2.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pbixpool",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.4",
+						"nodeCount": 10,
+						"cores": 8,
+						"memory": 56
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"source": [
+							"from pyspark.sql import functions as F, Window\n",
+							"from functools import reduce\n",
+							"import re\n",
+							"\n",
+							"# ---------- config ----------\n",
+							"STORAGE_ACCOUNT = \"navispowerbidatastorage2\"          # fill in\n",
+							"BASE        = f\"abfss://apmt-elz@{STORAGE_ACCOUNT}.dfs.core.windows.net\"\n",
+							"SOURCE_DIR  = f\"{BASE}/bronze/stackconformitycsvs/archive\"\n",
+							"TARGET_PATH = f\"{BASE}/gold/conformities_new\"\n",
+							"DRY_RUN     = False                              # True = build + check only, no write\n",
+							"\n",
+							"REQUIRED = [\"ContainerNo\",\"StackingFactor\",\"BlockType\",\"Eq Type\",\"Equipment Class\",\"YardRow\",\n",
+							"            \"Cat\",\"Sts\",\"SectionFactor\",\"Outbound Carrier\",\"Current POD\",\"Line\",\n",
+							"            \"CurrentPosition\",\"Special Stow1\",\"Special Stow2\"]\n",
+							"RENAME = {\"Eq Type\":\"Eq_Type\",\"Equipment Class\":\"Equipment_Class\",\"Outbound Carrier\":\"Outbound_Carrier\",\n",
+							"          \"Current POD\":\"Current_POD\",\"Special Stow1\":\"Special_Stow1\",\"Special Stow2\":\"Special_Stow2\"}\n",
+							"\n",
+							"def clean(name):                                # strip [ ], BOM, spaces around the name\n",
+							"    return re.sub(r\"[\\[\\]\\ufeff]\", \"\", name).strip()\n",
+							"\n",
+							"# ---------- list files ----------\n",
+							"hpath = spark._jvm.org.apache.hadoop.fs.Path(SOURCE_DIR)\n",
+							"fs = hpath.getFileSystem(spark._jsc.hadoopConfiguration())\n",
+							"files = sorted(str(s.getPath()) for s in fs.listStatus(hpath) if str(s.getPath()).lower().endswith(\".csv\"))\n",
+							"\n",
+							"# ---------- read each file by header name ----------\n",
+							"frames, problems = [], []\n",
+							"for path in files:\n",
+							"    fname = path.rsplit(\"/\", 1)[-1]\n",
+							"    m = re.search(r\"_(\\d{6})\\.csv$\", fname, re.I)\n",
+							"    if not m:\n",
+							"        problems.append((fname, \"no ddMMyy in file name\")); continue\n",
+							"    raw = (spark.read.option(\"header\", True).option(\"inferSchema\", False)\n",
+							"           .option(\"quote\", '\"').option(\"escape\", \"\\\\\").csv(path))\n",
+							"    df = raw.toDF(*[clean(c) for c in raw.columns])\n",
+							"    missing = [c for c in REQUIRED if c not in df.columns]\n",
+							"    if missing:\n",
+							"        problems.append((fname, f\"missing {missing}\")); continue\n",
+							"    df = df.select(*[F.col(f\"`{c}`\").alias(RENAME.get(c, c)) for c in REQUIRED]) \\\n",
+							"           .withColumn(\"FileDate\", F.lit(fname)) \\\n",
+							"           .withColumn(\"Date\", F.to_date(F.lit(m.group(1)), \"ddMMyy\"))\n",
+							"    frames.append(df)\n",
+							"\n",
+							"print(\"Files read:\", len(frames), \"| Problems:\", problems)\n",
+							"src = reduce(lambda a, b: a.unionByName(b), frames)\n",
+							"\n",
+							"# ---------- derivedColumn1 ----------\n",
+							"fcl, mty = F.col(\"Sts\") == \"FCL\", F.col(\"Sts\") == \"MTY\"\n",
+							"d = (src\n",
+							"  .withColumn(\"Pos_WO_Tier\", F.when(F.col(\"CurrentPosition\").rlike(r\"\\d$\"),\n",
+							"                F.expr(\"substring(CurrentPosition, 1, length(CurrentPosition) - 2)\"))\n",
+							"              .otherwise(F.col(\"CurrentPosition\")))\n",
+							"  .withColumn(\"Week\", F.when(F.dayofweek(\"Date\") == 1, F.weekofyear(\"Date\") + 1)\n",
+							"              .otherwise(F.weekofyear(\"Date\")).cast(\"int\"))\n",
+							"  .withColumn(\"StackingFactor_der\",\n",
+							"      F.when(fcl, F.concat(\"Outbound_Carrier\", F.lit(\"/\"), \"Current_POD\", F.lit(\"/\"),\n",
+							"                           F.coalesce(\"Special_Stow1\", F.lit(\"\")), F.lit(\"/\"),\n",
+							"                           F.coalesce(\"Special_Stow2\", F.lit(\"\")), F.lit(\"/\"), \"Equipment_Class\"))\n",
+							"       .when(mty, F.concat(\"Equipment_Class\", F.lit(\"/\"), \"Line\"))\n",
+							"       .otherwise(F.lit(None).cast(\"string\")))\n",
+							"  .withColumn(\"SectionFactor_der\",\n",
+							"      F.when(fcl, F.concat(\"Outbound_Carrier\", F.lit(\"/\"), \"Current_POD\", F.lit(\"/\"), \"Sts\"))\n",
+							"       .when(mty, F.concat(\"Equipment_Class\", F.lit(\"/\"), \"Line\"))\n",
+							"       .otherwise(F.lit(None).cast(\"string\"))))\n",
+							"\n",
+							"# inner joins in the flow drop null keys - replicate that\n",
+							"d = d.filter(F.col(\"Date\").isNotNull() & F.col(\"Pos_WO_Tier\").isNotNull() & F.col(\"YardRow\").isNotNull())\n",
+							"\n",
+							"# ---------- window1/aggregate1 + window2/aggregate2 (same as rank + max > 1) ----------\n",
+							"ws  = Window.partitionBy(\"Date\", \"Pos_WO_Tier\")\n",
+							"wy  = Window.partitionBy(\"Date\", \"YardRow\")\n",
+							"d = (d\n",
+							"  .withColumn(\"stackrank\",   F.rank().over(ws.orderBy(F.col(\"StackingFactor\").asc_nulls_first())))\n",
+							"  .withColumn(\"sectionrank\", F.rank().over(wy.orderBy(F.col(\"SectionFactor\").asc_nulls_first())))\n",
+							"  .withColumn(\"Stack_confirmty\",    F.when(F.max(\"stackrank\").over(ws) > 1, \"Mix\").otherwise(\"Pure\"))\n",
+							"  .withColumn(\"Section_conformity\", F.when(F.max(\"sectionrank\").over(wy) > 1, \"Mix\").otherwise(\"Pure\")))\n",
+							"\n",
+							"# ---------- filter1 ----------\n",
+							"d = d.filter(F.col(\"ContainerNo\").isNotNull() & (F.col(\"ContainerNo\") != \"\")\n",
+							"             & ~F.col(\"ContainerNo\").rlike(r\"^\\d{4}-\\d{1,2}-\\d{1,2}\"))\n",
+							"\n",
+							"# ---------- per-file reconciliation ----------\n",
+							"(src.groupBy(\"FileDate\").agg(F.count(\"*\").alias(\"rows_in\"))\n",
+							"   .join(d.groupBy(\"FileDate\").agg(F.count(\"*\").alias(\"rows_out\")), \"FileDate\", \"left\")\n",
+							"   .orderBy(\"FileDate\").show(100, False))\n",
+							"\n",
+							"# ---------- select1 + select2 (sink schema) ----------\n",
+							"out = d.select(\n",
+							"  F.col(\"ContainerNo\").alias(\"Container_No\"), F.col(\"StackingFactor\").alias(\"Stacking_Factor\"),\n",
+							"  \"Eq_Type\", \"BlockType\", F.col(\"CurrentPosition\").alias(\"Current_position\"),\n",
+							"  F.col(\"YardRow\").alias(\"Yard_Row\"), \"Cat\", \"Sts\", F.col(\"SectionFactor\").alias(\"Section_Factor\"),\n",
+							"  \"Pos_WO_Tier\", \"Date\", \"Week\", \"StackingFactor_der\", \"SectionFactor_der\",\n",
+							"  \"Stack_confirmty\", \"Section_conformity\", \"Line\")\n",
+							"\n",
+							"# ---------- write: replace only the dates being loaded (no duplicates on rerun) ----------\n",
+							"if not DRY_RUN:\n",
+							"    # keep the existing Delta table structure: same columns, order and types\n",
+							"    target_schema = spark.read.format(\"delta\").load(TARGET_PATH).schema\n",
+							"    aligned = out.select([\n",
+							"        (F.col(f.name) if f.name in out.columns else F.lit(None))\n",
+							"            .cast(f.dataType).alias(f.name)\n",
+							"        for f in target_schema\n",
+							"    ])\n",
+							"\n",
+							"    (aligned.write.format(\"delta\")\n",
+							"        .mode(\"overwrite\")                    # replace all rows\n",
+							"        .option(\"overwriteSchema\", \"false\")   # never change the table schema\n",
+							"        .save(TARGET_PATH))\n",
+							"\n",
+							"    print(\"Rows written:\", spark.read.format(\"delta\").load(TARGET_PATH).count())\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 13
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/Elizabeth_Decking_upd')]",
 			"type": "Microsoft.Synapse/workspaces/notebooks",
 			"apiVersion": "2019-06-01-preview",
@@ -129176,6 +129401,302 @@
 						],
 						"outputs": [],
 						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/MICT_trshp_Pairs')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "pbixpool",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "56g",
+					"driverCores": 8,
+					"executorMemory": "56g",
+					"executorCores": 8,
+					"numExecutors": 1,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "true",
+						"spark.dynamicAllocation.minExecutors": "1",
+						"spark.dynamicAllocation.maxExecutors": "3",
+						"spark.autotune.trackingId": "ec0aeee0-41b5-4e85-bd2d-bced36afe90c"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Synapse/workspaces/navispowerbidata2/bigDataPools/pbixpool",
+						"name": "pbixpool",
+						"type": "Spark",
+						"endpoint": "https://navispowerbidata2.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pbixpool",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.4",
+						"nodeCount": 10,
+						"cores": 8,
+						"memory": 56
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"source": [
+							"from pyspark.sql import functions as F\n",
+							"from pyspark.sql.window import Window\n",
+							"\n",
+							"# ============================================================\n",
+							"# 1. READ FROM DELTA\n",
+							"# ============================================================\n",
+							"STORAGE_ACCOUNT  = \"navispowerbidatastorage2\"\n",
+							"CONTAINER        = \"mict\"                          # ← Update for MFT\n",
+							"DELTA_MOVES_PATH = \"silver/moves\"\n",
+							"OUTPUT_PATH      = \"gold/tranship_pairs\"\n",
+							"\n",
+							"\n",
+							"BASE_PATH    = f\"abfss://{CONTAINER}@{STORAGE_ACCOUNT}.dfs.core.windows.net\"\n",
+							"MOVES_PATH   = f\"{BASE_PATH}/{DELTA_MOVES_PATH}\"\n",
+							"OUTPUT_DELTA = f\"{BASE_PATH}/{OUTPUT_PATH}\"\n",
+							"\n",
+							"\n",
+							"df = spark.read.format(\"delta\").load(MOVES_PATH)\n",
+							"\n",
+							"# ============================================================\n",
+							"# 2. FILTER TRANSHIPMENT ONLY\n",
+							"# ============================================================\n",
+							"df_trshp = df.filter(\n",
+							"    (F.col(\"Category_Id\") == \"TRSHP\") &\n",
+							"    (F.col(\"Event_Type_Id\").isin(\"UNIT_DISCH\", \"UNIT_LOAD\")) &\n",
+							"    (F.col(\"Year\") >= 2026)\n",
+							")\n",
+							"\n",
+							"# ============================================================\n",
+							"# 3. EXTRACT YARDBLOCK FROM POSITION NAME\n",
+							"# Format: Y-MFT-XE 040 06B → XE\n",
+							"# ============================================================\n",
+							"SPECIAL_BLOCKS = [\n",
+							"    \"BERTH1\", \"BERTH2\", \"BERTH3\", \"BERTH4\", \"BERTH5\", \"BERTH6\", \"BERTH7\", \"BERTH8\",\n",
+							"    \"CFS3\", \"NENACO\", \"OOG\", \"SW05\", \"SW34\", \"WALL\", \"XRAY\",\n",
+							"]\n",
+							"\n",
+							"def extract_yardblock(col_name):\n",
+							"    # 3rd segment: everything after the 2nd '-' up to the next '-' or space\n",
+							"    segment = F.regexp_extract(F.col(col_name), r\"^Y-[^-]+-([^- ]+)\", 1)\n",
+							"    return (\n",
+							"        F.when(~F.col(col_name).startswith(\"Y-\"), F.lit(None))\n",
+							"         .when(segment == \"\", F.lit(None))\n",
+							"         .when(segment.isin(SPECIAL_BLOCKS), segment)   # BERTH6, OOG, SW34, ...\n",
+							"         .otherwise(segment.substr(1, 2))               # 5E0102F3 -> 5E\n",
+							"    )\n",
+							"\n",
+							"\n",
+							"df_trshp = df_trshp \\\n",
+							"    .withColumn(\"From_YardBlock\", extract_yardblock(\"From_Position_Name\")) \\\n",
+							"    .withColumn(\"To_YardBlock\",   extract_yardblock(\"To_Position_Name\"))\n",
+							"\n",
+							"# ============================================================\n",
+							"# 4. CRANE LOOKUP\n",
+							"# ============================================================\n",
+							"cranes_data = [\n",
+							"    ('QC02','T1'),('QC03','T1'),('QC17','T1'),\n",
+							"    ('QC06','T1'),('QC07','T1'),('QC20','T1'),\n",
+							"    ('QC21','T1'),('QC08','T1'),('QC09','T1'),\n",
+							"    ('QC10','T1'),('QC18','T1'),('QC19','T1'),\n",
+							"    ('QC11','T2'),('QC12','T2'),('QC14','T2'),\n",
+							"    ('QC15','T2'),('QC16','T2'),('QC22','T2')\n",
+							"]\n",
+							"df_cranes = spark.createDataFrame(cranes_data, [\"CraneId\", \"Crane_Terminal\"])\n",
+							"\n",
+							"# ============================================================\n",
+							"# 5. YARDBLOCK LOOKUP\n",
+							"# ============================================================\n",
+							"yardblocks_data = [\n",
+							"('0B', 'T1'), ('0C', 'T1'), ('0D', 'T1'), ('0E', 'T1'),('0F', 'T1'), ('0G', 'T1'), ('0H', 'T1'), ('0I', 'T1'),\n",
+							"('0J', 'T1'), ('0L', 'T2'), ('0M', 'T2'), ('0N', 'T2'),('0O', 'T2'), ('0P', 'T2'), ('1B', 'T1'), ('1C', 'T1'),\n",
+							"('1D', 'T1'), ('1E', 'T1'), ('1F', 'T1'), ('1G', 'T1'),('1H', 'T1'), ('1I', 'T1'), ('1J', 'T1'), ('1L', 'T2'),\n",
+							"('1M', 'T2'), ('1N', 'T2'), ('1O', 'T2'), ('1P', 'T2'),('1Q', 'T3'), ('2B', 'T1'), ('2C', 'T1'),('2D', 'T1'),\n",
+							"('2E', 'T1'), ('2F', 'T1'), ('2G', 'T1'),('2H', 'T1'), ('2I', 'T1'), ('2J', 'T1'), ('2K', 'T1'),('2L', 'T2'), \n",
+							"('2M', 'T2'), ('2N', 'T2'), ('2O', 'T2'),('2P', 'T2'), ('2Q', 'T4'), ('3B', 'T1'),('3C', 'T1'), ('3D', 'T1'), \n",
+							"('3E', 'T1'), ('3F', 'T1'),('3G', 'T1'), ('3H', 'T1'), ('3I', 'T1'), ('3J', 'T1'),('3K', 'T1'), ('3L', 'T2'),\n",
+							"('3M', 'T2'), ('3N', 'T2'),('3O', 'T2'), ('3P', 'T2'), ('3Q', 'T5'),('4B', 'T1'), ('4C', 'T1'), ('4D', 'T1'), ('4E', 'T1'),\n",
+							"('4F', 'T1'), ('4G', 'T1'), ('4H', 'T1'), ('4I', 'T1'),('4J', 'T1'), ('4K', 'T2'), ('4L', 'T2'), ('4M', 'T2'),\n",
+							"('4N', 'T2'), ('4O', 'T2'), ('4P', 'T2'),('5B', 'T1'), ('5C', 'T1'), ('5D', 'T1'), ('5E', 'T1'),\n",
+							"('5F', 'T1'), ('5G', 'T1'), ('5H', 'T1'), ('5I', 'T1'),('5J', 'T1'), ('5K', 'T2'), ('5L', 'T2'), ('5M', 'T2'),\n",
+							"('5N', 'T2'), ('5O', 'T2'), ('5P', 'T2'),('6B', 'T1'), ('6C', 'T1'), ('6D', 'T1'), ('6E', 'T1'),\n",
+							"('6F', 'T1'), ('6G', 'T1'), ('6H', 'T1'), ('6I', 'T1'),('6J', 'T1'), ('6K', 'T2'), ('6L', 'T2'), ('6M', 'T2'),\n",
+							"('6N', 'T2'), ('6O', 'T2'), ('6P', 'T2'),('7B', 'T1'), ('7C', 'T1'), ('7D', 'T1'), ('7E', 'T1'),\n",
+							"('7F', 'T1'), ('7G', 'T1'), ('7H', 'T1'), ('7I', 'T1'),('7J', 'T1'), ('7K', 'T1'), ('8B', 'T1'), ('8C', 'T1'),\n",
+							"('8D', 'T1'), ('8E', 'T1'), ('8F', 'T1'), ('8G', 'T1'),('8H', 'T1'), ('8I', 'T1'), ('8J', 'T1'), ('9E', 'T1'),\n",
+							"('9F', 'T1'), ('9G', 'T1'), ('9H', 'T1'), ('9I', 'T1'),('9J', 'T1'), ('BERTH1', 'T1'), ('BERTH2', 'T1'), ('BERTH3', 'T1'),\n",
+							"('BERTH4', 'T1'), ('BERTH5', 'T1'), ('BERTH6', 'T2'), ('BERTH7', 'T2'),('BERTH8', 'T2'), ('CB', 'T1'), ('CC', 'T1'), ('CD', 'T1'),\n",
+							"('CE', 'T1'), ('CF', 'T1'), ('CFS3', 'T1'), ('CG', 'T1'),('CH', 'T1'), ('CI', 'T1'), ('CJ', 'T1'), ('CK', 'T2'),\n",
+							"('CL', 'T2'), ('CM', 'T2'), ('CN', 'T2'), ('CO', 'T2'),('CP', 'T2'), ('NENACO', ''), ('OO', 'T2'), ('OOG', ''),\n",
+							"('SW05', ''), ('SW34', ''), ('WALL', ''), ('XF', 'T1'),('XG', 'T1'), ('XRAY', 'T1'), ('YF', 'T1'), ('YG', 'T1')\n",
+							"]\n",
+							"df_yardblocks = spark.createDataFrame(yardblocks_data, [\"YardBlock\", \"TerminalShort\"])\n",
+							"# ============================================================\n",
+							"# 6. JOIN TERMINAL LOOKUPS\n",
+							"# ============================================================\n",
+							"df_enriched = df_trshp \\\n",
+							"    .join(df_cranes,    df_trshp.pow            == df_cranes.CraneId,      \"left\") \\\n",
+							"    .join(df_yardblocks.alias(\"yf\"), \n",
+							"          df_trshp.From_YardBlock == F.col(\"yf.YardBlock\"), \"left\") \\\n",
+							"    .withColumnRenamed(\"TerminalShort\", \"From_Terminal\") \\\n",
+							"    .join(df_yardblocks.alias(\"yt\"), \n",
+							"          df_trshp.To_YardBlock   == F.col(\"yt.YardBlock\"), \"left\") \\\n",
+							"    .withColumnRenamed(\"TerminalShort\", \"To_Terminal\")\n",
+							"\n",
+							"# ============================================================\n",
+							"# 7. SEQUENCE MOVES PER UNIT\n",
+							"# ============================================================\n",
+							"window_seq = Window.partitionBy(\"Unit_Nbr\").orderBy(\"t_put\")\n",
+							"\n",
+							"df_sequenced = df_enriched.withColumn(\"move_seq\", F.row_number().over(window_seq))\n",
+							"\n",
+							"# ============================================================\n",
+							"# 8. SPLIT INTO DISCH AND LOAD\n",
+							"# ============================================================\n",
+							"df_disch = df_sequenced.filter(F.col(\"Event_Type_Id\") == \"UNIT_DISCH\") \\\n",
+							"    .select(\n",
+							"        \"Unit_Nbr\", \"mve_gkey\", \"move_seq\",\n",
+							"        \"t_put\", \"Carrier_Visit_Key\",\n",
+							"        \"Crane_Terminal\", \"To_Terminal\", \"To_YardBlock\",\n",
+							"        \"Freight_Kind_Id\", \"pow\"\n",
+							"    )\n",
+							"\n",
+							"df_load = df_sequenced.filter(F.col(\"Event_Type_Id\") == \"UNIT_LOAD\") \\\n",
+							"    .select(\n",
+							"        \"Unit_Nbr\",\n",
+							"        F.col(\"mve_gkey\").alias(\"load_mve_gkey\"),\n",
+							"        F.col(\"move_seq\").alias(\"load_move_seq\"),\n",
+							"        F.col(\"t_put\").alias(\"load_datetime\"),\n",
+							"        F.col(\"Carrier_Visit_Key\").alias(\"load_vessel\"),\n",
+							"        F.col(\"Crane_Terminal\").alias(\"load_crane_terminal\"),\n",
+							"        F.col(\"From_Terminal\").alias(\"load_yard_terminal\"),\n",
+							"        F.col(\"From_YardBlock\").alias(\"load_yard_block\"),\n",
+							"        F.col(\"pow\").alias(\"load_pow\"),\n",
+							"        F.col(\"Carrier_Visit_Key\").alias(\"load_Carrier_Visit_Key\")\n",
+							"    )\n",
+							"\n",
+							"# ============================================================\n",
+							"# 9. PAIR DISCH → NEXT LOAD\n",
+							"# LEFT JOIN to keep discharged units with no load yet (Pending)\n",
+							"# ============================================================\n",
+							"window_unit = Window.partitionBy(\"Unit_Nbr\").orderBy(\"move_seq\")\n",
+							"\n",
+							"# LEFT JOIN — keeps DISCH rows even with no matching LOAD\n",
+							"df_joined = df_disch.join(df_load, on=\"Unit_Nbr\", how=\"left\") \\\n",
+							"    .filter(\n",
+							"        F.col(\"load_move_seq\").isNull() |           # ← Pending Load (no load yet)\n",
+							"        (F.col(\"load_move_seq\") > F.col(\"move_seq\")) # ← Valid next load\n",
+							"    )\n",
+							"\n",
+							"# Keep only the CLOSEST next load per discharge (Pending rows have no load so rank = 1)\n",
+							"window_closest = Window.partitionBy(\"Unit_Nbr\", \"mve_gkey\").orderBy(\n",
+							"    F.col(\"load_move_seq\").asc_nulls_last()         # ← NULLs (Pending) go last in sort\n",
+							")\n",
+							"\n",
+							"df_paired = df_joined \\\n",
+							"    .withColumn(\"rn\", F.row_number().over(window_closest)) \\\n",
+							"    .filter(F.col(\"rn\") == 1) \\\n",
+							"    .drop(\"rn\", \"load_move_seq\", \"move_seq\")\n",
+							"\n",
+							"# ============================================================\n",
+							"# 10. ADD DERIVED COLUMNS\n",
+							"# ============================================================\n",
+							"window_tranship = Window.partitionBy(\"Unit_Nbr\").orderBy(\"t_put\")\n",
+							"\n",
+							"df_final = df_paired \\\n",
+							"    .withColumn(\"dwell_hours\",\n",
+							"        F.when(\n",
+							"            F.col(\"load_datetime\").isNotNull(),\n",
+							"            # Completed transhipment — actual dwell\n",
+							"            (F.col(\"load_datetime\").cast(\"long\") -\n",
+							"             F.col(\"t_put\").cast(\"long\")) / 3600\n",
+							"        ).otherwise(\n",
+							"            # Pending load — dwell so far since discharge\n",
+							"            (F.unix_timestamp(F.current_timestamp()) -\n",
+							"             F.col(\"t_put\").cast(\"long\")) / 3600\n",
+							"        )\n",
+							"    ) \\\n",
+							"    .withColumn(\"tranship_sequence\",\n",
+							"        F.row_number().over(window_tranship)\n",
+							"    ) \\\n",
+							"    .withColumn(\"tranship_type\",\n",
+							"        F.when(\n",
+							"            F.col(\"load_mve_gkey\").isNull(),\n",
+							"            F.lit(\"Pending Load\")                           # No load yet\n",
+							"        ).when(\n",
+							"            (F.col(\"Crane_Terminal\") == F.col(\"To_Terminal\")) &\n",
+							"            (F.col(\"To_Terminal\")  == F.col(\"load_yard_terminal\"))  &\n",
+							"            (F.col(\"load_yard_terminal\")   == F.col(\"load_crane_terminal\")),\n",
+							"            F.lit(\"Same-Terminal\")                          # All 4 legs on same terminal\n",
+							"        ).otherwise(\n",
+							"            F.lit(\"Cross-Terminal\")                         # Any leg differs\n",
+							"        )\n",
+							"    \n",
+							"    ) \\\n",
+							"    .withColumn(\"terminal_flow\",\n",
+							"        F.when(\n",
+							"            F.col(\"load_mve_gkey\").isNull(),\n",
+							"            F.concat(F.col(\"Crane_Terminal\"), F.lit(\" → Pending\"))\n",
+							"        ).otherwise(\n",
+							"            F.concat(F.col(\"Crane_Terminal\"), F.lit(\" → \"), F.col(\"load_crane_terminal\"))\n",
+							"        )\n",
+							"    ) \\\n",
+							"    .withColumn(\"disch_date\",       F.to_date(\"t_put\")) \\\n",
+							"    .withColumn(\"load_date\",        F.to_date(\"load_datetime\")) \\\n",
+							"    .withColumn(\"disch_year\",       F.year(\"t_put\")) \\\n",
+							"    .withColumn(\"disch_month\",      F.month(\"t_put\")) \\\n",
+							"    .withColumn(\"disch_month_name\", F.date_format(\"t_put\", \"MMMM\")) \\\n",
+							"    .withColumn(\"disch_year_month\", F.date_format(\"t_put\", \"yyyy-MM\")) \\\n",
+							"    .withColumnRenamed(\"t_put\",             \"disch_datetime\") \\\n",
+							"    .withColumnRenamed(\"Carrier_Visit_Key\", \"disch_vessel\") \\\n",
+							"    .withColumnRenamed(\"Crane_Terminal\",    \"disch_crane_terminal\") \\\n",
+							"    .withColumnRenamed(\"To_Terminal\",       \"disch_yard_terminal\") \\\n",
+							"    .withColumnRenamed(\"To_YardBlock\",      \"disch_yard_block\")\n",
+							"\n",
+							"# ============================================================\n",
+							"# 11. WRITE TO DELTA (silver layer)\n",
+							"# ============================================================\n",
+							"df_final.cache()\n",
+							"\n",
+							"# Sanity check before writing\n",
+							"print(f\"Total pairs:        {df_final.count()}\")\n",
+							"print(f\"Same-Terminal:      {df_final.filter(F.col('tranship_type') == 'Same-Terminal').count()}\")\n",
+							"print(f\"Cross-Terminal:     {df_final.filter(F.col('tranship_type') == 'Cross-Terminal').count()}\")\n",
+							"print(f\"Pending Load:       {df_final.filter(F.col('tranship_type') == 'Pending Load').count()}\")\n",
+							"\n",
+							"df_final.write \\\n",
+							"    .format(\"delta\") \\\n",
+							"    .mode(\"overwrite\") \\\n",
+							"    .save(OUTPUT_DELTA)\n",
+							"\n",
+							"print(\"✅ tranship_pairs written successfully!\")\n",
+							"\n",
+							"df_final.unpersist()\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 2
 					}
 				]
 			},
@@ -133941,7 +134462,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "4d7154b3-275a-4980-aa0f-5ee7dbada0d3"
+						"spark.autotune.trackingId": "23ecd141-1738-471d-ba20-474c9d7b1c73"
 					}
 				},
 				"metadata": {
@@ -133966,8 +134487,7 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56,
-						"automaticScaleJobs": true
+						"memory": 56
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -133993,7 +134513,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# TERMINAL CONFIGURATION\n",
@@ -134224,7 +134743,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# REGISTER LOOKUP TABLES FROM CONFIG\n",
@@ -134252,7 +134770,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# READ BRONZE CSV FILES\n",
@@ -134429,7 +134946,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# DYNAMIC DATE/TIME PARSING\n",
@@ -134478,7 +134994,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# HELPER FUNCTION: POSITION PARSING\n",
@@ -134789,7 +135304,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# DYNAMIC POSITION PARSING\n",
@@ -135304,7 +135818,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# ADD REMAINING DERIVED COLUMNS\n",
@@ -135410,7 +135923,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FINAL SILVER DATA (Filter row_number = 1)\n",
@@ -135532,7 +136044,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# WRITE TO SILVER LAYER\n",
@@ -135569,7 +136080,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# WRITE TO GOLD LAYER (All Terminals - Latest Data)\n",
@@ -135636,7 +136146,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# ARCHIVE BRONZE FILES\n",
@@ -135690,7 +136199,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "811cb7bf-1216-4cdd-802c-dc1eb713347f"
+						"spark.autotune.trackingId": "ac963197-ae5b-42bf-9c98-710a998baead"
 					}
 				},
 				"metadata": {
@@ -135715,8 +136224,7 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56,
-						"automaticScaleJobs": true
+						"memory": 56
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -135743,7 +136251,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# TERMINAL CONFIGURATION\n",
@@ -135886,7 +136393,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COLUMN MAP  — ground truth from ATTRS/NAMES in converter\n",
@@ -135985,7 +136491,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FIXED SILVER SCHEMA\n",
@@ -136117,7 +136622,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# LOOKUP TABLES\n",
@@ -136141,7 +136645,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FILENAME DATETIME EXTRACTION\n",
@@ -136178,7 +136681,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COVERAGE VALIDATOR\n",
@@ -136206,7 +136708,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PARSER  — CRITICAL FIX\n",
@@ -136338,7 +136839,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# DISCOVER TXT FILES\n",
@@ -136367,7 +136867,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PROCESS EACH FILE\n",
@@ -141188,531 +141687,6 @@
 			},
 			"dependsOn": [],
 			"location": "westus"
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/MICT_trshp_Pairs')]",
-			"type": "Microsoft.Synapse/workspaces/notebooks",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"nbformat": 4,
-				"nbformat_minor": 2,
-				"bigDataPool": {
-					"referenceName": "pbixpool",
-					"type": "BigDataPoolReference"
-				},
-				"sessionProperties": {
-					"driverMemory": "56g",
-					"driverCores": 8,
-					"executorMemory": "56g",
-					"executorCores": 8,
-					"numExecutors": 1,
-					"conf": {
-						"spark.dynamicAllocation.enabled": "true",
-						"spark.dynamicAllocation.minExecutors": "1",
-						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "5f3d68e1-234c-425f-8171-4308bb388c20"
-					}
-				},
-				"metadata": {
-					"saveOutput": true,
-					"enableDebugMode": false,
-					"kernelspec": {
-						"name": "synapse_pyspark",
-						"display_name": "Synapse PySpark"
-					},
-					"language_info": {
-						"name": "python"
-					},
-					"a365ComputeOptions": {
-						"id": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Synapse/workspaces/navispowerbidata2/bigDataPools/pbixpool",
-						"name": "pbixpool",
-						"type": "Spark",
-						"endpoint": "https://navispowerbidata2.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pbixpool",
-						"auth": {
-							"type": "AAD",
-							"authResource": "https://dev.azuresynapse.net"
-						},
-						"sparkVersion": "3.4",
-						"nodeCount": 10,
-						"cores": 8,
-						"memory": 56,
-						"automaticScaleJobs": true
-					},
-					"sessionKeepAliveTimeout": 30
-				},
-				"cells": [
-					{
-						"cell_type": "code",
-						"metadata": {},
-						"source": [
-							"from pyspark.sql import functions as F\n",
-							"from pyspark.sql.window import Window\n",
-							"\n",
-							"# ============================================================\n",
-							"# 1. READ FROM DELTA\n",
-							"# ============================================================\n",
-							"STORAGE_ACCOUNT  = \"navispowerbidatastorage2\"\n",
-							"CONTAINER        = \"mict\"                          # ← Update for MFT\n",
-							"DELTA_MOVES_PATH = \"silver/moves\"\n",
-							"OUTPUT_PATH      = \"gold/tranship_pairs\"\n",
-							"\n",
-							"\n",
-							"BASE_PATH    = f\"abfss://{CONTAINER}@{STORAGE_ACCOUNT}.dfs.core.windows.net\"\n",
-							"MOVES_PATH   = f\"{BASE_PATH}/{DELTA_MOVES_PATH}\"\n",
-							"OUTPUT_DELTA = f\"{BASE_PATH}/{OUTPUT_PATH}\"\n",
-							"\n",
-							"\n",
-							"df = spark.read.format(\"delta\").load(MOVES_PATH)\n",
-							"\n",
-							"# ============================================================\n",
-							"# 2. FILTER TRANSHIPMENT ONLY\n",
-							"# ============================================================\n",
-							"df_trshp = df.filter(\n",
-							"    (F.col(\"Category_Id\") == \"TRSHP\") &\n",
-							"    (F.col(\"Event_Type_Id\").isin(\"UNIT_DISCH\", \"UNIT_LOAD\")) &\n",
-							"    (F.col(\"Year\") >= 2026)\n",
-							")\n",
-							"\n",
-							"# ============================================================\n",
-							"# 3. EXTRACT YARDBLOCK FROM POSITION NAME\n",
-							"# Format: Y-MFT-XE 040 06B → XE\n",
-							"# ============================================================\n",
-							"SPECIAL_BLOCKS = [\n",
-							"    \"BERTH1\", \"BERTH2\", \"BERTH3\", \"BERTH4\", \"BERTH5\", \"BERTH6\", \"BERTH7\", \"BERTH8\",\n",
-							"    \"CFS3\", \"NENACO\", \"OOG\", \"SW05\", \"SW34\", \"WALL\", \"XRAY\",\n",
-							"]\n",
-							"\n",
-							"def extract_yardblock(col_name):\n",
-							"    # 3rd segment: everything after the 2nd '-' up to the next '-' or space\n",
-							"    segment = F.regexp_extract(F.col(col_name), r\"^Y-[^-]+-([^- ]+)\", 1)\n",
-							"    return (\n",
-							"        F.when(~F.col(col_name).startswith(\"Y-\"), F.lit(None))\n",
-							"         .when(segment == \"\", F.lit(None))\n",
-							"         .when(segment.isin(SPECIAL_BLOCKS), segment)   # BERTH6, OOG, SW34, ...\n",
-							"         .otherwise(segment.substr(1, 2))               # 5E0102F3 -> 5E\n",
-							"    )\n",
-							"\n",
-							"\n",
-							"df_trshp = df_trshp \\\n",
-							"    .withColumn(\"From_YardBlock\", extract_yardblock(\"From_Position_Name\")) \\\n",
-							"    .withColumn(\"To_YardBlock\",   extract_yardblock(\"To_Position_Name\"))\n",
-							"\n",
-							"# ============================================================\n",
-							"# 4. CRANE LOOKUP\n",
-							"# ============================================================\n",
-							"cranes_data = [\n",
-							"    ('QC02','T1'),('QC03','T1'),('QC17','T1'),\n",
-							"    ('QC06','T1'),('QC07','T1'),('QC20','T1'),\n",
-							"    ('QC21','T1'),('QC08','T1'),('QC09','T1'),\n",
-							"    ('QC10','T1'),('QC18','T1'),('QC19','T1'),\n",
-							"    ('QC11','T2'),('QC12','T2'),('QC14','T2'),\n",
-							"    ('QC15','T2'),('QC16','T2'),('QC22','T2')\n",
-							"]\n",
-							"df_cranes = spark.createDataFrame(cranes_data, [\"CraneId\", \"Crane_Terminal\"])\n",
-							"\n",
-							"# ============================================================\n",
-							"# 5. YARDBLOCK LOOKUP\n",
-							"# ============================================================\n",
-							"yardblocks_data = [\n",
-							"('0B', 'T1'), ('0C', 'T1'), ('0D', 'T1'), ('0E', 'T1'),('0F', 'T1'), ('0G', 'T1'), ('0H', 'T1'), ('0I', 'T1'),\n",
-							"('0J', 'T1'), ('0L', 'T2'), ('0M', 'T2'), ('0N', 'T2'),('0O', 'T2'), ('0P', 'T2'), ('1B', 'T1'), ('1C', 'T1'),\n",
-							"('1D', 'T1'), ('1E', 'T1'), ('1F', 'T1'), ('1G', 'T1'),('1H', 'T1'), ('1I', 'T1'), ('1J', 'T1'), ('1L', 'T2'),\n",
-							"('1M', 'T2'), ('1N', 'T2'), ('1O', 'T2'), ('1P', 'T2'),('1Q', 'T3'), ('2B', 'T1'), ('2C', 'T1'),('2D', 'T1'),\n",
-							"('2E', 'T1'), ('2F', 'T1'), ('2G', 'T1'),('2H', 'T1'), ('2I', 'T1'), ('2J', 'T1'), ('2K', 'T1'),('2L', 'T2'), \n",
-							"('2M', 'T2'), ('2N', 'T2'), ('2O', 'T2'),('2P', 'T2'), ('2Q', 'T4'), ('3B', 'T1'),('3C', 'T1'), ('3D', 'T1'), \n",
-							"('3E', 'T1'), ('3F', 'T1'),('3G', 'T1'), ('3H', 'T1'), ('3I', 'T1'), ('3J', 'T1'),('3K', 'T1'), ('3L', 'T2'),\n",
-							"('3M', 'T2'), ('3N', 'T2'),('3O', 'T2'), ('3P', 'T2'), ('3Q', 'T5'),('4B', 'T1'), ('4C', 'T1'), ('4D', 'T1'), ('4E', 'T1'),\n",
-							"('4F', 'T1'), ('4G', 'T1'), ('4H', 'T1'), ('4I', 'T1'),('4J', 'T1'), ('4K', 'T2'), ('4L', 'T2'), ('4M', 'T2'),\n",
-							"('4N', 'T2'), ('4O', 'T2'), ('4P', 'T2'),('5B', 'T1'), ('5C', 'T1'), ('5D', 'T1'), ('5E', 'T1'),\n",
-							"('5F', 'T1'), ('5G', 'T1'), ('5H', 'T1'), ('5I', 'T1'),('5J', 'T1'), ('5K', 'T2'), ('5L', 'T2'), ('5M', 'T2'),\n",
-							"('5N', 'T2'), ('5O', 'T2'), ('5P', 'T2'),('6B', 'T1'), ('6C', 'T1'), ('6D', 'T1'), ('6E', 'T1'),\n",
-							"('6F', 'T1'), ('6G', 'T1'), ('6H', 'T1'), ('6I', 'T1'),('6J', 'T1'), ('6K', 'T2'), ('6L', 'T2'), ('6M', 'T2'),\n",
-							"('6N', 'T2'), ('6O', 'T2'), ('6P', 'T2'),('7B', 'T1'), ('7C', 'T1'), ('7D', 'T1'), ('7E', 'T1'),\n",
-							"('7F', 'T1'), ('7G', 'T1'), ('7H', 'T1'), ('7I', 'T1'),('7J', 'T1'), ('7K', 'T1'), ('8B', 'T1'), ('8C', 'T1'),\n",
-							"('8D', 'T1'), ('8E', 'T1'), ('8F', 'T1'), ('8G', 'T1'),('8H', 'T1'), ('8I', 'T1'), ('8J', 'T1'), ('9E', 'T1'),\n",
-							"('9F', 'T1'), ('9G', 'T1'), ('9H', 'T1'), ('9I', 'T1'),('9J', 'T1'), ('BERTH1', 'T1'), ('BERTH2', 'T1'), ('BERTH3', 'T1'),\n",
-							"('BERTH4', 'T1'), ('BERTH5', 'T1'), ('BERTH6', 'T2'), ('BERTH7', 'T2'),('BERTH8', 'T2'), ('CB', 'T1'), ('CC', 'T1'), ('CD', 'T1'),\n",
-							"('CE', 'T1'), ('CF', 'T1'), ('CFS3', 'T1'), ('CG', 'T1'),('CH', 'T1'), ('CI', 'T1'), ('CJ', 'T1'), ('CK', 'T2'),\n",
-							"('CL', 'T2'), ('CM', 'T2'), ('CN', 'T2'), ('CO', 'T2'),('CP', 'T2'), ('NENACO', ''), ('OO', 'T2'), ('OOG', ''),\n",
-							"('SW05', ''), ('SW34', ''), ('WALL', ''), ('XF', 'T1'),('XG', 'T1'), ('XRAY', 'T1'), ('YF', 'T1'), ('YG', 'T1')\n",
-							"]\n",
-							"df_yardblocks = spark.createDataFrame(yardblocks_data, [\"YardBlock\", \"TerminalShort\"])\n",
-							"# ============================================================\n",
-							"# 6. JOIN TERMINAL LOOKUPS\n",
-							"# ============================================================\n",
-							"df_enriched = df_trshp \\\n",
-							"    .join(df_cranes,    df_trshp.pow            == df_cranes.CraneId,      \"left\") \\\n",
-							"    .join(df_yardblocks.alias(\"yf\"), \n",
-							"          df_trshp.From_YardBlock == F.col(\"yf.YardBlock\"), \"left\") \\\n",
-							"    .withColumnRenamed(\"TerminalShort\", \"From_Terminal\") \\\n",
-							"    .join(df_yardblocks.alias(\"yt\"), \n",
-							"          df_trshp.To_YardBlock   == F.col(\"yt.YardBlock\"), \"left\") \\\n",
-							"    .withColumnRenamed(\"TerminalShort\", \"To_Terminal\")\n",
-							"\n",
-							"# ============================================================\n",
-							"# 7. SEQUENCE MOVES PER UNIT\n",
-							"# ============================================================\n",
-							"window_seq = Window.partitionBy(\"Unit_Nbr\").orderBy(\"t_put\")\n",
-							"\n",
-							"df_sequenced = df_enriched.withColumn(\"move_seq\", F.row_number().over(window_seq))\n",
-							"\n",
-							"# ============================================================\n",
-							"# 8. SPLIT INTO DISCH AND LOAD\n",
-							"# ============================================================\n",
-							"df_disch = df_sequenced.filter(F.col(\"Event_Type_Id\") == \"UNIT_DISCH\") \\\n",
-							"    .select(\n",
-							"        \"Unit_Nbr\", \"mve_gkey\", \"move_seq\",\n",
-							"        \"t_put\", \"Carrier_Visit_Key\",\n",
-							"        \"Crane_Terminal\", \"To_Terminal\", \"To_YardBlock\",\n",
-							"        \"Freight_Kind_Id\", \"pow\"\n",
-							"    )\n",
-							"\n",
-							"df_load = df_sequenced.filter(F.col(\"Event_Type_Id\") == \"UNIT_LOAD\") \\\n",
-							"    .select(\n",
-							"        \"Unit_Nbr\",\n",
-							"        F.col(\"mve_gkey\").alias(\"load_mve_gkey\"),\n",
-							"        F.col(\"move_seq\").alias(\"load_move_seq\"),\n",
-							"        F.col(\"t_put\").alias(\"load_datetime\"),\n",
-							"        F.col(\"Carrier_Visit_Key\").alias(\"load_vessel\"),\n",
-							"        F.col(\"Crane_Terminal\").alias(\"load_crane_terminal\"),\n",
-							"        F.col(\"From_Terminal\").alias(\"load_yard_terminal\"),\n",
-							"        F.col(\"From_YardBlock\").alias(\"load_yard_block\"),\n",
-							"        F.col(\"pow\").alias(\"load_pow\"),\n",
-							"        F.col(\"Carrier_Visit_Key\").alias(\"load_Carrier_Visit_Key\")\n",
-							"    )\n",
-							"\n",
-							"# ============================================================\n",
-							"# 9. PAIR DISCH → NEXT LOAD\n",
-							"# LEFT JOIN to keep discharged units with no load yet (Pending)\n",
-							"# ============================================================\n",
-							"window_unit = Window.partitionBy(\"Unit_Nbr\").orderBy(\"move_seq\")\n",
-							"\n",
-							"# LEFT JOIN — keeps DISCH rows even with no matching LOAD\n",
-							"df_joined = df_disch.join(df_load, on=\"Unit_Nbr\", how=\"left\") \\\n",
-							"    .filter(\n",
-							"        F.col(\"load_move_seq\").isNull() |           # ← Pending Load (no load yet)\n",
-							"        (F.col(\"load_move_seq\") > F.col(\"move_seq\")) # ← Valid next load\n",
-							"    )\n",
-							"\n",
-							"# Keep only the CLOSEST next load per discharge (Pending rows have no load so rank = 1)\n",
-							"window_closest = Window.partitionBy(\"Unit_Nbr\", \"mve_gkey\").orderBy(\n",
-							"    F.col(\"load_move_seq\").asc_nulls_last()         # ← NULLs (Pending) go last in sort\n",
-							")\n",
-							"\n",
-							"df_paired = df_joined \\\n",
-							"    .withColumn(\"rn\", F.row_number().over(window_closest)) \\\n",
-							"    .filter(F.col(\"rn\") == 1) \\\n",
-							"    .drop(\"rn\", \"load_move_seq\", \"move_seq\")\n",
-							"\n",
-							"# ============================================================\n",
-							"# 10. ADD DERIVED COLUMNS\n",
-							"# ============================================================\n",
-							"window_tranship = Window.partitionBy(\"Unit_Nbr\").orderBy(\"t_put\")\n",
-							"\n",
-							"df_final = df_paired \\\n",
-							"    .withColumn(\"dwell_hours\",\n",
-							"        F.when(\n",
-							"            F.col(\"load_datetime\").isNotNull(),\n",
-							"            # Completed transhipment — actual dwell\n",
-							"            (F.col(\"load_datetime\").cast(\"long\") -\n",
-							"             F.col(\"t_put\").cast(\"long\")) / 3600\n",
-							"        ).otherwise(\n",
-							"            # Pending load — dwell so far since discharge\n",
-							"            (F.unix_timestamp(F.current_timestamp()) -\n",
-							"             F.col(\"t_put\").cast(\"long\")) / 3600\n",
-							"        )\n",
-							"    ) \\\n",
-							"    .withColumn(\"tranship_sequence\",\n",
-							"        F.row_number().over(window_tranship)\n",
-							"    ) \\\n",
-							"    .withColumn(\"tranship_type\",\n",
-							"        F.when(\n",
-							"            F.col(\"load_mve_gkey\").isNull(),\n",
-							"            F.lit(\"Pending Load\")                           # No load yet\n",
-							"        ).when(\n",
-							"            (F.col(\"Crane_Terminal\") == F.col(\"To_Terminal\")) &\n",
-							"            (F.col(\"To_Terminal\")  == F.col(\"load_yard_terminal\"))  &\n",
-							"            (F.col(\"load_yard_terminal\")   == F.col(\"load_crane_terminal\")),\n",
-							"            F.lit(\"Same-Terminal\")                          # All 4 legs on same terminal\n",
-							"        ).otherwise(\n",
-							"            F.lit(\"Cross-Terminal\")                         # Any leg differs\n",
-							"        )\n",
-							"    \n",
-							"    ) \\\n",
-							"    .withColumn(\"terminal_flow\",\n",
-							"        F.when(\n",
-							"            F.col(\"load_mve_gkey\").isNull(),\n",
-							"            F.concat(F.col(\"Crane_Terminal\"), F.lit(\" → Pending\"))\n",
-							"        ).otherwise(\n",
-							"            F.concat(F.col(\"Crane_Terminal\"), F.lit(\" → \"), F.col(\"load_crane_terminal\"))\n",
-							"        )\n",
-							"    ) \\\n",
-							"    .withColumn(\"disch_date\",       F.to_date(\"t_put\")) \\\n",
-							"    .withColumn(\"load_date\",        F.to_date(\"load_datetime\")) \\\n",
-							"    .withColumn(\"disch_year\",       F.year(\"t_put\")) \\\n",
-							"    .withColumn(\"disch_month\",      F.month(\"t_put\")) \\\n",
-							"    .withColumn(\"disch_month_name\", F.date_format(\"t_put\", \"MMMM\")) \\\n",
-							"    .withColumn(\"disch_year_month\", F.date_format(\"t_put\", \"yyyy-MM\")) \\\n",
-							"    .withColumnRenamed(\"t_put\",             \"disch_datetime\") \\\n",
-							"    .withColumnRenamed(\"Carrier_Visit_Key\", \"disch_vessel\") \\\n",
-							"    .withColumnRenamed(\"Crane_Terminal\",    \"disch_crane_terminal\") \\\n",
-							"    .withColumnRenamed(\"To_Terminal\",       \"disch_yard_terminal\") \\\n",
-							"    .withColumnRenamed(\"To_YardBlock\",      \"disch_yard_block\")\n",
-							"\n",
-							"# ============================================================\n",
-							"# 11. WRITE TO DELTA (silver layer)\n",
-							"# ============================================================\n",
-							"df_final.cache()\n",
-							"\n",
-							"# Sanity check before writing\n",
-							"print(f\"Total pairs:        {df_final.count()}\")\n",
-							"print(f\"Same-Terminal:      {df_final.filter(F.col('tranship_type') == 'Same-Terminal').count()}\")\n",
-							"print(f\"Cross-Terminal:     {df_final.filter(F.col('tranship_type') == 'Cross-Terminal').count()}\")\n",
-							"print(f\"Pending Load:       {df_final.filter(F.col('tranship_type') == 'Pending Load').count()}\")\n",
-							"\n",
-							"df_final.write \\\n",
-							"    .format(\"delta\") \\\n",
-							"    .mode(\"overwrite\") \\\n",
-							"    .save(OUTPUT_DELTA)\n",
-							"\n",
-							"print(\"✅ tranship_pairs written successfully!\")\n",
-							"\n",
-							"df_final.unpersist()\n",
-							""
-						],
-						"outputs": [],
-						"execution_count": 2
-					}
-				]
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/VesselVisits_MICT_Updated')]",
-			"type": "Microsoft.Synapse/workspaces/dataflows",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"linkedService": {
-								"referenceName": "linkedService1",
-								"type": "LinkedServiceReference"
-							},
-							"name": "vesselvisits"
-						}
-					],
-					"sinks": [
-						{
-							"linkedService": {
-								"referenceName": "linkedService1",
-								"type": "LinkedServiceReference"
-							},
-							"name": "VesselVisit"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Select1"
-						},
-						{
-							"name": "Aggregate1"
-						},
-						{
-							"name": "Select2"
-						},
-						{
-							"name": "AlterRow1"
-						},
-						{
-							"name": "filter1"
-						},
-						{
-							"name": "derivedColumn1"
-						}
-					],
-					"script": "source(output(\n\t\t{Complex Id} as string,\n\t\t{Facility Id} as string,\n\t\t{Carrier Visit Id} as string,\n\t\tPhase as string,\n\t\t{Visit Nbr} as string,\n\t\t{Carrier Mode} as string,\n\t\tATA as string,\n\t\tATD as string,\n\t\tETA as string,\n\t\tETD as string,\n\t\t{Operator Line Id} as string,\n\t\t{Operator Line Role} as string,\n\t\t{Operator Line Name} as string,\n\t\t{Time First Availabilty} as string,\n\t\t{Time Discharge Complete} as string,\n\t\t{Service Id} as string,\n\t\t{Service Name} as string,\n\t\t{Vessel Id} as string,\n\t\t{IB VYG} as string,\n\t\t{OB VYG} as string,\n\t\t{Carrier Name} as string,\n\t\t{Vessel Class} as string,\n\t\t{Published ETA} as string,\n\t\t{Published ETD} as string,\n\t\t{Start Work} as string,\n\t\t{End Work} as string,\n\t\t{Begin Receive_Date} as string,\n\t\t{Cargo Cutoff Date} as string,\n\t\t{Hazard Cutoff Date} as string,\n\t\t{Reefer Cutoff Date} as string,\n\t\t{Labor On Board Date} as string,\n\t\t{Labor Off Board Date} as string,\n\t\t{Off Port Arrival Date} as string,\n\t\t{Off Port Departure} as string,\n\t\t{Pilot On Board Date} as string,\n\t\t{Pilot Off Board Date} as string,\n\t\t{Est BBK Discharge} as string,\n\t\t{Est BBK Load} as string,\n\t\t{Est Load} as short,\n\t\t{Est Discharge} as short,\n\t\t{Est Restow} as string,\n\t\t{Est Shift} as string,\n\t\tVvFlexstring01 as string,\n\t\tVvFlexstring02 as string,\n\t\tVvFlexstring03 as string,\n\t\tVvFlexstring04 as string,\n\t\tVvFlexstring05 as string,\n\t\tVvFlexstring06 as string,\n\t\tVvFlexstring07 as string,\n\t\tVvFlexstring08 as string,\n\t\tVvFlexDate01 as string,\n\t\tVvFlexDate02 as string,\n\t\tVvFlexDate03 as string,\n\t\tVvFlexDate04 as string,\n\t\tVvFlexDate05 as string,\n\t\tVvFlexDate06 as string,\n\t\tVvFlexDate07 as string,\n\t\tVvFlexDate08 as string,\n\t\t{Carrier Visit Key} as string,\n\t\t{Vessel Classification} as string,\n\t\t{Vessel Class Length Overall cm} as string,\n\t\t{Vessel Class Beam cm} as string,\n\t\t{Vessel TEU Capacity} as string,\n\t\t{Lloyds Code} as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: true,\n\tmoveFiles: ['bronze/vesselvisits/load','bronze/vesselvisits/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'mict',\n\tfolderPath: 'bronze/vesselvisits/load/',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\''],\n\tmode: 'read') ~> vesselvisits\nSelect2 select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nderivedColumn1 aggregate(groupBy(Hash_Col),\n\teach(match(name!='Hash_Col'), $$ = first($$))) ~> Aggregate1\nvesselvisits select(mapColumn(\n\t\teach(match(/* All input columns */true()),\n\t\t\t/* Input name */$$ = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nfilter1 alterRow(upsertIf(true())) ~> AlterRow1\nAggregate1 filter(not(isNull(Hash_Col))) ~> filter1\nSelect1 derive(Hash_Col = md5(\r\n    toString(Carrier_Visit_Key) + \r\n    coalesce(ATA, '') + \r\n    coalesce(ATD, '') + \r\n    coalesce(ETA, '') + \r\n    coalesce(ETD, '') +\r\n    coalesce(Phase, '')\r\n),\n\t\tLoadedDate = currentTimestamp()) ~> derivedColumn1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'mict',\n\tfolderPath: 'silver/vesselvisits2',\n\tmergeSchema: false,\n\tautoCompact: false,\n\toptimizedWrite: false,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['Hash_Col'],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> VesselVisit"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Elizabeth_ Conformity')]",
-			"type": "Microsoft.Synapse/workspaces/notebooks",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"nbformat": 4,
-				"nbformat_minor": 2,
-				"bigDataPool": {
-					"referenceName": "pbixpool",
-					"type": "BigDataPoolReference"
-				},
-				"sessionProperties": {
-					"driverMemory": "56g",
-					"driverCores": 8,
-					"executorMemory": "56g",
-					"executorCores": 8,
-					"numExecutors": 1,
-					"conf": {
-						"spark.dynamicAllocation.enabled": "true",
-						"spark.dynamicAllocation.minExecutors": "1",
-						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "b5d44a52-1db9-453a-8b22-d5b5a70e2538"
-					}
-				},
-				"metadata": {
-					"saveOutput": true,
-					"enableDebugMode": false,
-					"kernelspec": {
-						"name": "synapse_pyspark",
-						"display_name": "Synapse PySpark"
-					},
-					"language_info": {
-						"name": "python"
-					},
-					"a365ComputeOptions": {
-						"id": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Synapse/workspaces/navispowerbidata2/bigDataPools/pbixpool",
-						"name": "pbixpool",
-						"type": "Spark",
-						"endpoint": "https://navispowerbidata2.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pbixpool",
-						"auth": {
-							"type": "AAD",
-							"authResource": "https://dev.azuresynapse.net"
-						},
-						"sparkVersion": "3.4",
-						"nodeCount": 10,
-						"cores": 8,
-						"memory": 56,
-						"automaticScaleJobs": true
-					},
-					"sessionKeepAliveTimeout": 30
-				},
-				"cells": [
-					{
-						"cell_type": "code",
-						"metadata": {},
-						"source": [
-							"from pyspark.sql import functions as F, Window\n",
-							"from functools import reduce\n",
-							"import re\n",
-							"\n",
-							"# ---------- config ----------\n",
-							"STORAGE_ACCOUNT = \"navispowerbidatastorage2\"          # fill in\n",
-							"BASE        = f\"abfss://apmt-elz@{STORAGE_ACCOUNT}.dfs.core.windows.net\"\n",
-							"SOURCE_DIR  = f\"{BASE}/bronze/stackconformitycsvs/archive\"\n",
-							"TARGET_PATH = f\"{BASE}/gold/conformities_new\"\n",
-							"DRY_RUN     = False                              # True = build + check only, no write\n",
-							"\n",
-							"REQUIRED = [\"ContainerNo\",\"StackingFactor\",\"BlockType\",\"Eq Type\",\"Equipment Class\",\"YardRow\",\n",
-							"            \"Cat\",\"Sts\",\"SectionFactor\",\"Outbound Carrier\",\"Current POD\",\"Line\",\n",
-							"            \"CurrentPosition\",\"Special Stow1\",\"Special Stow2\"]\n",
-							"RENAME = {\"Eq Type\":\"Eq_Type\",\"Equipment Class\":\"Equipment_Class\",\"Outbound Carrier\":\"Outbound_Carrier\",\n",
-							"          \"Current POD\":\"Current_POD\",\"Special Stow1\":\"Special_Stow1\",\"Special Stow2\":\"Special_Stow2\"}\n",
-							"\n",
-							"def clean(name):                                # strip [ ], BOM, spaces around the name\n",
-							"    return re.sub(r\"[\\[\\]\\ufeff]\", \"\", name).strip()\n",
-							"\n",
-							"# ---------- list files ----------\n",
-							"hpath = spark._jvm.org.apache.hadoop.fs.Path(SOURCE_DIR)\n",
-							"fs = hpath.getFileSystem(spark._jsc.hadoopConfiguration())\n",
-							"files = sorted(str(s.getPath()) for s in fs.listStatus(hpath) if str(s.getPath()).lower().endswith(\".csv\"))\n",
-							"\n",
-							"# ---------- read each file by header name ----------\n",
-							"frames, problems = [], []\n",
-							"for path in files:\n",
-							"    fname = path.rsplit(\"/\", 1)[-1]\n",
-							"    m = re.search(r\"_(\\d{6})\\.csv$\", fname, re.I)\n",
-							"    if not m:\n",
-							"        problems.append((fname, \"no ddMMyy in file name\")); continue\n",
-							"    raw = (spark.read.option(\"header\", True).option(\"inferSchema\", False)\n",
-							"           .option(\"quote\", '\"').option(\"escape\", \"\\\\\").csv(path))\n",
-							"    df = raw.toDF(*[clean(c) for c in raw.columns])\n",
-							"    missing = [c for c in REQUIRED if c not in df.columns]\n",
-							"    if missing:\n",
-							"        problems.append((fname, f\"missing {missing}\")); continue\n",
-							"    df = df.select(*[F.col(f\"`{c}`\").alias(RENAME.get(c, c)) for c in REQUIRED]) \\\n",
-							"           .withColumn(\"FileDate\", F.lit(fname)) \\\n",
-							"           .withColumn(\"Date\", F.to_date(F.lit(m.group(1)), \"ddMMyy\"))\n",
-							"    frames.append(df)\n",
-							"\n",
-							"print(\"Files read:\", len(frames), \"| Problems:\", problems)\n",
-							"src = reduce(lambda a, b: a.unionByName(b), frames)\n",
-							"\n",
-							"# ---------- derivedColumn1 ----------\n",
-							"fcl, mty = F.col(\"Sts\") == \"FCL\", F.col(\"Sts\") == \"MTY\"\n",
-							"d = (src\n",
-							"  .withColumn(\"Pos_WO_Tier\", F.when(F.col(\"CurrentPosition\").rlike(r\"\\d$\"),\n",
-							"                F.expr(\"substring(CurrentPosition, 1, length(CurrentPosition) - 2)\"))\n",
-							"              .otherwise(F.col(\"CurrentPosition\")))\n",
-							"  .withColumn(\"Week\", F.when(F.dayofweek(\"Date\") == 1, F.weekofyear(\"Date\") + 1)\n",
-							"              .otherwise(F.weekofyear(\"Date\")).cast(\"int\"))\n",
-							"  .withColumn(\"StackingFactor_der\",\n",
-							"      F.when(fcl, F.concat(\"Outbound_Carrier\", F.lit(\"/\"), \"Current_POD\", F.lit(\"/\"),\n",
-							"                           F.coalesce(\"Special_Stow1\", F.lit(\"\")), F.lit(\"/\"),\n",
-							"                           F.coalesce(\"Special_Stow2\", F.lit(\"\")), F.lit(\"/\"), \"Equipment_Class\"))\n",
-							"       .when(mty, F.concat(\"Equipment_Class\", F.lit(\"/\"), \"Line\"))\n",
-							"       .otherwise(F.lit(None).cast(\"string\")))\n",
-							"  .withColumn(\"SectionFactor_der\",\n",
-							"      F.when(fcl, F.concat(\"Outbound_Carrier\", F.lit(\"/\"), \"Current_POD\", F.lit(\"/\"), \"Sts\"))\n",
-							"       .when(mty, F.concat(\"Equipment_Class\", F.lit(\"/\"), \"Line\"))\n",
-							"       .otherwise(F.lit(None).cast(\"string\"))))\n",
-							"\n",
-							"# inner joins in the flow drop null keys - replicate that\n",
-							"d = d.filter(F.col(\"Date\").isNotNull() & F.col(\"Pos_WO_Tier\").isNotNull() & F.col(\"YardRow\").isNotNull())\n",
-							"\n",
-							"# ---------- window1/aggregate1 + window2/aggregate2 (same as rank + max > 1) ----------\n",
-							"ws  = Window.partitionBy(\"Date\", \"Pos_WO_Tier\")\n",
-							"wy  = Window.partitionBy(\"Date\", \"YardRow\")\n",
-							"d = (d\n",
-							"  .withColumn(\"stackrank\",   F.rank().over(ws.orderBy(F.col(\"StackingFactor\").asc_nulls_first())))\n",
-							"  .withColumn(\"sectionrank\", F.rank().over(wy.orderBy(F.col(\"SectionFactor\").asc_nulls_first())))\n",
-							"  .withColumn(\"Stack_confirmty\",    F.when(F.max(\"stackrank\").over(ws) > 1, \"Mix\").otherwise(\"Pure\"))\n",
-							"  .withColumn(\"Section_conformity\", F.when(F.max(\"sectionrank\").over(wy) > 1, \"Mix\").otherwise(\"Pure\")))\n",
-							"\n",
-							"# ---------- filter1 ----------\n",
-							"d = d.filter(F.col(\"ContainerNo\").isNotNull() & (F.col(\"ContainerNo\") != \"\")\n",
-							"             & ~F.col(\"ContainerNo\").rlike(r\"^\\d{4}-\\d{1,2}-\\d{1,2}\"))\n",
-							"\n",
-							"# ---------- per-file reconciliation ----------\n",
-							"(src.groupBy(\"FileDate\").agg(F.count(\"*\").alias(\"rows_in\"))\n",
-							"   .join(d.groupBy(\"FileDate\").agg(F.count(\"*\").alias(\"rows_out\")), \"FileDate\", \"left\")\n",
-							"   .orderBy(\"FileDate\").show(100, False))\n",
-							"\n",
-							"# ---------- select1 + select2 (sink schema) ----------\n",
-							"out = d.select(\n",
-							"  F.col(\"ContainerNo\").alias(\"Container_No\"), F.col(\"StackingFactor\").alias(\"Stacking_Factor\"),\n",
-							"  \"Eq_Type\", \"BlockType\", F.col(\"CurrentPosition\").alias(\"Current_position\"),\n",
-							"  F.col(\"YardRow\").alias(\"Yard_Row\"), \"Cat\", \"Sts\", F.col(\"SectionFactor\").alias(\"Section_Factor\"),\n",
-							"  \"Pos_WO_Tier\", \"Date\", \"Week\", \"StackingFactor_der\", \"SectionFactor_der\",\n",
-							"  \"Stack_confirmty\", \"Section_conformity\", \"Line\")\n",
-							"\n",
-							"# ---------- write: replace only the dates being loaded (no duplicates on rerun) ----------\n",
-							"if not DRY_RUN:\n",
-							"    # keep the existing Delta table structure: same columns, order and types\n",
-							"    target_schema = spark.read.format(\"delta\").load(TARGET_PATH).schema\n",
-							"    aligned = out.select([\n",
-							"        (F.col(f.name) if f.name in out.columns else F.lit(None))\n",
-							"            .cast(f.dataType).alias(f.name)\n",
-							"        for f in target_schema\n",
-							"    ])\n",
-							"\n",
-							"    (aligned.write.format(\"delta\")\n",
-							"        .mode(\"overwrite\")                    # replace all rows\n",
-							"        .option(\"overwriteSchema\", \"false\")   # never change the table schema\n",
-							"        .save(TARGET_PATH))\n",
-							"\n",
-							"    print(\"Rows written:\", spark.read.format(\"delta\").load(TARGET_PATH).count())\n",
-							""
-						],
-						"outputs": [],
-						"execution_count": 13
-					}
-				]
-			},
-			"dependsOn": []
 		}
 	]
 }
