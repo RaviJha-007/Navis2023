@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "8dc8fb25-e847-4ff6-9bd2-30c2f96f32ab"
+				"spark.autotune.trackingId": "212ce33f-a908-48f5-9c77-c9d728cd7b66"
 			}
 		},
 		"metadata": {
@@ -85,7 +85,7 @@
 					"\n",
 					""
 				],
-				"execution_count": 12
+				"execution_count": 1
 			},
 			{
 				"cell_type": "code",
@@ -103,7 +103,7 @@
 					"MOVE_KIND_COL      = \"Move_Kind\"\n",
 					"MOVE_GKEY_COL      = \"mve_gkey\""
 				],
-				"execution_count": 13
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -123,7 +123,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 14
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -136,7 +136,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 15
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -147,18 +147,15 @@
 					"df_joined = df_deckings.alias(\"d\").join(\n",
 					"    df_moves.alias(\"m\"),\n",
 					"    on=(\n",
-					"        F.col(f\"d.{DECKING_CONTAINER_COL}\") == F.col(f\"m.{MOVE_CONTAINER_COL}\")\n",
+					"        (F.col(f\"d.{DECKING_CONTAINER_COL}\") == F.col(f\"m.{MOVE_CONTAINER_COL}\")) &\n",
+					"        (F.col(f\"m.{MOVE_TIMESTAMP_COL}\") > F.col(f\"d.{DECKING_TIMESTAMP_COL}\"))\n",
 					"    ),\n",
 					"    how=\"left\"\n",
-					").filter(\n",
-					"    # Keep only move records that occurred AFTER the decking event\n",
-					"    # (null-safe: rows with no match are kept via left join)\n",
-					"    F.col(f\"m.{MOVE_TIMESTAMP_COL}\").isNull() |\n",
-					"    (F.col(f\"m.{MOVE_TIMESTAMP_COL}\") > F.col(f\"d.{DECKING_TIMESTAMP_COL}\"))\n",
 					")\n",
+					"\n",
 					""
 				],
-				"execution_count": 16
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -178,7 +175,7 @@
 					"df_best_match = df_ranked.filter(F.col(\"_move_rank\") == 1)\n",
 					""
 				],
-				"execution_count": 17
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
@@ -202,7 +199,7 @@
 					"df_result.show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 18
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -215,7 +212,7 @@
 					"\n",
 					"print(f\"✅ Written to Delta: {output_path}\")"
 				],
-				"execution_count": 19
+				"execution_count": 8
 			}
 		]
 	}
