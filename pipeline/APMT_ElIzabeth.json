@@ -40,7 +40,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "MoveSrc_apmt_elz",
+						"referenceName": "MoveSrc_apmt_elz_UpdatedCheck",
 						"type": "DataFlowReference"
 					},
 					"compute": {
