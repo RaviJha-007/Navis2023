@@ -177,6 +177,33 @@
 					},
 					"numExecutors": null
 				}
+			},
+			{
+				"name": "Rehandle",
+				"type": "SynapseNotebook",
+				"dependsOn": [
+					{
+						"activity": "MoveHistory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "APMT_ELZ_Rehandles",
+						"type": "NotebookReference"
+					},
+					"snapshot": true
+				}
 			}
 		],
 		"annotations": []
