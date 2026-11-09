@@ -385,50 +385,11 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "MoveSrc_apmt_elz",
+								"referenceName": "MoveSrc_apmt_elz_UpdatedCheck",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
 									"CSV": {},
-									"sink1": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					},
-					{
-						"name": "Rehandles",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [
-							{
-								"activity": "MoveHistory",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "Rehandle_apmt_elz",
-								"type": "DataFlowReference",
-								"parameters": {
-									"customer": "'apmt-ez'"
-								},
-								"datasetParameters": {
-									"source1": {},
 									"sink1": {}
 								}
 							},
@@ -525,6 +486,12 @@
 								"dependencyConditions": [
 									"Succeeded"
 								]
+							},
+							{
+								"activity": "MoveHistory",
+								"dependencyConditions": [
+									"Succeeded"
+								]
 							}
 						],
 						"policy": {
@@ -548,6 +515,71 @@
 							},
 							"numExecutors": null
 						}
+					},
+					{
+						"name": "Rehandle",
+						"type": "SynapseNotebook",
+						"dependsOn": [
+							{
+								"activity": "MoveHistory",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Position Correction",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "APMT_ELZ_Rehandles",
+								"type": "NotebookReference"
+							},
+							"snapshot": true,
+							"conf": {
+								"spark.dynamicAllocation.enabled": null,
+								"spark.dynamicAllocation.minExecutors": null,
+								"spark.dynamicAllocation.maxExecutors": null
+							},
+							"numExecutors": null
+						}
+					},
+					{
+						"name": "Position Correction",
+						"type": "SynapseNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "APMT_ELZ_PositionCorrection",
+								"type": "NotebookReference"
+							},
+							"snapshot": true,
+							"conf": {
+								"spark.dynamicAllocation.enabled": null,
+								"spark.dynamicAllocation.minExecutors": null,
+								"spark.dynamicAllocation.maxExecutors": null
+							},
+							"numExecutors": null
+						}
 					}
 				],
 				"policy": {
@@ -557,11 +589,12 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/Decking_APMT_Elz')]",
-				"[concat(variables('workspaceId'), '/dataflows/MoveSrc_apmt_elz')]",
-				"[concat(variables('workspaceId'), '/dataflows/Rehandle_apmt_elz')]",
+				"[concat(variables('workspaceId'), '/dataflows/MoveSrc_apmt_elz_UpdatedCheck')]",
 				"[concat(variables('workspaceId'), '/dataflows/confirmity_csv_APMT_Elz')]",
 				"[concat(variables('workspaceId'), '/dataflows/APMT_ELZ_RTG_violations')]",
-				"[concat(variables('workspaceId'), '/notebooks/Elizabeth_Decking_upd')]"
+				"[concat(variables('workspaceId'), '/notebooks/Elizabeth_Decking_upd')]",
+				"[concat(variables('workspaceId'), '/notebooks/APMT_ELZ_Rehandles')]",
+				"[concat(variables('workspaceId'), '/notebooks/APMT_ELZ_PositionCorrection')]"
 			]
 		},
 		{
@@ -19427,6 +19460,43 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "Laden Unladen dual cycle",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "MoveSrc_mict",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "LadenUnladen_TimeDistance_DualyCycle_MICT",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
@@ -19444,7 +19514,8 @@
 				"[concat(variables('workspaceId'), '/dataflows/TT_Productivity_mict')]",
 				"[concat(variables('workspaceId'), '/dataflows/violations_mict')]",
 				"[concat(variables('workspaceId'), '/dataflows/Dual Cycling_mict')]",
-				"[concat(variables('workspaceId'), '/dataflows/MICT_jobstep_Missed')]"
+				"[concat(variables('workspaceId'), '/dataflows/MICT_jobstep_Missed')]",
+				"[concat(variables('workspaceId'), '/dataflows/LadenUnladen_TimeDistance_DualyCycle_MICT')]"
 			]
 		},
 		{
@@ -51548,6 +51619,64 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/LadenUnladen_TimeDistance_DualyCycle_MICT')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "window1"
+						},
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "AlterRow1"
+						},
+						{
+							"name": "aggregate1"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "filter1"
+						},
+						{
+							"name": "filter2"
+						},
+						{
+							"name": "derivedColumn2"
+						}
+					],
+					"script": "source(output(\n\t\tmve_gkey as integer,\n\t\tUnit_Nbr as string,\n\t\tFacility_Id as string,\n\t\tComplex_Id as string,\n\t\tYard_Id as string,\n\t\tCarrier_Visit_Key as integer,\n\t\tEvent_Type_Id as string,\n\t\tMove_Kind as string,\n\t\tFrom_Location as string,\n\t\tTo_Location as string,\n\t\tFrom_Position_Name as string,\n\t\tTo_Position_Name as string,\n\t\tCarry_CHE_Operator_Id as short,\n\t\tFetch_CHE_Operator_Id as string,\n\t\tPut_CHE_Operator_Id as string,\n\t\tFetch_CHE_Id as long,\n\t\tFetch_CHE_Kind as string,\n\t\tCarry_CHE_Id as long,\n\t\tCarry_CHE_Kind as string,\n\t\tPut_CHE_Id as long,\n\t\tPut_CHE_Kind as string,\n\t\tQC_CHE_Id as long,\n\t\tQC_CHE_Kind as string,\n\t\tt_carry_complete as timestamp,\n\t\tt_put as timestamp,\n\t\tt_fetch as timestamp,\n\t\tt_dispatch as timestamp,\n\t\tt_discharge as timestamp,\n\t\tt_carry_dispatch as timestamp,\n\t\tt_carry_fetch_ready as timestamp,\n\t\tt_carry_put_ready as timestamp,\n\t\tdist_carry as integer,\n\t\tdist_start as short,\n\t\tTwin_Fetch as string,\n\t\tTwin_Carry as string,\n\t\tTwin_Put as string,\n\t\tCategory_Id as string,\n\t\tFreight_Kind_Id as string,\n\t\tto_pos_gkey as integer,\n\t\tfm_pos_gkey as integer,\n\t\tRestow_Reason as string,\n\t\tContainer_Line_Id as string,\n\t\tContainer_Line_Role as string,\n\t\tpow as string,\n\t\tufv_gkey as integer,\n\t\tBerth_Id as string,\n\t\tGoods_And_Ctr_Wt_Kg as double,\n\t\tactive_ufv as integer,\n\t\tRequires_Power_Flag as string,\n\t\tOOG_Flag as string,\n\t\tShipper_Id as string,\n\t\tConsignee_Id as string,\n\t\tCommodity_Id as string,\n\t\tATA as timestamp,\n\t\tATD as timestamp,\n\t\tRehandles as string,\n\t\tYear as integer,\n\t\tMonth as integer,\n\t\tWeek as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: true,\n\tformat: 'delta',\n\tfileSystem: 'mict',\n\tfolderPath: 'silver/moves') ~> source1\naggregate1 window(over(Carry_CHE_Id),\n\tasc(t_carry_complete, true),\n\tstartRowOffset: -1L,\n\tendRowOffset: -1L,\n\tCarry_CHE_Id_PREV = lag(Carry_CHE_Id),\n\t\tEvent_Type_Id_PREV = lag(Event_Type_Id),\n\t\tt_carry_complete_PREV = lag(t_carry_complete)) ~> window1\nfilter2 derive(Cycle_Type = iif(Carry_CHE_Id==Carry_CHE_Id_PREV && dayOfYear(t_carry_complete)==dayOfYear(t_carry_complete_PREV),\n(\niif(Event_Type_Id=='UNIT_LOAD',\niif(Event_Type_Id_PREV=='UNIT_LOAD','Half Load Cycle','Discharge to Load Cycle'),\niif(Event_Type_Id_PREV=='UNIT_DISCH','Half Discharge Cycle','Load to Discharge Cycle'))\n),\niif(Event_Type_Id=='UNIT_LOAD','Half Load Cycle','Half Discharge Cycle')),\n\t\tDSCH_Laden_Duration_Sec = iif(Move_Kind == 'DSCH', (toLong(t_carry_complete) - toLong(t_discharge))/1000, toLong(null())),\n\t\tDSCH_UnLaden_Duration_Sec01 = iif(Move_Kind == 'DSCH', (toLong(t_discharge) - toLong(t_carry_dispatch))/1000, toLong(null())),\n\t\tDSCH_Cycle_Duration_Sec = iif(Move_Kind == 'DSCH', (toLong(t_carry_complete) - toLong(t_carry_dispatch))/1000, toLong(null())),\n\t\tLaden_Travel_Service_Sec = iif(Move_Kind == 'DSCH', (toLong(t_carry_complete) - toLong(t_discharge))/1000, toLong(null())),\n\t\tLoad_Unladen_Duration_Sec = iif(Move_Kind == 'LOAD', (toLong(t_fetch) - toLong(t_carry_dispatch))/1000, toLong(null())),\n\t\tLoad_Laden_Duration_Sec = iif(Move_Kind == 'LOAD', (toLong(t_carry_complete) - toLong(t_fetch))/1000, toLong(null())),\n\t\tLoad_UnladenWait_ToLoad = (toLong(t_fetch) - toLong(t_carry_dispatch))/1000,\n\t\tLoad_Cycle_Duration_Sec = iif(Move_Kind == 'LOAD', (toLong(t_carry_complete) - toLong(t_carry_dispatch))/1000, toLong(null())),\n\t\tUnladen_Travel_Service_Sec = iif(Move_Kind == 'LOAD', (toLong(t_fetch) - toLong(t_carry_dispatch))/1000, toLong(null())),\n\t\tLoad_Laden_Distance = iif(Move_Kind == 'LOAD', toLong(dist_carry), toLong(null())),\n\t\tLoad_Unladen_Distance = iif(Move_Kind == 'LOAD', toLong(dist_start), toLong(null())),\n\t\tDSCH_Laden_Distance = iif(Move_Kind == 'DSCH', toLong(dist_carry), toLong(null())),\n\t\tDSCH_Unladen_Distance = iif(Move_Kind == 'DSCH', toLong(dist_start), toLong(null())),\n\t\tDLVR_Laden_Distance = iif(Move_Kind == 'DLVR', toLong(dist_carry), toLong(null())),\n\t\tDLVR_Unladen_Distance = iif(Move_Kind == 'DLVR', toLong(dist_start), toLong(null())),\n\t\tRECV_Laden_Distance = iif(Move_Kind == 'RECV', toLong(dist_carry), toLong(null())),\n\t\tRECV_Unladen_Distance = iif(Move_Kind == 'RECV', toLong(dist_start), toLong(null()))) ~> derivedColumn1\nselect1 alterRow(upsertIf(true())) ~> AlterRow1\nfilter1 aggregate(groupBy(mve_gkey),\n\teach(match(name!='mve_gkey'), $$ = first($$))) ~> aggregate1\nderivedColumn2 select(mapColumn(\n\t\tmve_gkey,\n\t\tUnit_Nbr,\n\t\tFacility_Id,\n\t\tEvent_Type_Id,\n\t\tMove_Kind,\n\t\tCycle_Type,\n\t\tt_carry_complete,\n\t\tt_put,\n\t\tt_fetch,\n\t\tt_dispatch,\n\t\tt_discharge,\n\t\tt_carry_dispatch,\n\t\tt_carry_fetch_ready,\n\t\tt_carry_put_ready,\n\t\tdist_carry,\n\t\tdist_start,\n\t\tPreviousJobCompletion = t_carry_complete_PREV,\n\t\tDSCH_Laden_Duration_Sec,\n\t\tDSCH_UnLaden_Duration_Sec01,\n\t\tDSCH_Cycle_Duration_Sec,\n\t\tLaden_Travel_Service_Sec,\n\t\tLoad_Unladen_Duration_Sec,\n\t\tLoad_Laden_Duration_Sec,\n\t\tLoad_Cycle_Duration_Sec,\n\t\tUnladen_Travel_Service_Sec,\n\t\tDsch_Unladen_Duration_Sec,\n\t\tLoad_Laden_Distance,\n\t\tLoad_Unladen_Distance,\n\t\tDSCH_Laden_Distance,\n\t\tDSCH_Unladen_Distance,\n\t\tDLVR_Laden_Distance,\n\t\tDLVR_Unladen_Distance,\n\t\tRECV_Laden_Distance,\n\t\tRECV_Unladen_Distance,\n\t\tYear,\n\t\tMonth,\n\t\tWeek,\n\t\tLoad_UnladenWait_ToLoad,\n\t\tCategory_Id,\n\t\tFreight_Kind_Id,\n\t\tOOG_Flag,\n\t\tpow\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select1\nsource1 filter(equals(Carry_CHE_Kind,'ITV') && equals(isNull(Carry_CHE_Id),false()) && Year >= 2026) ~> filter1\nwindow1 filter((Event_Type_Id=='UNIT_LOAD' || Event_Type_Id=='UNIT_DISCH' || Event_Type_Id=='UNIT_DELIVER' || Event_Type_Id=='UNIT_RECEIVE')) ~> filter2\nderivedColumn1 derive(Dsch_Unladen_Duration_Sec = iif(\n    DSCH_UnLaden_Duration_Sec01 == 0 && t_carry_complete_PREV <= t_discharge,\n    (toLong(t_discharge) - toLong(t_carry_complete_PREV)) / 1000,\n    DSCH_UnLaden_Duration_Sec01\n)) ~> derivedColumn2\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tmve_gkey as long,\n\t\tUnit_Nbr as string,\n\t\tFacility_Id as string,\n\t\tEvent_Type_Id as string,\n\t\tMove_Kind as string,\n\t\tCycle_Type as string,\n\t\tt_carry_complete as timestamp,\n\t\tt_put as timestamp,\n\t\tt_fetch as timestamp,\n\t\tt_dispatch as timestamp,\n\t\tt_discharge as timestamp,\n\t\tt_carry_dispatch as timestamp,\n\t\tt_carry_fetch_ready as timestamp,\n\t\tt_carry_put_ready as timestamp,\n\t\tdist_carry as string,\n\t\tdist_start as string,\n\t\tPreviousJobCompletion as timestamp,\n\t\tDSCH_Laden_Duration_Sec as double,\n\t\tDSCH_UnLaden_Duration_Sec01 as double,\n\t\tDSCH_Cycle_Duration_Sec as double,\n\t\tLaden_Travel_Service_Sec as double,\n\t\tLoad_Unladen_Duration_Sec as double,\n\t\tLoad_Laden_Duration_Sec as double,\n\t\tLoad_Cycle_Duration_Sec as double,\n\t\tUnladen_Travel_Service_Sec as double,\n\t\tDsch_Unladen_Duration_Sec as double,\n\t\tYear as integer,\n\t\tMonth as integer,\n\t\tWeek as integer,\n\t\tLoad_UnladenWait_ToLoad as double,\n\t\tCategory_Id as string,\n\t\tFreight_Kind_Id as string,\n\t\tOOG_Flag as string,\n\t\tpow as string\n\t),\n\tformat: 'delta',\n\tfileSystem: 'mict',\n\tfolderPath: 'gold/laden_unladen_time_dist',\n\tmergeSchema: true,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['mve_gkey'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('key',\n\t\t0,\n\t\tYear,\n\t\tMonth,\n\t\tWeek\n\t)) ~> sink1"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/LadenUnladen_TimeDistance_DualyCycle_MNHPI')]",
 			"type": "Microsoft.Synapse/workspaces/dataflows",
 			"apiVersion": "2019-06-01-preview",
@@ -56237,6 +56366,73 @@
 						}
 					],
 					"script": "source(output(\n\t\t{Unit Number} as string,\n\t\t{Facility ID} as string,\n\t\t{Complex ID} as string,\n\t\t{Yard ID} as string,\n\t\t{Carrier Visit Key} as long,\n\t\t{Carrier Service} as string,\n\t\t{Event Type ID} as string,\n\t\t{Move Kind} as string,\n\t\t{From Location} as string,\n\t\t{To Location} as string,\n\t\t{From Position Name} as string,\n\t\t{To Position Name} as string,\n\t\t{QC CHE ID} as short,\n\t\t{QC CHE Kind} as string,\n\t\t{Unit POD} as string,\n\t\t{Carry Complete Time} as string,\n\t\t{Put Time} as string,\n\t\t{Fetch Time} as string,\n\t\t{Dispatch Time} as string,\n\t\t{Carry Dispatch Time} as string,\n\t\t{Carry Fetch Ready Time} as string,\n\t\t{Carry Put Ready Time} as string,\n\t\t{Twin Fetch} as string,\n\t\t{Twin Carry} as string,\n\t\t{Twin Put} as string,\n\t\t{Category ID} as string,\n\t\t{Freight Kind ID} as string,\n\t\t{Container Line ID} as string,\n\t\t{Container Line Role} as string,\n\t\tPOW as string,\n\t\t{Berth ID} as string,\n\t\t{Requires Power Flag} as string,\n\t\t{OOG Flag} as string,\n\t\tATA as string,\n\t\t{Deck Logic} as string,\n\t\t{Carry Distance} as integer,\n\t\t{Start Distance} as integer,\n\t\t{From Position Gkey} as long,\n\t\t{Move Gkey} as long,\n\t\t{UFV Gkey} as long,\n\t\t{Goods and Container Weight Kg} as string,\n\t\t{Active UFV} as long,\n\t\tRehandles as string,\n\t\t{Shipper ID} as string,\n\t\t{Commodity ID} as integer,\n\t\t{Consignee ID} as string,\n\t\t{Put CHE ID} as short,\n\t\t{Put CHE Operator ID} as string,\n\t\t{Put CHE Kind} as string,\n\t\t{Carry CHE ID} as integer,\n\t\t{Carry CHE Operator ID} as string,\n\t\t{Carry CHE Kind} as string,\n\t\t{To Position Gkey} as long,\n\t\t{Restow Reason} as string,\n\t\t{Discharge Time} as string,\n\t\t{Fetch CHE ID} as integer,\n\t\t{Fetch CHE Operator ID} as string,\n\t\t{Fetch CHE Kind} as string,\n\t\tATD as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: false,\n\tvalidateSchema: true,\n\tignoreNoFilesFound: false,\n\tmoveFiles: ['/bronze/moves/load','/bronze/moves/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'apmt-elz',\n\tfolderPath: 'bronze/moves/load',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\'']) ~> CSV\nAggregate1 derive(t_carry_complete = coalesce(toTimestamp({Carry_Complete_Time},'MM/dd/yyyy HH:mm'),toTimestamp({Carry_Complete_Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Carry_Complete_Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Carry_Complete_Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Carry_Complete_Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Carry_Complete_Time},'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp({Carry_Complete_Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tt_discharge = coalesce(toTimestamp({Discharge_Time},'MM/dd/yyyy HH:mm'),toTimestamp({Discharge_Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Discharge_Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Discharge_Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Discharge_Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Discharge_Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Discharge_Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Discharge_Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tFetch_CHE_Id = toLong({Fetch_CHE_ID}),\n\t\tQC_CHE_Id = toLong({QC_CHE_ID}),\n\t\tPut_CHE_Id = toLong({Put_CHE_ID}),\n\t\tCarry_CHE_Id = toLong({Carry_CHE_ID}),\n\t\tYear = year(t_put),\n\t\tMonth = month(t_put),\n\t\tWeek = weekOfYear(t_put),\n\t\tt_dispatch = coalesce(toTimestamp({Dispatch_Time},'MM/dd/yyyy HH:mm'),toTimestamp({Dispatch_Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Dispatch_Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Dispatch_Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Dispatch_Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Dispatch_Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Dispatch_Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Dispatch_Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tt_carry_dispatch = coalesce(toTimestamp({Carry_Dispatch_Time},'MM/dd/yyyy HH:mm'),toTimestamp({Carry_Dispatch_Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Carry_Dispatch_Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Carry_Dispatch_Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Carry_Dispatch_Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Carry_Dispatch_Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Carry_Dispatch_Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Carry_Dispatch_Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tt_carry_fetch_ready = coalesce(toTimestamp({Carry_Fetch_Ready_Time},'MM/dd/yyyy HH:mm'),toTimestamp({Carry_Fetch_Ready_Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Carry_Fetch_Ready_Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Carry_Fetch_Ready_Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Carry_Fetch_Ready_Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Carry_Fetch_Ready_Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Carry_Fetch_Ready_Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Carry_Fetch_Ready_Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tt_carry_put_ready = coalesce(toTimestamp({Carry_Put_Ready_Time},'MM/dd/yyyy HH:mm'),toTimestamp({Carry_Put_Ready_Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Carry_Put_Ready_Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Carry_Put_Ready_Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Carry_Put_Ready_Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Carry_Put_Ready_Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Carry_Put_Ready_Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Carry_Put_Ready_Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tATD = coalesce(toTimestamp({ATD},'MM/dd/yyyy HH:mm'),toTimestamp({ATD},'MM/dd/yyyy HH:mm:ss'),toTimestamp({ATD},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({ATD},'dd-MM-yy HH:mm:ss'),toTimestamp({ATD},'dd.MM.yy HH:mm:ss'),toTimestamp({ATD},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({ATD},'dd/MM/yyyy HH:mm:ss'),toTimestamp({ATD},'dd-MM-yyyy HH:mm:ss')),\n\t\tATA = coalesce(toTimestamp({ATA},'MM/dd/yyyy HH:mm'),toTimestamp({ATA},'MM/dd/yyyy HH:mm:ss'),toTimestamp({ATA},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({ATA},'dd-MM-yy HH:mm:ss'),toTimestamp({ATA},'dd.MM.yy HH:mm:ss'),toTimestamp({ATA},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({ATA},'dd/MM/yyyy HH:mm:ss'),toTimestamp({ATA},'dd-MM-yyyy HH:mm:ss')),\n\t\tmve_gkey = toLong(mve_gkey),\n\t\tCarrier_Visit_Key = toLong({Carrier_Visit_Key})) ~> DataTypeConversion\nSelect2 select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nSelect1 aggregate(groupBy(mve_gkey),\n\teach(match(name!='mve_gkey'), $$ = first($$))) ~> Aggregate1\nderivedColumn1 select(mapColumn(\n\t\teach(match(/* All input columns */true()),\n\t\t\t/* Input name */$$ = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nselect3 alterRow(upsertIf(true())) ~> AlterRow1\nCSV derive({Carrier Visit Key} = toLong({Carrier Visit Key}),\n\t\tmve_gkey = toLong({Move Gkey}),\n\t\tt_put = coalesce(toTimestamp({Put Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Put Time},'MM/dd/yyyy HH:mm'),toTimestamp({Put Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Put Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Put Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Put Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Put Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Put Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Put Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tt_fetch = coalesce(toTimestamp({Fetch Time} ,'dd/MM/yyyy HH:mm:ss'),toTimestamp({Fetch Time},'MM/dd/yyyy HH:mm'),toTimestamp({Fetch Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Fetch Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Fetch Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Fetch Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Fetch Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Fetch Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Fetch Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tufv_gkey = toLong({UFV Gkey})) ~> derivedColumn1\nDataTypeConversion select(mapColumn(\n\t\tmve_gkey,\n\t\tUnit_Nbr = Unit_Number,\n\t\tFacility_Id = Facility_ID,\n\t\tYard_Id = Yard_ID,\n\t\tCarrier_Visit_Key,\n\t\tEvent_Type_Id = Event_Type_ID,\n\t\tMove_Kind,\n\t\tFrom_Location,\n\t\tTo_Location,\n\t\tFrom_Position_Name,\n\t\tTo_Position_Name,\n\t\tCarry_CHE_Operator_Id = Carry_CHE_Operator_ID,\n\t\tFetch_CHE_Operator_Id = Fetch_CHE_Operator_ID,\n\t\tPut_CHE_Operator_Id = Put_CHE_Operator_ID,\n\t\tFetch_CHE_Id = DataTypeConversion@Fetch_CHE_Id,\n\t\tFetch_CHE_Kind,\n\t\tCarry_CHE_Id = DataTypeConversion@Carry_CHE_Id,\n\t\tCarry_CHE_Kind,\n\t\tPut_CHE_Id = DataTypeConversion@Put_CHE_Id,\n\t\tPut_CHE_Kind,\n\t\tQC_CHE_Id = DataTypeConversion@QC_CHE_Id,\n\t\tQC_CHE_Kind,\n\t\tt_carry_complete,\n\t\tt_put,\n\t\tt_fetch,\n\t\tt_dispatch,\n\t\tt_discharge,\n\t\tt_carry_dispatch,\n\t\tt_carry_fetch_ready,\n\t\tt_carry_put_ready,\n\t\tdist_carry = Carry_Distance,\n\t\tdist_start = Start_Distance,\n\t\tTwin_Fetch,\n\t\tTwin_Carry,\n\t\tTwin_Put,\n\t\tCategory_Id = Category_ID,\n\t\tFreight_Kind_Id = Freight_Kind_ID,\n\t\tRestow_Reason,\n\t\tPOW,\n\t\tufv_gkey = Aggregate1@ufv_gkey,\n\t\tGoods_And_Ctr_Wt_Kg = Goods_and_Container_Weight_Kg,\n\t\tRequires_Power_Flag,\n\t\tOOG_Flag,\n\t\tATA,\n\t\tATD,\n\t\tRehandles,\n\t\tYear,\n\t\tMonth,\n\t\tWeek,\n\t\tPOD = Unit_POD,\n\t\tDeck_Logic\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select3\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'apmt-elz',\n\tfolderPath: 'silver/moves',\n\tmergeSchema: true,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['mve_gkey'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tmve_gkey,\n\t\tUnit_Nbr,\n\t\tFacility_Id,\n\t\tYard_Id,\n\t\tCarrier_Visit_Key,\n\t\tEvent_Type_Id,\n\t\tMove_Kind,\n\t\tFrom_Location,\n\t\tTo_Location,\n\t\tFrom_Position_Name,\n\t\tTo_Position_Name,\n\t\tCarry_CHE_Operator_Id,\n\t\tFetch_CHE_Operator_Id,\n\t\tPut_CHE_Operator_Id,\n\t\tFetch_CHE_Id,\n\t\tFetch_CHE_Kind,\n\t\tCarry_CHE_Id,\n\t\tCarry_CHE_Kind,\n\t\tPut_CHE_Id,\n\t\tPut_CHE_Kind,\n\t\tQC_CHE_Id,\n\t\tQC_CHE_Kind,\n\t\tt_carry_complete,\n\t\tt_put,\n\t\tt_fetch,\n\t\tt_dispatch,\n\t\tt_discharge,\n\t\tt_carry_dispatch,\n\t\tt_carry_fetch_ready,\n\t\tt_carry_put_ready,\n\t\tdist_carry,\n\t\tdist_start,\n\t\tTwin_Fetch,\n\t\tTwin_Carry,\n\t\tTwin_Put,\n\t\tCategory_Id,\n\t\tFreight_Kind_Id,\n\t\tRestow_Reason,\n\t\tPOW,\n\t\tufv_gkey,\n\t\tGoods_And_Ctr_Wt_Kg,\n\t\tRequires_Power_Flag,\n\t\tOOG_Flag,\n\t\tATA,\n\t\tATD,\n\t\tRehandles,\n\t\tYear,\n\t\tMonth,\n\t\tWeek,\n\t\tPOD,\n\t\tDeck_Logic\n\t)) ~> sink1"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/MoveSrc_apmt_elz_UpdatedCheck')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "CSV"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "cleanHeaders"
+						},
+						{
+							"name": "aliasHeaders"
+						},
+						{
+							"name": "checkColumns"
+						},
+						{
+							"name": "typedColumns"
+						},
+						{
+							"name": "DataTypeConversion"
+						},
+						{
+							"name": "Select1"
+						},
+						{
+							"name": "Aggregate1"
+						},
+						{
+							"name": "Select2"
+						},
+						{
+							"name": "AlterRow1"
+						},
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "select3"
+						}
+					],
+					"script": "source(useSchema: false,\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tmoveFiles: ['/bronze/moves/load','/bronze/moves/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'apmt-elz',\n\tfolderPath: 'bronze/moves/load',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true) ~> CSV\nCSV select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace(trim(toString($$)),`[\\[\\]\\uFEFF]`,'') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> cleanHeaders\ncleanHeaders select(mapColumn(\n\t\teach(match(true()),\n\t\t\tcase(in(['unit nbr','unit no','unit number'],lower(toString($$))),'Unit Number',in(['mve gkey','mve_gkey','move key','move gkey'],lower(toString($$))),'Move Gkey',in(['ufv gkey','ufv_gkey'],lower(toString($$))),'UFV Gkey',lower(toString($$))=='facility id','Facility ID',lower(toString($$))=='complex id','Complex ID',lower(toString($$))=='yard id','Yard ID',lower(toString($$))=='event type id','Event Type ID',lower(toString($$))=='category id','Category ID',lower(toString($$))=='freight kind id','Freight Kind ID',lower(toString($$))=='container line id','Container Line ID',lower(toString($$))=='berth id','Berth ID',lower(toString($$))=='shipper id','Shipper ID',lower(toString($$))=='consignee id','Consignee ID',lower(toString($$))=='commodity id','Commodity ID',lower(toString($$))=='qc che id','QC CHE ID',lower(toString($$))=='put che id','Put CHE ID',lower(toString($$))=='carry che id','Carry CHE ID',lower(toString($$))=='fetch che id','Fetch CHE ID',lower(toString($$))=='put che operator id','Put CHE Operator ID',lower(toString($$))=='carry che operator id','Carry CHE Operator ID',lower(toString($$))=='fetch che operator id','Fetch CHE Operator ID',lower(toString($$))=='t_carry_complete','Carry Complete Time',lower(toString($$))=='t_put','Put Time',lower(toString($$))=='t_fetch','Fetch Time',lower(toString($$))=='t_dispatch','Dispatch Time',lower(toString($$))=='t_discharge','Discharge Time',lower(toString($$))=='t_carry_dispatch','Carry Dispatch Time',lower(toString($$))=='t_carry_fetch_ready','Carry Fetch Ready Time',lower(toString($$))=='t_carry_put_ready','Carry Put Ready Time',lower(toString($$))=='dist_carry','Carry Distance',lower(toString($$))=='dist_start','Start Distance',lower(toString($$))=='to_pos_gkey','To Position Gkey',lower(toString($$))=='fm_pos_gkey','From Position Gkey',lower(toString($$))=='active_ufv','Active UFV',lower(toString($$))=='pow','POW',lower(toString($$))=='goods and ctr wt kg','Goods and Container Weight Kg',toString($$)) = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> aliasHeaders\naliasHeaders assert(expectTrue(hasColumn('Unit Number') && hasColumn('Facility ID') && hasColumn('Complex ID') && hasColumn('Yard ID') && hasColumn('Carrier Visit Key') && hasColumn('Carrier Service') && hasColumn('Event Type ID') && hasColumn('Move Kind') && hasColumn('From Location') && hasColumn('To Location') && hasColumn('From Position Name') && hasColumn('To Position Name') && hasColumn('QC CHE ID') && hasColumn('QC CHE Kind') && hasColumn('Unit POD') && hasColumn('Carry Complete Time') && hasColumn('Put Time') && hasColumn('Fetch Time') && hasColumn('Dispatch Time') && hasColumn('Carry Dispatch Time') && hasColumn('Carry Fetch Ready Time') && hasColumn('Carry Put Ready Time') && hasColumn('Twin Fetch') && hasColumn('Twin Carry') && hasColumn('Twin Put') && hasColumn('Category ID') && hasColumn('Freight Kind ID') && hasColumn('Container Line ID') && hasColumn('Container Line Role') && hasColumn('POW') && hasColumn('Berth ID') && hasColumn('Requires Power Flag') && hasColumn('OOG Flag') && hasColumn('ATA') && hasColumn('Deck Logic') && hasColumn('Carry Distance') && hasColumn('Start Distance') && hasColumn('From Position Gkey') && hasColumn('Move Gkey') && hasColumn('UFV Gkey') && hasColumn('Goods and Container Weight Kg') && hasColumn('Active UFV') && hasColumn('Rehandles') && hasColumn('Shipper ID') && hasColumn('Commodity ID') && hasColumn('Consignee ID') && hasColumn('Put CHE ID') && hasColumn('Put CHE Operator ID') && hasColumn('Put CHE Kind') && hasColumn('Carry CHE ID') && hasColumn('Carry CHE Operator ID') && hasColumn('Carry CHE Kind') && hasColumn('To Position Gkey') && hasColumn('Restow Reason') && hasColumn('Discharge Time') && hasColumn('Fetch CHE ID') && hasColumn('Fetch CHE Operator ID') && hasColumn('Fetch CHE Kind') && hasColumn('ATD'), false, 'requiredColumns', null, 'Required columns present'),\n\tabort: true,\n\tfail: true) ~> checkColumns\ncheckColumns derive({Unit Number} = toString(byName('Unit Number')),\n\t\t{Facility ID} = toString(byName('Facility ID')),\n\t\t{Complex ID} = toString(byName('Complex ID')),\n\t\t{Yard ID} = toString(byName('Yard ID')),\n\t\t{Carrier Visit Key} = toLong(byName('Carrier Visit Key')),\n\t\t{Carrier Service} = toString(byName('Carrier Service')),\n\t\t{Event Type ID} = toString(byName('Event Type ID')),\n\t\t{Move Kind} = toString(byName('Move Kind')),\n\t\t{From Location} = toString(byName('From Location')),\n\t\t{To Location} = toString(byName('To Location')),\n\t\t{From Position Name} = toString(byName('From Position Name')),\n\t\t{To Position Name} = toString(byName('To Position Name')),\n\t\t{QC CHE ID} = toShort(byName('QC CHE ID')),\n\t\t{QC CHE Kind} = toString(byName('QC CHE Kind')),\n\t\t{Unit POD} = toString(byName('Unit POD')),\n\t\t{Carry Complete Time} = toString(byName('Carry Complete Time')),\n\t\t{Put Time} = toString(byName('Put Time')),\n\t\t{Fetch Time} = toString(byName('Fetch Time')),\n\t\t{Dispatch Time} = toString(byName('Dispatch Time')),\n\t\t{Carry Dispatch Time} = toString(byName('Carry Dispatch Time')),\n\t\t{Carry Fetch Ready Time} = toString(byName('Carry Fetch Ready Time')),\n\t\t{Carry Put Ready Time} = toString(byName('Carry Put Ready Time')),\n\t\t{Twin Fetch} = toString(byName('Twin Fetch')),\n\t\t{Twin Carry} = toString(byName('Twin Carry')),\n\t\t{Twin Put} = toString(byName('Twin Put')),\n\t\t{Category ID} = toString(byName('Category ID')),\n\t\t{Freight Kind ID} = toString(byName('Freight Kind ID')),\n\t\t{Container Line ID} = toString(byName('Container Line ID')),\n\t\t{Container Line Role} = toString(byName('Container Line Role')),\n\t\tPOW = toString(byName('POW')),\n\t\t{Berth ID} = toString(byName('Berth ID')),\n\t\t{Requires Power Flag} = toString(byName('Requires Power Flag')),\n\t\t{OOG Flag} = toString(byName('OOG Flag')),\n\t\tATA = toString(byName('ATA')),\n\t\t{Deck Logic} = toString(byName('Deck Logic')),\n\t\t{Carry Distance} = toInteger(byName('Carry Distance')),\n\t\t{Start Distance} = toInteger(byName('Start Distance')),\n\t\t{From Position Gkey} = toLong(byName('From Position Gkey')),\n\t\t{Move Gkey} = toLong(byName('Move Gkey')),\n\t\t{UFV Gkey} = toLong(byName('UFV Gkey')),\n\t\t{Goods and Container Weight Kg} = toString(byName('Goods and Container Weight Kg')),\n\t\t{Active UFV} = toLong(byName('Active UFV')),\n\t\tRehandles = toString(byName('Rehandles')),\n\t\t{Shipper ID} = toString(byName('Shipper ID')),\n\t\t{Commodity ID} = toInteger(byName('Commodity ID')),\n\t\t{Consignee ID} = toString(byName('Consignee ID')),\n\t\t{Put CHE ID} = toShort(byName('Put CHE ID')),\n\t\t{Put CHE Operator ID} = toString(byName('Put CHE Operator ID')),\n\t\t{Put CHE Kind} = toString(byName('Put CHE Kind')),\n\t\t{Carry CHE ID} = toInteger(byName('Carry CHE ID')),\n\t\t{Carry CHE Operator ID} = toString(byName('Carry CHE Operator ID')),\n\t\t{Carry CHE Kind} = toString(byName('Carry CHE Kind')),\n\t\t{To Position Gkey} = toLong(byName('To Position Gkey')),\n\t\t{Restow Reason} = toString(byName('Restow Reason')),\n\t\t{Discharge Time} = toString(byName('Discharge Time')),\n\t\t{Fetch CHE ID} = toInteger(byName('Fetch CHE ID')),\n\t\t{Fetch CHE Operator ID} = toString(byName('Fetch CHE Operator ID')),\n\t\t{Fetch CHE Kind} = toString(byName('Fetch CHE Kind')),\n\t\tATD = toString(byName('ATD'))) ~> typedColumns\nAggregate1 derive(t_carry_complete = coalesce(toTimestamp({Carry_Complete_Time},'yyyy-MM-dd HH:mm:ss'),toTimestamp({Carry_Complete_Time},'MM/dd/yyyy HH:mm'),toTimestamp({Carry_Complete_Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Carry_Complete_Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Carry_Complete_Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Carry_Complete_Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Carry_Complete_Time},'yyyy-MM-dd HH:mm:ss.SSS'),toTimestamp({Carry_Complete_Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tt_discharge = coalesce(toTimestamp({Discharge_Time},'yyyy-MM-dd HH:mm:ss'),toTimestamp({Discharge_Time},'MM/dd/yyyy HH:mm'),toTimestamp({Discharge_Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Discharge_Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Discharge_Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Discharge_Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Discharge_Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Discharge_Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Discharge_Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tFetch_CHE_Id = toLong({Fetch_CHE_ID}),\n\t\tQC_CHE_Id = toLong({QC_CHE_ID}),\n\t\tPut_CHE_Id = toLong({Put_CHE_ID}),\n\t\tCarry_CHE_Id = toLong({Carry_CHE_ID}),\n\t\tYear = year(t_put),\n\t\tMonth = month(t_put),\n\t\tWeek = weekOfYear(t_put),\n\t\tt_dispatch = coalesce(toTimestamp({Dispatch_Time},'yyyy-MM-dd HH:mm:ss'),toTimestamp({Dispatch_Time},'MM/dd/yyyy HH:mm'),toTimestamp({Dispatch_Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Dispatch_Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Dispatch_Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Dispatch_Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Dispatch_Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Dispatch_Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Dispatch_Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tt_carry_dispatch = coalesce(toTimestamp({Carry_Dispatch_Time},'yyyy-MM-dd HH:mm:ss'),toTimestamp({Carry_Dispatch_Time},'MM/dd/yyyy HH:mm'),toTimestamp({Carry_Dispatch_Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Carry_Dispatch_Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Carry_Dispatch_Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Carry_Dispatch_Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Carry_Dispatch_Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Carry_Dispatch_Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Carry_Dispatch_Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tt_carry_fetch_ready = coalesce(toTimestamp({Carry_Fetch_Ready_Time},'yyyy-MM-dd HH:mm:ss'),toTimestamp({Carry_Fetch_Ready_Time},'MM/dd/yyyy HH:mm'),toTimestamp({Carry_Fetch_Ready_Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Carry_Fetch_Ready_Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Carry_Fetch_Ready_Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Carry_Fetch_Ready_Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Carry_Fetch_Ready_Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Carry_Fetch_Ready_Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Carry_Fetch_Ready_Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tt_carry_put_ready = coalesce(toTimestamp({Carry_Put_Ready_Time},'yyyy-MM-dd HH:mm:ss'),toTimestamp({Carry_Put_Ready_Time},'MM/dd/yyyy HH:mm'),toTimestamp({Carry_Put_Ready_Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Carry_Put_Ready_Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Carry_Put_Ready_Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Carry_Put_Ready_Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Carry_Put_Ready_Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Carry_Put_Ready_Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Carry_Put_Ready_Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tATD = coalesce(toTimestamp({ATD},'yyyy-MM-dd HH:mm:ss'),toTimestamp({ATD},'MM/dd/yyyy HH:mm'),toTimestamp({ATD},'MM/dd/yyyy HH:mm:ss'),toTimestamp({ATD},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({ATD},'dd-MM-yy HH:mm:ss'),toTimestamp({ATD},'dd.MM.yy HH:mm:ss'),toTimestamp({ATD},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({ATD},'dd/MM/yyyy HH:mm:ss'),toTimestamp({ATD},'dd-MM-yyyy HH:mm:ss')),\n\t\tATA = coalesce(toTimestamp({ATA},'yyyy-MM-dd HH:mm:ss'),toTimestamp({ATA},'MM/dd/yyyy HH:mm'),toTimestamp({ATA},'MM/dd/yyyy HH:mm:ss'),toTimestamp({ATA},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({ATA},'dd-MM-yy HH:mm:ss'),toTimestamp({ATA},'dd.MM.yy HH:mm:ss'),toTimestamp({ATA},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({ATA},'dd/MM/yyyy HH:mm:ss'),toTimestamp({ATA},'dd-MM-yyyy HH:mm:ss')),\n\t\tmve_gkey = toLong(mve_gkey),\n\t\tCarrier_Visit_Key = toLong({Carrier_Visit_Key})) ~> DataTypeConversion\nSelect2 select(mapColumn(\n\t\teach(match(true()),\n\t\t\tregexReplace($$,' ','_') = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nSelect1 aggregate(groupBy(mve_gkey),\n\teach(match(name!='mve_gkey'), $$ = first($$))) ~> Aggregate1\nderivedColumn1 select(mapColumn(\n\t\teach(match(/* All input columns */true()),\n\t\t\t/* Input name */$$ = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nselect3 alterRow(upsertIf(true())) ~> AlterRow1\ntypedColumns derive({Carrier Visit Key} = toLong({Carrier Visit Key}),\n\t\tmve_gkey = toLong({Move Gkey}),\n\t\tt_put = coalesce(toTimestamp({Put Time},'yyyy-MM-dd HH:mm:ss'),toTimestamp({Put Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Put Time},'MM/dd/yyyy HH:mm'),toTimestamp({Put Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Put Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Put Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Put Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Put Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Put Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tt_fetch = coalesce(toTimestamp({Fetch Time},'yyyy-MM-dd HH:mm:ss'),toTimestamp({Fetch Time},'dd/MM/yyyy HH:mm:ss'),toTimestamp({Fetch Time},'MM/dd/yyyy HH:mm'),toTimestamp({Fetch Time},'MM/dd/yyyy HH:mm:ss'),toTimestamp({Fetch Time},'yyyy/MM/dd HH:mm:ss.SSS'),toTimestamp({Fetch Time},'dd-MM-yy HH:mm:ss'),toTimestamp({Fetch Time},'dd.MM.yy HH:mm:ss'),toTimestamp({Fetch Time},'dd/MM/yyyy\\'T\\'HH:mm:ss'), toTimestamp({Fetch Time},'dd-MM-yyyy HH:mm:ss')),\n\t\tufv_gkey = toLong({UFV Gkey})) ~> derivedColumn1\nDataTypeConversion select(mapColumn(\n\t\tmve_gkey,\n\t\tUnit_Nbr = Unit_Number,\n\t\tFacility_Id = Facility_ID,\n\t\tYard_Id = Yard_ID,\n\t\tCarrier_Visit_Key,\n\t\tEvent_Type_Id = Event_Type_ID,\n\t\tMove_Kind,\n\t\tFrom_Location,\n\t\tTo_Location,\n\t\tFrom_Position_Name,\n\t\tTo_Position_Name,\n\t\tCarry_CHE_Operator_Id = Carry_CHE_Operator_ID,\n\t\tFetch_CHE_Operator_Id = Fetch_CHE_Operator_ID,\n\t\tPut_CHE_Operator_Id = Put_CHE_Operator_ID,\n\t\tFetch_CHE_Id = DataTypeConversion@Fetch_CHE_Id,\n\t\tFetch_CHE_Kind,\n\t\tCarry_CHE_Id = DataTypeConversion@Carry_CHE_Id,\n\t\tCarry_CHE_Kind,\n\t\tPut_CHE_Id = DataTypeConversion@Put_CHE_Id,\n\t\tPut_CHE_Kind,\n\t\tQC_CHE_Id = DataTypeConversion@QC_CHE_Id,\n\t\tQC_CHE_Kind,\n\t\tt_carry_complete,\n\t\tt_put,\n\t\tt_fetch,\n\t\tt_dispatch,\n\t\tt_discharge,\n\t\tt_carry_dispatch,\n\t\tt_carry_fetch_ready,\n\t\tt_carry_put_ready,\n\t\tdist_carry = Carry_Distance,\n\t\tdist_start = Start_Distance,\n\t\tTwin_Fetch,\n\t\tTwin_Carry,\n\t\tTwin_Put,\n\t\tCategory_Id = Category_ID,\n\t\tFreight_Kind_Id = Freight_Kind_ID,\n\t\tRestow_Reason,\n\t\tPOW,\n\t\tufv_gkey = Aggregate1@ufv_gkey,\n\t\tGoods_And_Ctr_Wt_Kg = Goods_and_Container_Weight_Kg,\n\t\tRequires_Power_Flag,\n\t\tOOG_Flag,\n\t\tATA,\n\t\tATD,\n\t\tRehandles,\n\t\tYear,\n\t\tMonth,\n\t\tWeek,\n\t\tPOD = Unit_POD,\n\t\tDeck_Logic\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select3\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'apmt-elz',\n\tfolderPath: 'silver/moves',\n\tmergeSchema: false,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['mve_gkey'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tmve_gkey,\n\t\tUnit_Nbr,\n\t\tFacility_Id,\n\t\tYard_Id,\n\t\tCarrier_Visit_Key,\n\t\tEvent_Type_Id,\n\t\tMove_Kind,\n\t\tFrom_Location,\n\t\tTo_Location,\n\t\tFrom_Position_Name,\n\t\tTo_Position_Name,\n\t\tCarry_CHE_Operator_Id,\n\t\tFetch_CHE_Operator_Id,\n\t\tPut_CHE_Operator_Id,\n\t\tFetch_CHE_Id,\n\t\tFetch_CHE_Kind,\n\t\tCarry_CHE_Id,\n\t\tCarry_CHE_Kind,\n\t\tPut_CHE_Id,\n\t\tPut_CHE_Kind,\n\t\tQC_CHE_Id,\n\t\tQC_CHE_Kind,\n\t\tt_carry_complete,\n\t\tt_put,\n\t\tt_fetch,\n\t\tt_dispatch,\n\t\tt_discharge,\n\t\tt_carry_dispatch,\n\t\tt_carry_fetch_ready,\n\t\tt_carry_put_ready,\n\t\tdist_carry,\n\t\tdist_start,\n\t\tTwin_Fetch,\n\t\tTwin_Carry,\n\t\tTwin_Put,\n\t\tCategory_Id,\n\t\tFreight_Kind_Id,\n\t\tRestow_Reason,\n\t\tPOW,\n\t\tufv_gkey,\n\t\tGoods_And_Ctr_Wt_Kg,\n\t\tRequires_Power_Flag,\n\t\tOOG_Flag,\n\t\tATA,\n\t\tATD,\n\t\tRehandles,\n\t\tYear,\n\t\tMonth,\n\t\tWeek,\n\t\tPOD,\n\t\tDeck_Logic\n\t)) ~> sink1"
 				}
 			},
 			"dependsOn": [
@@ -94896,6 +95092,59 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/lanechange_Mundra_ct04')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "CSV"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "linkedService2",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink2"
+						}
+					],
+					"transformations": [
+						{
+							"name": "DataTypeConversion"
+						},
+						{
+							"name": "Select1"
+						},
+						{
+							"name": "Aggregate1"
+						},
+						{
+							"name": "AlterRow1"
+						},
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "select2"
+						}
+					],
+					"script": "source(output(\n\t\tgkey as short,\n\t\tche_gkey as short,\n\t\tyrd_gkey as short,\n\t\tstatus as string,\n\t\torigin_lane as short,\n\t\torigin_block as short,\n\t\tdestination_block as short,\n\t\tpath_message as string,\n\t\texecution_criteria as string,\n\t\tmessage as string,\n\t\ttime_frame as string,\n\t\torigin_access_enum as string,\n\t\torigin_access_text as string,\n\t\tdest_access_enum as string,\n\t\tdest_access_text as string,\n\t\tsys_path_message as string,\n\t\texecution_note as string,\n\t\tcreator as string,\n\t\tcreated as string,\n\t\tconfirmer as string,\n\t\tconfirmed as string,\n\t\tdispatched as string,\n\t\tcanceler as string,\n\t\tcanceled as string,\n\t\tcompleted as string,\n\t\tcancel_reason as string\n\t),\n\tuseSchema: false,\n\tallowSchemaDrift: true,\n\tvalidateSchema: true,\n\tignoreNoFilesFound: false,\n\tmoveFiles: ['bronze/lanechange/load','bronze/lanechange/archive'],\n\tformat: 'delimited',\n\tfileSystem: 'mundra-ct04',\n\tfolderPath: 'bronze/lanechange/load',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: true,\n\tdateFormats: ['dd-MM-yyyy'],\n\ttimestampFormats: ['yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\'','yyyy-MM-dd\\'T\\'HH:mm:ss\\'Z\\'']) ~> CSV\nAggregate1 derive(created = toDate(created, \"dd-MMM-yy\"),\n\t\tconfirmed = toDate(confirmed, \"dd-MMM-yy\"),\n\t\tdispatched = toDate(dispatched, \"dd-MMM-yy\"),\n\t\tcanceled = toDate(canceled, \"dd-MMM-yy\"),\n\t\tcompleted = toDate(completed, \"dd-MMM-yy\")) ~> DataTypeConversion\nCSV select(mapColumn(\n\t\teach(match(true()),\n\t\t\tlower(regexReplace($$,' ','_')) = $$)\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nSelect1 aggregate(groupBy(gkey),\n\teach(match(name!='gkey'), $$ = first($$))) ~> Aggregate1\nselect2 alterRow(upsertIf(true())) ~> AlterRow1\nDataTypeConversion derive(creatorType = iif(\r\n    left(creator,2)=='yc',\r\n    'System',\r\n    'User'\r\n),\n\t\tcancellorType = iif(\r\n    isNull(canceler) || trim(canceler)=='',\r\n    '',\r\n    iif(canceler=='-system-',\r\n        'System',\r\n        'User'\r\n    )\r\n)) ~> derivedColumn1\nderivedColumn1 select(mapColumn(\n\t\tgkey,\n\t\tstatus,\n\t\torigin_lane,\n\t\torigin_block,\n\t\tdestination_block,\n\t\ttime_frame,\n\t\tcreator,\n\t\tcreated,\n\t\tsys_path_message,\n\t\tconfirmer,\n\t\tconfirmed,\n\t\tdispatched,\n\t\tcanceler,\n\t\tcanceled,\n\t\tcompleted,\n\t\tcreatorType,\n\t\tcancellorType\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> select2\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'delta',\n\tfileSystem: 'mundra-ct04',\n\tfolderPath: 'gold/lanechange',\n\tmergeSchema: false,\n\tautoCompact: true,\n\toptimizedWrite: true,\n\tvacuum: 0,\n\tdeletable: false,\n\tinsertable: false,\n\tupdateable: false,\n\tupsertable: true,\n\tkeys:['gkey'],\n\tumask: 0777,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink2"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService1')]",
+				"[concat(variables('workspaceId'), '/linkedServices/linkedService2')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/lanechange_malta')]",
 			"type": "Microsoft.Synapse/workspaces/dataflows",
 			"apiVersion": "2019-06-01-preview",
@@ -124433,7 +124682,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "e7758cc7-a977-4488-9ef2-41a578a18cca"
+						"spark.autotune.trackingId": "87ce8366-d146-4d24-8bc6-0211bb08e402"
 					}
 				},
 				"metadata": {
@@ -124472,62 +124721,62 @@
 							}
 						},
 						"source": [
-							"## NO NEED TO RUN. Just to check the different types of HEaders\n",
+							"# ## NO NEED TO RUN. Just to check the different types of HEaders\n",
 							"\n",
-							"import re, csv, io\n",
-							"from collections import Counter\n",
-							"from datetime import datetime\n",
-							"from notebookutils import mssparkutils\n",
+							"# import re, csv, io\n",
+							"# from collections import Counter\n",
+							"# from datetime import datetime\n",
+							"# from notebookutils import mssparkutils\n",
 							"\n",
-							"folder = \"abfss://apmt-elz@navispowerbidatastorage2.dfs.core.windows.net/bronze/Rehandle_Moves/\"\n",
+							"# folder = \"abfss://apmt-elz@navispowerbidatastorage2.dfs.core.windows.net/bronze/Rehandle_Moves/\"\n",
 							"\n",
-							"def norm(c): return re.sub(r\"[^0-9a-z]+\", \"_\", str(c).strip().lower()).strip(\"_\")\n",
+							"# def norm(c): return re.sub(r\"[^0-9a-z]+\", \"_\", str(c).strip().lower()).strip(\"_\")\n",
 							"\n",
-							"def file_sort_date(f):\n",
-							"    n = f.name\n",
-							"    m = re.search(r\"(\\d{4}-\\d{2}-\\d{2})_(\\d{6})\", n)\n",
-							"    if m: return datetime.strptime(m.group(1) + m.group(2), \"%Y-%m-%d%H%M%S\")\n",
-							"    m = re.search(r\"(\\d{8})\", n)\n",
-							"    if m:\n",
-							"        for fmt in (\"%Y%m%d\", \"%d%m%Y\"):\n",
-							"            try: return datetime.strptime(m.group(1), fmt)\n",
-							"            except ValueError: pass\n",
-							"    return datetime.fromtimestamp(f.modifyTime / 1000)\n",
+							"# def file_sort_date(f):\n",
+							"#     n = f.name\n",
+							"#     m = re.search(r\"(\\d{4}-\\d{2}-\\d{2})_(\\d{6})\", n)\n",
+							"#     if m: return datetime.strptime(m.group(1) + m.group(2), \"%Y-%m-%d%H%M%S\")\n",
+							"#     m = re.search(r\"(\\d{8})\", n)\n",
+							"#     if m:\n",
+							"#         for fmt in (\"%Y%m%d\", \"%d%m%Y\"):\n",
+							"#             try: return datetime.strptime(m.group(1), fmt)\n",
+							"#             except ValueError: pass\n",
+							"#     return datetime.fromtimestamp(f.modifyTime / 1000)\n",
 							"\n",
-							"files = sorted([f for f in mssparkutils.fs.ls(folder)\n",
-							"                if not f.isDir and f.name.lower().endswith((\".csv\", \".txt\"))], key=file_sort_date)\n",
+							"# files = sorted([f for f in mssparkutils.fs.ls(folder)\n",
+							"#                 if not f.isDir and f.name.lower().endswith((\".csv\", \".txt\"))], key=file_sort_date)\n",
 							"\n",
-							"def profile(f):\n",
-							"    # first 5 KB is enough to see the header and a sample row\n",
-							"    head = mssparkutils.fs.head(f.path, 5000)\n",
-							"    head = head.lstrip(\"\\ufeff\")\n",
-							"    lines = [l for l in head.splitlines() if l.strip()]\n",
-							"    first = lines[0] if lines else \"\"\n",
-							"    counts = {d: first.count(d) for d in [\",\", \";\", \"\\t\", \"|\"]}\n",
-							"    delim = max(counts, key=counts.get) if max(counts.values()) > 0 else \"?\"\n",
-							"    cols = next(csv.reader([first], delimiter=delim)) if first else []\n",
-							"    sample = next(csv.reader([lines[1]], delimiter=delim)) if len(lines) > 1 else []\n",
-							"    return delim, cols, sample, counts\n",
+							"# def profile(f):\n",
+							"#     # first 5 KB is enough to see the header and a sample row\n",
+							"#     head = mssparkutils.fs.head(f.path, 5000)\n",
+							"#     head = head.lstrip(\"\\ufeff\")\n",
+							"#     lines = [l for l in head.splitlines() if l.strip()]\n",
+							"#     first = lines[0] if lines else \"\"\n",
+							"#     counts = {d: first.count(d) for d in [\",\", \";\", \"\\t\", \"|\"]}\n",
+							"#     delim = max(counts, key=counts.get) if max(counts.values()) > 0 else \"?\"\n",
+							"#     cols = next(csv.reader([first], delimiter=delim)) if first else []\n",
+							"#     sample = next(csv.reader([lines[1]], delimiter=delim)) if len(lines) > 1 else []\n",
+							"#     return delim, cols, sample, counts\n",
 							"\n",
-							"profiles = {}\n",
-							"for f in files:\n",
-							"    d, cols, sample, counts = profile(f)\n",
-							"    profiles[f.name] = (d, cols)\n",
-							"    print(f\"\\n=== {f.name}\")\n",
-							"    print(f\"delimiter: {repr(d)}  (counts in header: {counts})  | {len(cols)} columns\")\n",
-							"    print(\"header :\", cols)\n",
-							"    print(\"sample :\", sample)\n",
+							"# profiles = {}\n",
+							"# for f in files:\n",
+							"#     d, cols, sample, counts = profile(f)\n",
+							"#     profiles[f.name] = (d, cols)\n",
+							"#     print(f\"\\n=== {f.name}\")\n",
+							"#     print(f\"delimiter: {repr(d)}  (counts in header: {counts})  | {len(cols)} columns\")\n",
+							"#     print(\"header :\", cols)\n",
+							"#     print(\"sample :\", sample)\n",
 							"\n",
-							"# compare every file to the latest\n",
-							"latest = files[-1].name\n",
-							"ref = [norm(c) for c in profiles[latest][1]]\n",
-							"print(f\"\\n\\n##### Comparison to latest: {latest}\")\n",
-							"print(\"Delimiters used:\", Counter(repr(p[0]) for p in profiles.values()))\n",
-							"for f in files[:-1]:\n",
-							"    cols = [norm(c) for c in profiles[f.name][1]]\n",
-							"    missing = [c for c in ref if c not in cols]\n",
-							"    extra   = [c for c in cols if c not in ref]\n",
-							"    print(f\"\\n{f.name}\\n  missing vs latest: {missing}\\n  extra vs latest  : {extra}\")\n",
+							"# # compare every file to the latest\n",
+							"# latest = files[-1].name\n",
+							"# ref = [norm(c) for c in profiles[latest][1]]\n",
+							"# print(f\"\\n\\n##### Comparison to latest: {latest}\")\n",
+							"# print(\"Delimiters used:\", Counter(repr(p[0]) for p in profiles.values()))\n",
+							"# for f in files[:-1]:\n",
+							"#     cols = [norm(c) for c in profiles[f.name][1]]\n",
+							"#     missing = [c for c in ref if c not in cols]\n",
+							"#     extra   = [c for c in cols if c not in ref]\n",
+							"#     print(f\"\\n{f.name}\\n  missing vs latest: {missing}\\n  extra vs latest  : {extra}\")\n",
 							""
 						],
 						"outputs": [],
@@ -124644,7 +124893,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 4
+						"execution_count": 1
 					},
 					{
 						"cell_type": "code",
@@ -124692,7 +124941,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 5
+						"execution_count": 2
 					}
 				]
 			},
@@ -128813,7 +129062,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "8dc8fb25-e847-4ff6-9bd2-30c2f96f32ab"
+						"spark.autotune.trackingId": "fbc6783f-e09b-4bf6-8de2-1b2a1e5c365b"
 					}
 				},
 				"metadata": {
@@ -128838,13 +129087,15 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56
+						"memory": 56,
+						"automaticScaleJobs": true
 					},
 					"sessionKeepAliveTimeout": 30
 				},
 				"cells": [
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# Notebook: Decking History Status Enrichment\n",
@@ -128881,10 +129132,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 12
+						"execution_count": 1
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ── 3. Column Name Configuration ─────────────────────────────\n",
 							"# !! ADJUST THESE to match your actual column names !!\n",
@@ -128900,10 +129152,11 @@
 							"MOVE_GKEY_COL      = \"mve_gkey\""
 						],
 						"outputs": [],
-						"execution_count": 13
+						"execution_count": 2
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ── 4. Cast Timestamps (safety) ──────────────────────────────\n",
 							"from pyspark.sql import functions as F\n",
@@ -128921,10 +129174,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 14
+						"execution_count": 3
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ── 5. Add Surrogate Key to Deckings ─────────────────────────\n",
 							"# Needed to preserve each individual decking row after the join\n",
@@ -128935,10 +129189,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 15
+						"execution_count": 4
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ── 6. Join Decking → Move History ───────────────────────────\n",
 							"# Join on container number, then filter: t_put > decking timestamp\n",
@@ -128946,22 +129201,20 @@
 							"df_joined = df_deckings.alias(\"d\").join(\n",
 							"    df_moves.alias(\"m\"),\n",
 							"    on=(\n",
-							"        F.col(f\"d.{DECKING_CONTAINER_COL}\") == F.col(f\"m.{MOVE_CONTAINER_COL}\")\n",
+							"        (F.col(f\"d.{DECKING_CONTAINER_COL}\") == F.col(f\"m.{MOVE_CONTAINER_COL}\")) &\n",
+							"        (F.col(f\"m.{MOVE_TIMESTAMP_COL}\") > F.col(f\"d.{DECKING_TIMESTAMP_COL}\"))\n",
 							"    ),\n",
 							"    how=\"left\"\n",
-							").filter(\n",
-							"    # Keep only move records that occurred AFTER the decking event\n",
-							"    # (null-safe: rows with no match are kept via left join)\n",
-							"    F.col(f\"m.{MOVE_TIMESTAMP_COL}\").isNull() |\n",
-							"    (F.col(f\"m.{MOVE_TIMESTAMP_COL}\") > F.col(f\"d.{DECKING_TIMESTAMP_COL}\"))\n",
 							")\n",
+							"\n",
 							""
 						],
 						"outputs": [],
-						"execution_count": 16
+						"execution_count": 5
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ── 7. Pick Earliest Qualifying Move per Decking Row ─────────\n",
 							"# Window: for each unique decking row, rank move records by t_put ascending\n",
@@ -128979,10 +129232,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 17
+						"execution_count": 6
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ── 8. Build Final Output ─────────────────────────────────────\n",
 							"decking_cols = [\n",
@@ -129004,10 +129258,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 18
+						"execution_count": 7
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ── 9. Write Output as Delta ──────────────────────────────────\n",
 							"df_result.write \\\n",
@@ -129018,7 +129273,7 @@
 							"print(f\"✅ Written to Delta: {output_path}\")"
 						],
 						"outputs": [],
-						"execution_count": 19
+						"execution_count": 8
 					}
 				]
 			},
