@@ -86,7 +86,7 @@
 				"     allowSchemaDrift: false,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: true,",
-				"     moveFiles: ['bronze/yardinventory/load','bronze/yardinventory/archive'],",
+				"     moveFiles: ['bronze/stackconformitycsvs/load','bronze/stackconformitycsvs/archive'],",
 				"     rowUrlColumn: 'FileDate',",
 				"     format: 'delimited',",
 				"     fileSystem: 'yilport',",
