@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "e1332632-e000-4ef3-8794-e1c55e17465e"
+				"spark.autotune.trackingId": "97add6a1-97d6-4404-8dcd-8b01cbb9fc27"
 			}
 		},
 		"metadata": {
@@ -79,7 +79,7 @@
 					"print(\"HK output    :\", HK_OUTPUT_DELTA, \"->\", HK_TABLE)\n",
 					""
 				],
-				"execution_count": 1
+				"execution_count": 35
 			},
 			{
 				"cell_type": "code",
@@ -90,7 +90,7 @@
 					"\n",
 					"# Y-YCT-E13914 -> block E, body 1391, tier 4 -> stack E-1391\n",
 					"# No match (NULL): Y-YCT-E5Y, Y-YCT, Y-YCT-CFS\n",
-					"YCT_PATTERN = r\"^Y-YCT-([A-Z])([0-9]{4})([0-9])$\"\n",
+					"YCT_PATTERN = r\"^Y-YCT-([A-Z]{1,2})([0-9]{4,5})([0-9])$\"\n",
 					"\n",
 					"\n",
 					"def with_yct_from_position(df):\n",
@@ -115,7 +115,7 @@
 					"    return df.drop(\"_pos\")\n",
 					""
 				],
-				"execution_count": 2
+				"execution_count": 36
 			},
 			{
 				"cell_type": "code",
@@ -123,10 +123,14 @@
 					"expected = {\n",
 					"    \"Y-YCT-E13914\": (\"E-1391\", 4),\n",
 					"    \"Y-YCT-C11914\": (\"C-1191\", 4),\n",
+					"    \"Y-YCT-S210142\": (\"S-21014\", 2),\n",
+					"    \"Y-YCT-E1391\": (None, None),     # too short\n",
+					"    \"Y-YCT-S2101423\": (None, None),  # too long\n",
 					"    \"Y-YCT-E5Y\": (None, None),\n",
 					"    \"Y-YCT\": (None, None),\n",
 					"    \"Y-YCT-CFS\": (None, None),\n",
 					"}\n",
+					"\n",
 					"\n",
 					"t = spark.createDataFrame([(p,) for p in expected], [\"From_Position_Name\"])\n",
 					"parsed = with_yct_from_position(t)\n",
@@ -139,7 +143,7 @@
 					"print(\"YCT parser tests passed.\")\n",
 					""
 				],
-				"execution_count": 3
+				"execution_count": 37
 			},
 			{
 				"cell_type": "code",
@@ -168,7 +172,7 @@
 					"                \"t_put\").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 4
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -220,7 +224,7 @@
 					"print(\"Yard moves :\", yard_keys.count())\n",
 					""
 				],
-				"execution_count": 5
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -285,7 +289,7 @@
 					"    return per_load, assigned\n",
 					""
 				],
-				"execution_count": 6
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -340,7 +344,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 7
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -379,7 +383,7 @@
 					"    .orderBy(F.desc(\"count\")).show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": 8
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -412,7 +416,7 @@
 					"write_table(df_housekeeping, HK_TABLE, HK_OUTPUT_DELTA)\n",
 					""
 				],
-				"execution_count": 9
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -440,7 +444,7 @@
 					"    .show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": 10
+				"execution_count": null
 			}
 		]
 	}
