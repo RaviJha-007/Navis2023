@@ -90,7 +90,7 @@
 				"sc derive(Pos_WO_Tier = (iif(isInteger(right({Current Position}, 1)), left({Current Position}, length({Current Position}) - 1), {Current Position})),",
 				"          Date = :created_date,",
 				"          Week = iif(dayOfWeek(:created_date) == 1,  weekOfYear(:created_date) + 1, weekOfYear(:created_date)),",
-				"          Yard_Block = left({Current Position},3),",
+				"          Yard_Block = left({Current Position},2),",
 				"          stacking_array := split({Stacking Factor}, '/'),",
 				"          created_date := toDate(split(split(FileDate, \".\")[1],\"/\")[5], 'yyyyMMdd')) ~> derivedColumn1",
 				"filter1 sort(asc(Date, true),",
