@@ -101,7 +101,6 @@
 				"     validateSchema: false,",
 				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: true,",
-				"     moveFiles: ['/bronze/stackconformitycsvs/load','bronze/stackconformitycsvs/archive'],",
 				"     rowUrlColumn: 'FileDate',",
 				"     format: 'delimited',",
 				"     fileSystem: 'mct',",
