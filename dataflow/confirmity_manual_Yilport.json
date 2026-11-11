@@ -154,7 +154,7 @@
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'yilport',",
-				"     folderPath: 'gold/conformities',",
+				"     folderPath: 'gold/manual_conformities',",
 				"     mergeSchema: true,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
