@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "97add6a1-97d6-4404-8dcd-8b01cbb9fc27"
+				"spark.autotune.trackingId": "30f6ee9a-2db4-4757-8912-d56b61b4c7a1"
 			}
 		},
 		"metadata": {
@@ -52,7 +52,7 @@
 				"cell_type": "code",
 				"source": [
 					"STORAGE_ACCOUNT = \"navispowerbidatastorage2\"\n",
-					"CONTAINER = \"yilport-gebze\"\n",
+					"CONTAINER = \"yilport\"\n",
 					"\n",
 					"DELTA_MOVES_PATH = \"silver/moves\"\n",
 					"LOAD_OUTPUT_PATH = \"gold/rehandles_report_yct\"\n",
@@ -79,7 +79,7 @@
 					"print(\"HK output    :\", HK_OUTPUT_DELTA, \"->\", HK_TABLE)\n",
 					""
 				],
-				"execution_count": 35
+				"execution_count": 38
 			},
 			{
 				"cell_type": "code",
@@ -115,7 +115,7 @@
 					"    return df.drop(\"_pos\")\n",
 					""
 				],
-				"execution_count": 36
+				"execution_count": 39
 			},
 			{
 				"cell_type": "code",
@@ -143,7 +143,7 @@
 					"print(\"YCT parser tests passed.\")\n",
 					""
 				],
-				"execution_count": 37
+				"execution_count": 40
 			},
 			{
 				"cell_type": "code",
@@ -172,7 +172,7 @@
 					"                \"t_put\").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 41
 			},
 			{
 				"cell_type": "code",
@@ -224,7 +224,7 @@
 					"print(\"Yard moves :\", yard_keys.count())\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 42
 			},
 			{
 				"cell_type": "code",
@@ -289,7 +289,7 @@
 					"    return per_load, assigned\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 43
 			},
 			{
 				"cell_type": "code",
@@ -344,7 +344,7 @@
 					")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 44
 			},
 			{
 				"cell_type": "code",
@@ -383,7 +383,23 @@
 					"    .orderBy(F.desc(\"count\")).show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 45
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# Remove stale metastore entries that point at the old container.\n",
+					"# These tables were created with LOCATION, so they are external:\n",
+					"# DROP TABLE removes only the registration, not the data files.\n",
+					"for t in [LOAD_TABLE, HK_TABLE]:\n",
+					"    if spark.catalog.tableExists(t):\n",
+					"        print(t, \"->\", spark.sql(f\"DESCRIBE DETAIL {t}\")\n",
+					"              .select(\"location\").first()[\"location\"])\n",
+					"        spark.sql(f\"DROP TABLE {t}\")\n",
+					"        print(\"Dropped:\", t)\n",
+					""
+				],
+				"execution_count": 46
 			},
 			{
 				"cell_type": "code",
@@ -416,7 +432,7 @@
 					"write_table(df_housekeeping, HK_TABLE, HK_OUTPUT_DELTA)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 47
 			},
 			{
 				"cell_type": "code",
@@ -444,7 +460,7 @@
 					"    .show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 48
 			}
 		]
 	}
