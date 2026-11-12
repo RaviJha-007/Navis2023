@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "f2ff16d8-a084-4170-a5d4-8587fdb54337"
+				"spark.autotune.trackingId": "835bd34e-8e97-4bf5-9fc4-3d1948417425"
 			}
 		},
 		"metadata": {
@@ -93,7 +93,7 @@
 					"print(\"Shift events :\", SHIFT_EVENTS)\n",
 					""
 				],
-				"execution_count": 7
+				"execution_count": 36
 			},
 			{
 				"cell_type": "code",
@@ -211,7 +211,7 @@
 					"    return df.drop(\"_norm\")\n",
 					""
 				],
-				"execution_count": 8
+				"execution_count": 37
 			},
 			{
 				"cell_type": "code",
@@ -266,7 +266,7 @@
 					"print(\"MCT parser tests passed.\")\n",
 					""
 				],
-				"execution_count": 9
+				"execution_count": 38
 			},
 			{
 				"cell_type": "code",
@@ -311,7 +311,7 @@
 					").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 10
+				"execution_count": 39
 			},
 			{
 				"cell_type": "code",
@@ -396,7 +396,7 @@
 					"print(\"Shifts:\", shifts.count())\n",
 					""
 				],
-				"execution_count": 11
+				"execution_count": 40
 			},
 			{
 				"cell_type": "code",
@@ -674,7 +674,7 @@
 					"                    F.col(\"shift_hazardous\"),\n",
 					"                    F.col(\"shift_outbound_carrier_visit_key\"),\n",
 					"                    F.col(\"shift_outbound_load_time\"),\n",
-					"                    F.col(\"shift_carrier_service\"),\n",
+					"                    #F.col(\"shift_carrier_service\"),\n",
 					"                )\n",
 					"            ).alias(\"rehandle_details\"),\n",
 					"        )\n",
@@ -683,7 +683,7 @@
 					"    return per_load, assigned\n",
 					""
 				],
-				"execution_count": 12
+				"execution_count": 41
 			},
 			{
 				"cell_type": "code",
@@ -697,46 +697,39 @@
 					"# Anchor loads (stack 169A-03 / 785B-06) and lookup-only loads (stack None)\n",
 					"test_loads = spark.createDataFrame(\n",
 					"    [\n",
-					"        # anchors\n",
-					"        (101, \"ANCHOR1\", \"169A-03\", datetime(2026, 1, 1, 10, 10), \"SGSIN\", 1, 22000.0),\n",
-					"        (102, \"ANCHOR2\", \"169A-03\", datetime(2026, 1, 1, 10, 40), \"SGSIN\", 1, 22000.0),\n",
-					"        (103, \"ANCHOR3\", \"785B-06\", datetime(2026, 1, 1, 10, 10), \"SGSIN\", 1, 22000.0),\n",
-					"        # lookup-only: the shifted units' own loads (unparsed stack)\n",
-					"        (301, \"U1\", None, datetime(2026, 1, 1, 12, 0), \"SGSIN\", 2, 22000.0),  # different key\n",
-					"        (302, \"U2\", None, datetime(2026, 1, 1, 11, 0), \"CNSHA\", 1, 22000.0),  # same key\n",
-					"        (303, \"U3\", None, datetime(2026, 1, 1, 11, 0), \"SGSIN\", 1, 22000.0),  # same key\n",
-					"        (305, \"U5\", None, datetime(2026, 1, 1, 8, 0),  \"SGSIN\", 9, 22000.0),  # BEFORE shift -> ignored\n",
-					"        (306, \"U5\", None, datetime(2026, 1, 1, 11, 0), \"SGSIN\", 1, 22000.0),  # same key\n",
-					"        (307, \"U6\", None, datetime(2026, 1, 1, 11, 0), \"SGSIN\", 1, 22000.0),  # earliest -> wins\n",
-					"        (308, \"U6\", None, datetime(2026, 1, 1, 12, 0), \"SGSIN\", 2, 22000.0),  # later -> ignored\n",
-					"        (309, \"U7\", None, datetime(2026, 1, 1, 11, 0), \"SGSIN\", 1, 22000.0),  # same key\n",
-					"        # U4 has no later load at all\n",
+					"        # anchors (tier A)\n",
+					"        (101, \"ANCHOR1\", \"169A-03\", \"A\", datetime(2026, 1, 1, 10, 10), \"SGSIN\", 1, 22000.0),\n",
+					"        (102, \"ANCHOR2\", \"169A-03\", \"A\", datetime(2026, 1, 1, 10, 40), \"SGSIN\", 1, 22000.0),\n",
+					"        (103, \"ANCHOR3\", \"785B-06\", \"A\", datetime(2026, 1, 1, 10, 10), \"SGSIN\", 1, 22000.0),\n",
+					"        # lookup-only: the shifted units' own loads (unparsed stack, no tier)\n",
+					"        (301, \"U1\", None, None, datetime(2026, 1, 1, 12, 0), \"SGSIN\", 2, 22000.0),\n",
+					"        (302, \"U2\", None, None, datetime(2026, 1, 1, 11, 0), \"CNSHA\", 1, 22000.0),\n",
+					"        (303, \"U3\", None, None, datetime(2026, 1, 1, 11, 0), \"SGSIN\", 1, 22000.0),\n",
+					"        (305, \"U5\", None, None, datetime(2026, 1, 1, 8, 0),  \"SGSIN\", 9, 22000.0),\n",
+					"        (306, \"U5\", None, None, datetime(2026, 1, 1, 11, 0), \"SGSIN\", 1, 22000.0),\n",
+					"        (307, \"U6\", None, None, datetime(2026, 1, 1, 11, 0), \"SGSIN\", 1, 22000.0),\n",
+					"        (308, \"U6\", None, None, datetime(2026, 1, 1, 12, 0), \"SGSIN\", 2, 22000.0),\n",
+					"        (309, \"U7\", None, None, datetime(2026, 1, 1, 11, 0), \"SGSIN\", 1, 22000.0),\n",
 					"    ],\n",
 					"    \"mve_gkey_load long, load_unit_nbr string, load_from_stack string, \"\n",
-					"    \"load_time timestamp, load_pod string, load_carrier_visit_key long, \"\n",
-					"    \"load_weight_kg double\",\n",
+					"    \"load_tier_letter string, load_time timestamp, load_pod string, \"\n",
+					"    \"load_carrier_visit_key long, load_weight_kg double\",\n",
 					")\n",
 					"\n",
 					"test_shifts = spark.createDataFrame(\n",
 					"    [\n",
-					"        # 201 -> L101: U1 later loads on key 2 vs 1                  -> Different Outbound Carrier\n",
-					"        (201, \"U1\", \"169A-03\", datetime(2026, 1, 1, 9, 50),  \"SGSIN\", None, 22000.0),\n",
-					"        # 202 -> L101: U2 same key, POD differs                      -> Different POD\n",
-					"        (202, \"U2\", \"169A-03\", datetime(2026, 1, 1, 10, 5),  \"CNSHA\", None, 22000.0),\n",
-					"        # 203 -> L102: U3 same key, same POD, same weight            -> All Same\n",
-					"        (203, \"U3\", \"169A-03\", datetime(2026, 1, 1, 10, 30), \"SGSIN\", None, 22000.0),\n",
-					"        # 204 -> L102: U4 never loaded                               -> Different Outbound Carrier\n",
-					"        (204, \"U4\", \"169A-03\", datetime(2026, 1, 1, 10, 31), \"SGSIN\", None, 22000.0),\n",
-					"        # 205 -> L102: U5 same key (earlier load ignored), weight +3000 -> Different Weight\n",
-					"        (205, \"U5\", \"169A-03\", datetime(2026, 1, 1, 10, 32), \"SGSIN\", None, 25000.0),\n",
-					"        # 206 -> L102: U6 earliest later load = key 1                -> All Same\n",
-					"        (206, \"U6\", \"169A-03\", datetime(2026, 1, 1, 10, 33), \"SGSIN\", None, 22000.0),\n",
-					"        # 207 -> L102: U7 same key but shift POD null                -> Undetermined\n",
-					"        (207, \"U7\", \"169A-03\", datetime(2026, 1, 1, 10, 34), None,    None, 22000.0),\n",
+					"        (201, \"U1\", \"169A-03\", \"B\", datetime(2026, 1, 1, 9, 50),  \"SGSIN\", 22000.0, False, False),\n",
+					"        (202, \"U2\", \"169A-03\", \"B\", datetime(2026, 1, 1, 10, 5),  \"CNSHA\", 22000.0, False, False),\n",
+					"        (203, \"U3\", \"169A-03\", \"B\", datetime(2026, 1, 1, 10, 30), \"SGSIN\", 22000.0, False, False),\n",
+					"        (204, \"U4\", \"169A-03\", \"B\", datetime(2026, 1, 1, 10, 31), \"SGSIN\", 22000.0, False, False),\n",
+					"        (205, \"U5\", \"169A-03\", \"B\", datetime(2026, 1, 1, 10, 32), \"SGSIN\", 25000.0, False, False),\n",
+					"        (206, \"U6\", \"169A-03\", \"B\", datetime(2026, 1, 1, 10, 33), \"SGSIN\", 22000.0, False, False),\n",
+					"        (207, \"U7\", \"169A-03\", \"B\", datetime(2026, 1, 1, 10, 34), None,    22000.0, False, False),\n",
 					"    ],\n",
 					"    \"mve_gkey_shift long, shift_unit_nbr string, shift_from_stack string, \"\n",
-					"    \"shift_time timestamp, shift_pod string, shift_carrier_service string, \"\n",
-					"    \"shift_weight_kg double\",\n",
+					"    \"shift_tier_letter string, shift_time timestamp, shift_pod string, \"\n",
+					"    \"shift_weight_kg double, \"\n",
+					"    \"shift_special_stow boolean, shift_hazardous boolean\",\n",
 					")\n",
 					"\n",
 					"test_per_load, test_assigned = assign_rehandles(test_loads, test_shifts)\n",
@@ -812,7 +805,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 13
+				"execution_count": 42
 			},
 			{
 				"cell_type": "code",
@@ -898,7 +891,7 @@
 					").count().orderBy(F.desc(\"count\")).show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 43
 			},
 			{
 				"cell_type": "code",
@@ -948,7 +941,7 @@
 					"print(\"Registered :\", TABLE_NAME)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 44
 			},
 			{
 				"cell_type": "code",
@@ -987,7 +980,7 @@
 					").show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 45
 			}
 		]
 	}
