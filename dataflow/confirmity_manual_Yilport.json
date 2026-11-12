@@ -173,7 +173,7 @@
 				"    iif(         \r",
 				"        Pos_WO_Tier == 'WALL' ||         \r",
 				"        Pos_WO_Tier == 'OOG' ||         \r",
-				"        left(Pos_WO_Tier,4) == 'CFS',         \r",
+				"        left(Pos_WO_Tier,3) == 'CFS',         \r",
 				"        Pos_WO_Tier,         \r",
 				"        iif(             \r",
 				"            length(Pos_WO_Tier) > 2,             \r",
