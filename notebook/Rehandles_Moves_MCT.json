@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "b910b3a8-0ada-4a4c-ab27-1188895b9ea6"
+				"spark.autotune.trackingId": "f2ff16d8-a084-4170-a5d4-8587fdb54337"
 			}
 		},
 		"metadata": {
@@ -59,7 +59,7 @@
 					"STORAGE_ACCOUNT = \"navispowerbidatastorage2\"\n",
 					"CONTAINER = \"mct\"\n",
 					"\n",
-					"DELTA_MOVES_PATH = \"silver/moves1\"\n",
+					"DELTA_MOVES_PATH = \"silver/moves\"\n",
 					"OUTPUT_PATH = \"gold/rehandles_report_mct\"\n",
 					"\n",
 					"TABLE_NAME = \"rehandles_db.rehandle_details_mct\"\n",
@@ -67,6 +67,12 @@
 					"# A shift must be strictly before the load, and no more than\n",
 					"# two hours before it.\n",
 					"THRESHOLD_SECONDS = 7200\n",
+					"\n",
+					"MOVES_FROM_DATE = \"2026-10-01\"   # only moves with t_put on/after this date\n",
+					"\n",
+					"SPECIAL_STOW_COLS = [\"Special_Stow1\", \"Special_Stow2\", \"Special_Stow3\"]\n",
+					"HAZARDOUS_COL = \"Hazardous\"\n",
+					" \n",
 					"\n",
 					"# Preserve the event definition in the attached DGT notebook.\n",
 					"# Add \"UNIT_YARD_MOVE\" here only if DGT uses it for rehandles.\n",
@@ -87,7 +93,7 @@
 					"print(\"Shift events :\", SHIFT_EVENTS)\n",
 					""
 				],
-				"execution_count": 2
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -193,12 +199,7 @@
 					"        )\n",
 					"        .when(\n",
 					"            is_extended,\n",
-					"            F.concat_ws(\n",
-					"                \"-\",\n",
-					"                F.col(\"from_section\"),\n",
-					"                F.col(\"from_bay\"),\n",
-					"                F.col(\"from_tier_letter\"),\n",
-					"            ),\n",
+					"            F.concat_ws(\"-\", F.col(\"from_section\"), F.col(\"from_bay\")),\n",
 					"        )\n",
 					"        .when(\n",
 					"            is_heap,\n",
@@ -210,7 +211,7 @@
 					"    return df.drop(\"_norm\")\n",
 					""
 				],
-				"execution_count": 3
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -230,7 +231,9 @@
 					"    \"Y-MCT-785B06B\":      \"785B-06\",     # standard\n",
 					"    \"Y-MCT-562DR01A\":     \"562DR-01-A\",  # extended\n",
 					"    \"Y-MCT-560DR01A\":     \"560DR-01-A\",  # extended\n",
-					"    \"Y-MCT-H11A\":         \"H11A\",        # heap area\n",
+					"    \"Y-MCT-H11A\":         \"H11A\",   \n",
+					"    \"Y-MCT-562DR01A\":     \"562DR-01\",    # extended\n",
+					"    \"Y-MCT-560DR01A\":     \"560DR-01\",    # extended# heap area\n",
 					"    \"NOT-A-MCT-POSITION\": None,          # unrecognised\n",
 					"}\n",
 					"\n",
@@ -263,7 +266,7 @@
 					"print(\"MCT parser tests passed.\")\n",
 					""
 				],
-				"execution_count": 4
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
@@ -289,6 +292,7 @@
 					"    )\n",
 					"    .filter(\n",
 					"        F.col(\"t_put\").isNotNull()\n",
+					"        & (F.col(\"t_put\") >= F.lit(MOVES_FROM_DATE).cast(\"timestamp\"))\n",
 					"        & F.col(\"event_type\").isin(RELEVANT_EVENTS)\n",
 					"    )\n",
 					")\n",
@@ -307,7 +311,7 @@
 					").show(10, truncate=False)\n",
 					""
 				],
-				"execution_count": 5
+				"execution_count": 10
 			},
 			{
 				"cell_type": "code",
@@ -340,8 +344,8 @@
 					"        F.col(\"Freight_Kind_Id\").alias(\"load_freight_kind\"),\n",
 					"        F.col(\"Category_Id\").alias(\"load_category_id\"),\n",
 					"        F.col(\"pow\").alias(\"load_pow\"),\n",
-					"        F.col(\"`Unit_POD`\").alias(\"load_pod\"),\n",
-					"        F.col(\"`Carrier_Service`\").alias(\"load_carrier_service\"),\n",
+					"        F.col(\"Unit_POD\").alias(\"load_pod\")\n",
+					"        #F.col(\"Carrier_Service\").alias(\"load_carrier_service\"),\n",
 					"    )\n",
 					")\n",
 					"\n",
@@ -352,11 +356,19 @@
 					"        F.col(\"mve_gkey\").alias(\"mve_gkey_shift\"),\n",
 					"        F.col(\"Unit_Nbr\").alias(\"shift_unit_nbr\"),\n",
 					"        F.col(\"from_stack\").alias(\"shift_from_stack\"),\n",
+					"        F.col(\"from_tier_letter\").alias(\"shift_tier_letter\"),\n",
 					"        F.col(\"t_put\").alias(\"shift_time\"),\n",
 					"        F.col(\"Goods_And_Ctr_Wt_Kg\").cast(\"double\").alias(\"shift_weight_kg\"),\n",
-					"        F.col(\"`Unit_POD`\").alias(\"shift_pod\"),\n",
+					"        F.col(\"Unit_POD\").alias(\"shift_pod\"),\n",
 					"        F.col(\"Carrier_Visit_Key\").alias(\"shift_carrier_visit_key\"),\n",
-					"        F.col(\"`Carrier_Service`\").alias(\"shift_carrier_service\"),\n",
+					"        #F.col(\"Carrier_Service\").alias(\"shift_carrier_service\"),\n",
+					"        (\n",
+					"            F.col(\"Special_Stow1\").isNotNull()\n",
+					"            | F.col(\"Special_Stow2\").isNotNull()\n",
+					"            | F.col(\"Special_Stow3\").isNotNull()\n",
+					"        ).alias(\"shift_special_stow\"),\n",
+					"        (F.upper(F.trim(F.col(\"Hazardous\"))) == \"YES\").alias(\"shift_hazardous\")\n",
+					"\n",
 					"    )\n",
 					")\n",
 					"\n",
@@ -384,7 +396,7 @@
 					"print(\"Shifts:\", shifts.count())\n",
 					""
 				],
-				"execution_count": 6
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
@@ -396,6 +408,8 @@
 					"REASON_DIFF_CARRIER     = \"Different Outbound Carrier\"\n",
 					"REASON_DIFF_POD         = \"Same Outbound, Different POD\"\n",
 					"REASON_DIFF_WEIGHT      = \"Same Outbound & POD, Different Weight\"\n",
+					"REASON_SPECIAL_STOW     = \"Special Stow\"\n",
+					"REASON_HAZARDOUS        = \"Hazardous\"\n",
 					"REASON_ALL_SAME         = \"Unnecessary Shifting (All Same)\"\n",
 					"REASON_UNDETERMINED     = \"Undetermined\"\n",
 					"\n",
@@ -422,10 +436,15 @@
 					"    Reason cascade (shifted unit vs loaded unit):\n",
 					"      1. load_carrier_visit_key null               -> Undetermined\n",
 					"      2. shifted unit outbound key null or != load -> Different Outbound Carrier\n",
-					"      3. POD or weight null on either side         -> Undetermined\n",
+					"      3. POD or weight null on either side:\n",
+					"           3a. shifted unit has any Special Stow   -> Special Stow\n",
+					"           3b. shifted unit Hazardous = Yes        -> Hazardous\n",
+					"           3c. otherwise                           -> Undetermined\n",
 					"      4. shift_pod != load_pod                     -> Same Outbound, Different POD\n",
 					"      5. |weight diff| > WEIGHT_THRESHOLD_KG       -> Same Outbound & POD, Different Weight\n",
-					"      6. otherwise                                 -> Unnecessary Shifting (All Same)\n",
+					"      6. shifted unit has any Special Stow         -> Special Stow\n",
+					"      7. shifted unit Hazardous = Yes              -> Hazardous\n",
+					"      8. otherwise                                 -> Unnecessary Shifting (All Same)\n",
 					"    \"\"\"\n",
 					"\n",
 					"    load_keys = (\n",
@@ -437,6 +456,7 @@
 					"            \"load_pod\",\n",
 					"            \"load_carrier_visit_key\",\n",
 					"            \"load_weight_kg\",\n",
+					"            \"load_tier_letter\",\n",
 					"        )\n",
 					"        .filter(F.col(\"load_from_stack\").isNotNull())\n",
 					"        .alias(\"l\")\n",
@@ -450,8 +470,11 @@
 					"            \"shift_from_stack\",\n",
 					"            \"shift_time\",\n",
 					"            \"shift_pod\",\n",
-					"            \"shift_carrier_service\",\n",
+					"            \"shift_tier_letter\",\n",
+					"            #\"shift_carrier_service\",\n",
 					"            \"shift_weight_kg\",\n",
+					"            \"shift_special_stow\",\n",
+					"            \"shift_hazardous\",\n",
 					"        )\n",
 					"        .filter(F.col(\"shift_from_stack\").isNotNull())\n",
 					"        .alias(\"s\")\n",
@@ -459,13 +482,16 @@
 					"\n",
 					"    join_condition = (\n",
 					"        (F.col(\"s.shift_from_stack\") == F.col(\"l.load_from_stack\"))\n",
+					"        # shift came from a tier above the load's tier in the same stack\n",
+					"        & (F.col(\"s.shift_tier_letter\") > F.col(\"l.load_tier_letter\"))\n",
 					"        & (F.col(\"s.shift_time\") < F.col(\"l.load_time\"))\n",
 					"        & (\n",
 					"            F.col(\"l.load_time\")\n",
 					"            <= F.col(\"s.shift_time\")\n",
-					"               + F.expr(f\"INTERVAL {THRESHOLD_SECONDS} SECONDS\")\n",
+					"                + F.expr(f\"INTERVAL {THRESHOLD_SECONDS} SECONDS\")\n",
 					"        )\n",
 					"    )\n",
+					"\n",
 					"\n",
 					"    candidates = (\n",
 					"        shift_keys\n",
@@ -476,8 +502,10 @@
 					"            F.col(\"s.shift_from_stack\"),\n",
 					"            F.col(\"s.shift_time\"),\n",
 					"            F.col(\"s.shift_pod\"),\n",
-					"            F.col(\"s.shift_carrier_service\"),\n",
+					"            #F.col(\"s.shift_carrier_service\"),\n",
 					"            F.col(\"s.shift_weight_kg\"),\n",
+					"            F.col(\"s.shift_special_stow\"),\n",
+					"            F.col(\"s.shift_hazardous\"),\n",
 					"            F.col(\"l.mve_gkey_load\"),\n",
 					"            F.col(\"l.load_time\"),\n",
 					"            F.col(\"l.load_pod\"),\n",
@@ -567,17 +595,30 @@
 					"        | F.col(\"load_weight_kg\").isNull()\n",
 					"    )\n",
 					"\n",
+					"    # Null-safe flags: null is treated as false\n",
+					"    is_special_stow = F.coalesce(F.col(\"shift_special_stow\"), F.lit(False))\n",
+					"    is_hazardous    = F.coalesce(F.col(\"shift_hazardous\"),    F.lit(False))\n",
+					"\n",
 					"    assigned = assigned.withColumn(\n",
 					"        \"rehandle_reason\",\n",
+					"        # 1-2: unchanged\n",
 					"        F.when(load_carrier_missing, REASON_UNDETERMINED)\n",
 					"        .when(different_carrier, REASON_DIFF_CARRIER)\n",
+					"        # 3: POD/weight missing -> Special Stow / Hazardous before Undetermined\n",
+					"        .when(pod_or_weight_missing & is_special_stow, REASON_SPECIAL_STOW)\n",
+					"        .when(pod_or_weight_missing & is_hazardous, REASON_HAZARDOUS)\n",
 					"        .when(pod_or_weight_missing, REASON_UNDETERMINED)\n",
+					"        # 4-5: unchanged\n",
 					"        .when(F.col(\"shift_pod\") != F.col(\"load_pod\"), REASON_DIFF_POD)\n",
 					"        .when(\n",
 					"            F.abs(F.col(\"shift_weight_kg\") - F.col(\"load_weight_kg\"))\n",
 					"            > F.lit(WEIGHT_THRESHOLD_KG),\n",
 					"            REASON_DIFF_WEIGHT,\n",
 					"        )\n",
+					"        # 6-7: new reasons, before \"All Same\"\n",
+					"        .when(is_special_stow, REASON_SPECIAL_STOW)\n",
+					"        .when(is_hazardous, REASON_HAZARDOUS)\n",
+					"        # 8: unchanged\n",
 					"        .otherwise(REASON_ALL_SAME),\n",
 					"    )\n",
 					"\n",
@@ -606,6 +647,14 @@
 					"            ).otherwise(0)).alias(\"cnt_diff_weight\"),\n",
 					"\n",
 					"            F.sum(F.when(\n",
+					"                F.col(\"rehandle_reason\") == REASON_SPECIAL_STOW, 1\n",
+					"            ).otherwise(0)).alias(\"cnt_special_stow\"),\n",
+					"\n",
+					"            F.sum(F.when(\n",
+					"                F.col(\"rehandle_reason\") == REASON_HAZARDOUS, 1\n",
+					"            ).otherwise(0)).alias(\"cnt_hazardous\"),\n",
+					"\n",
+					"            F.sum(F.when(\n",
 					"                F.col(\"rehandle_reason\") == REASON_ALL_SAME, 1\n",
 					"            ).otherwise(0)).alias(\"cnt_all_same\"),\n",
 					"\n",
@@ -621,6 +670,8 @@
 					"                    F.col(\"rehandle_reason\"),\n",
 					"                    F.col(\"shift_pod\"),\n",
 					"                    F.col(\"shift_weight_kg\"),\n",
+					"                    F.col(\"shift_special_stow\"),\n",
+					"                    F.col(\"shift_hazardous\"),\n",
 					"                    F.col(\"shift_outbound_carrier_visit_key\"),\n",
 					"                    F.col(\"shift_outbound_load_time\"),\n",
 					"                    F.col(\"shift_carrier_service\"),\n",
@@ -632,7 +683,7 @@
 					"    return per_load, assigned\n",
 					""
 				],
-				"execution_count": 7
+				"execution_count": 12
 			},
 			{
 				"cell_type": "code",
@@ -761,7 +812,7 @@
 					")\n",
 					""
 				],
-				"execution_count": 8
+				"execution_count": 13
 			},
 			{
 				"cell_type": "code",
@@ -847,7 +898,7 @@
 					").count().orderBy(F.desc(\"count\")).show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": 9
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -897,7 +948,7 @@
 					"print(\"Registered :\", TABLE_NAME)\n",
 					""
 				],
-				"execution_count": 10
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -936,7 +987,7 @@
 					").show(20, truncate=False)\n",
 					""
 				],
-				"execution_count": 97
+				"execution_count": null
 			}
 		]
 	}
