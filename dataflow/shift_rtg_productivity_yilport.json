@@ -1,5 +1,5 @@
 {
-	"name": "shift_rtg_productivity_v1",
+	"name": "shift_rtg_productivity_yilport",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -152,7 +152,7 @@
 			],
 			"scriptLines": [
 				"parameters{",
-				"     Customer as string ('yilport-gebze')",
+				"     Customer as string ('yilport')",
 				"}",
 				"source(output(",
 				"          ecEventGkey as long,",
