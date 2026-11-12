@@ -117,7 +117,7 @@
 			],
 			"scriptLines": [
 				"parameters{",
-				"     Customer as string ('yilport-gebze')",
+				"     Customer as string ('yilport')",
 				"}",
 				"source(output(",
 				"          mve_gkey as string,",
