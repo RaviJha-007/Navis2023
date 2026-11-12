@@ -160,7 +160,16 @@
 						"referenceName": "Yilport_Gebze_Decking_upd",
 						"type": "NotebookReference"
 					},
-					"snapshot": true
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": "pbixpool",
+						"type": "BigDataPoolReference"
+					},
+					"executorSize": "Small",
+					"driverSize": "Small",
+					"authentication": {
+						"type": "MSI"
+					}
 				}
 			},
 			{
@@ -375,6 +384,42 @@
 						"computeType": "General"
 					},
 					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "Rehandle_HK_Yilport",
+				"type": "SynapseNotebook",
+				"dependsOn": [
+					{
+						"activity": "MoveSrc_yilport_gebze",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "Rehandle_HK_Yilport",
+						"type": "NotebookReference"
+					},
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": "pbixpool",
+						"type": "BigDataPoolReference"
+					},
+					"executorSize": "Small",
+					"driverSize": "Small",
+					"authentication": {
+						"type": "MSI"
+					}
 				}
 			}
 		],
