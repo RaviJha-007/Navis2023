@@ -412,6 +412,10 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebook": {
+						"referenceName": "Rehandle_HK_Yilport",
+						"type": "NotebookReference"
+					},
 					"snapshot": true,
 					"sparkPool": {
 						"referenceName": "pbixpool",
