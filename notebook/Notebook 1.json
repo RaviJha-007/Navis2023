@@ -1,0 +1,270 @@
+{
+	"name": "Notebook 1",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "pbixpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 1,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "3",
+				"spark.autotune.trackingId": "8e99115f-3799-4709-87a8-71e7a11f7e11"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Synapse/workspaces/navispowerbidata2/bigDataPools/pbixpool",
+				"name": "pbixpool",
+				"type": "Spark",
+				"endpoint": "https://navispowerbidata2.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/pbixpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"automaticScaleJobs": true
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"# ===== CELL 1 : imports + parameters =====\n",
+					"from pyspark.sql import functions as F, Window as W\n",
+					"from pyspark.sql.types import TimestampType\n",
+					"\n",
+					"STORAGE_ACCOUNT  = \"navispowerbidatastorage2\"\n",
+					"SRC_FORMAT       = \"delta\"                 # delta | parquet | csv\n",
+					"TERMINAL         = \"DGT\"                   # YardID filter, None = all\n",
+					"CONTAINER        = \"dgt\"                   # the container is named after the terminal\n",
+					"SRC_PATH         = f\"abfss://{CONTAINER}@{STORAGE_ACCOUNT}.dfs.core.windows.net/silver/ecevents\"\n",
+					"\n",
+					"spark.conf.set(\"spark.sql.session.timeZone\", \"UTC\")   # keep timestamps exactly as stored\n",
+					"\n",
+					"print(\"source path :\", SRC_PATH)\n",
+					"print(\"format      :\", SRC_FORMAT)\n",
+					"print(\"terminal    :\", TERMINAL)\n",
+					""
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ===== CELL 2 : read silver ecEvents =====\n",
+					"rd = spark.read.format(SRC_FORMAT)\n",
+					"if SRC_FORMAT == \"csv\":\n",
+					"    rd = rd.option(\"header\", True).option(\"inferSchema\", True)\n",
+					"raw = rd.load(SRC_PATH)\n",
+					"print(\"rows read:\", raw.count())\n",
+					"raw.printSchema()\n",
+					""
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ===== CELL 3 : clean + keep only SC rows that belong to a move =====\n",
+					"# adapt the delta schema to the column names used in the later cells\n",
+					"RENAMES = {\"cheID\": \"CHE_ID\", \"OPERATOR_ID\": \"operator_name\"}\n",
+					"\n",
+					"REQUIRED = [\"ecEventGkey\", \"YardID\", \"cheKind\", \"CHE_Name\", \"cheID\", \"EcEventTime\", \"eventTypeDescription\",\n",
+					"            \"unit\", \"pow\", \"pool\", \"workQueue\", \"travelDistance\", \"moveKind\", \"isTwin\",\n",
+					"            \"startDistance\", \"workAssignment\", \"OPERATOR_ID\"]\n",
+					"missing = [c for c in REQUIRED if c not in raw.columns]\n",
+					"assert not missing, f\"missing columns in silver ecevents: {missing}\"\n",
+					"assert isinstance(raw.schema[\"EcEventTime\"].dataType, TimestampType), \\\n",
+					"    f\"EcEventTime is {raw.schema['EcEventTime'].dataType}, expected timestamp\"\n",
+					"\n",
+					"ev = raw\n",
+					"for old, new in RENAMES.items():\n",
+					"    ev = ev.withColumnRenamed(old, new)\n",
+					"\n",
+					"ev = (ev\n",
+					"      .withColumn(\"ts\", F.col(\"EcEventTime\"))\n",
+					"      .withColumn(\"evt\", F.trim(\"eventTypeDescription\"))\n",
+					"      .withColumn(\"workAssignment\", F.col(\"workAssignment\").cast(\"long\"))\n",
+					"      .withColumn(\"unit\", F.trim(\"unit\"))\n",
+					"      .filter(F.col(\"ts\").isNotNull())\n",
+					"      .dropDuplicates([\"ecEventGkey\"]))\n",
+					"\n",
+					"if TERMINAL:\n",
+					"    ev = ev.filter(F.upper(F.col(\"YardID\")) == TERMINAL.upper())\n",
+					"\n",
+					"# AVAL / UNAV / LGON / LGOF / plain IDLE have no workAssignment -> equipment state, not a move\n",
+					"sc = ev.filter((F.col(\"cheKind\") == \"SC\") & F.col(\"workAssignment\").isNotNull())\n",
+					"print(\"SC rows with a workAssignment:\", sc.count())\n",
+					""
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ===== CELL 4 : one header row per move (key = CHE_Name + workAssignment) =====\n",
+					"# Unit / MoveKind / etc. come from the LadenTo row (LTSH, LTRW, LTGD) - the row that defines a valid move.\n",
+					"# Fallback 1: the dispatch row. Fallback 2: the first row of the move.\n",
+					"KEY  = [\"CHE_Name\", \"workAssignment\"]\n",
+					"META = [\"unit\", \"moveKind\", \"pow\", \"pool\", \"workQueue\", \"isTwin\", \"operator_name\",\n",
+					"        \"CHE_ID\", \"travelDistance\", \"startDistance\", \"YardID\"]\n",
+					"LADEN_TO_CODES = [\"LTSH\", \"LTRW\", \"LTGD\"]\n",
+					"DISPATCH_CODES = [\"DSPT\", \"ETRW\", \"ETSH\", \"ETGD\"]\n",
+					"\n",
+					"meta_struct = F.struct(\"ts\", \"ecEventGkey\", *META)\n",
+					"\n",
+					"hdr = (sc.groupBy(*KEY)\n",
+					"         .agg(F.min(F.when(F.col(\"evt\").isin(LADEN_TO_CODES), meta_struct)).alias(\"_l\"),\n",
+					"              F.min(F.when(F.col(\"evt\").isin(DISPATCH_CODES), meta_struct)).alias(\"_d\"),\n",
+					"              F.min(meta_struct).alias(\"_f\"),\n",
+					"              F.collect_set(\"unit\").alias(\"_units\"),\n",
+					"              F.count(\"*\").alias(\"n_events\"),\n",
+					"              F.min(\"ts\").alias(\"first_event_time\"),\n",
+					"              F.max(\"ts\").alias(\"last_event_time\")))\n",
+					"\n",
+					"for c in META:\n",
+					"    hdr = hdr.withColumn(c, F.coalesce(F.col(\"_l\")[c], F.col(\"_d\")[c], F.col(\"_f\")[c]))\n",
+					"\n",
+					"hdr = (hdr.withColumn(\"all_units\", F.concat_ws(\"|\", F.array_sort(\"_units\")))\n",
+					"          .withColumn(\"n_units\", F.size(\"_units\"))\n",
+					"          .drop(\"_l\", \"_d\", \"_f\", \"_units\")\n",
+					"          .withColumnRenamed(\"moveKind\", \"move_kind\"))\n",
+					"\n",
+					"# only the 4 move kinds in scope\n",
+					"KINDS = [\"LOAD\", \"DSCH\", \"RECV\", \"DLVR\"]\n",
+					"hdr = hdr.filter(F.col(\"move_kind\").isin(KINDS))\n",
+					"print(\"moves in scope:\", hdr.count())\n",
+					"hdr.groupBy(\"move_kind\").count().show()\n",
+					""
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ===== CELL 5 : event-code mapping per move kind (edit here if the rule changes) =====\n",
+					"# order inside each list = order of priority\n",
+					"EVENT_MAP = {\n",
+					"    \"LOAD\": {\"dispatch\": [\"DSPT\", \"ETRW\"], \"unladen_arrive\": [\"EARW\"], \"laden_to\": [\"LTSH\"],\n",
+					"             \"laden_arrival\": [\"LASH\"], \"complete\": [\"DROP\", \"IDLE\"]},\n",
+					"    \"DSCH\": {\"dispatch\": [\"DSPT\", \"ETSH\"], \"unladen_arrive\": [\"EASH\"], \"laden_to\": [\"LTRW\"],\n",
+					"             \"laden_arrival\": [\"LARW\"], \"complete\": [\"DROP\", \"IDLE\"]},\n",
+					"    \"RECV\": {\"dispatch\": [\"DSPT\", \"ETGD\"], \"unladen_arrive\": [\"EAGD\"], \"laden_to\": [\"LTRW\"],\n",
+					"             \"laden_arrival\": [\"LARW\"], \"complete\": [\"DROP\", \"IDLE\"]},\n",
+					"    \"DLVR\": {\"dispatch\": [\"DSPT\", \"ETRW\"], \"unladen_arrive\": [\"EARW\"], \"laden_to\": [\"LTGD\"],\n",
+					"             \"laden_arrival\": [\"LAGD\"], \"complete\": [\"DROP\", \"IDLE\"]},\n",
+					"}\n",
+					"OUT_COLS = [\"dispatch_time\", \"unladen_arrive\", \"laden_to\", \"laden_arrival\", \"complete_time\"]\n",
+					"STAGE_TO_COL = dict(zip([\"dispatch\", \"unladen_arrive\", \"laden_to\", \"laden_arrival\", \"complete\"], OUT_COLS))\n",
+					"\n",
+					"ALL_CODES = sorted({c for k in EVENT_MAP.values() for codes in k.values() for c in codes})\n",
+					"print(\"event codes needed:\", ALL_CODES)\n",
+					""
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ===== CELL 6 : transpose - one timestamp column per event code (first occurrence in the move) =====\n",
+					"sc_k = sc.join(hdr.select(*KEY), KEY, \"inner\")          # keep only rows of in-scope moves\n",
+					"\n",
+					"pivot = (sc_k.filter(F.col(\"evt\").isin(ALL_CODES))\n",
+					"             .groupBy(*KEY)\n",
+					"             .pivot(\"evt\", ALL_CODES)\n",
+					"             .agg(F.min(\"ts\")))\n",
+					"for c in ALL_CODES:\n",
+					"    pivot = pivot.withColumnRenamed(c, f\"t_{c}\")\n",
+					"\n",
+					"wide = hdr.join(pivot, KEY, \"left\")\n",
+					"wide.select(\"CHE_Name\", \"workAssignment\", \"unit\", \"move_kind\", *[f\"t_{c}\" for c in ALL_CODES]).show(5, truncate=False)\n",
+					""
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ===== CELL 7 : build the 5 columns by move kind (blank = event not found) =====\n",
+					"def pick(kind, stage):\n",
+					"    cols = [F.col(f\"t_{c}\") for c in EVENT_MAP[kind][stage]]\n",
+					"    return cols[0] if len(cols) == 1 else F.coalesce(*cols)\n",
+					"\n",
+					"result = wide\n",
+					"for stage, out in STAGE_TO_COL.items():\n",
+					"    expr = None\n",
+					"    for kind in KINDS:\n",
+					"        cond = F.col(\"move_kind\") == kind\n",
+					"        expr = F.when(cond, pick(kind, stage)) if expr is None else expr.when(cond, pick(kind, stage))\n",
+					"    result = result.withColumn(out, expr)\n",
+					"\n",
+					"# valid move = the move kind's LadenTo event exists (nothing else is checked)\n",
+					"result = result.withColumn(\"is_valid\", F.col(\"laden_to\").isNotNull())\n",
+					"\n",
+					"lead = [\"CHE_Name\", \"workAssignment\", \"unit\", \"all_units\", \"n_units\", \"move_kind\", *OUT_COLS, \"is_valid\",\n",
+					"        \"pow\", \"pool\", \"workQueue\", \"isTwin\", \"operator_name\", \"CHE_ID\",\n",
+					"        \"travelDistance\", \"startDistance\", \"YardID\", \"n_events\", \"first_event_time\", \"last_event_time\"]\n",
+					"result = result.select(*lead)\n",
+					""
+				],
+				"execution_count": 12
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ===== CELL 8 : sanity checks =====\n",
+					"print(\"moves:\", result.count(), \"| valid (has LadenTo):\", result.filter(\"is_valid\").count())\n",
+					"\n",
+					"(result.groupBy(\"move_kind\")\n",
+					"       .agg(F.count(\"*\").alias(\"moves\"),\n",
+					"            F.sum(F.col(\"is_valid\").cast(\"int\")).alias(\"valid\"),\n",
+					"            *[F.sum(F.col(c).isNull().cast(\"int\")).alias(f\"blank_{c}\") for c in OUT_COLS])\n",
+					"       .orderBy(\"move_kind\").show())\n",
+					"\n",
+					"# the same, restricted to valid moves\n",
+					"(result.filter(\"is_valid\").groupBy(\"move_kind\")\n",
+					"       .agg(F.count(\"*\").alias(\"valid_moves\"),\n",
+					"            *[F.sum(F.col(c).isNull().cast(\"int\")).alias(f\"blank_{c}\") for c in OUT_COLS])\n",
+					"       .orderBy(\"move_kind\").show())\n",
+					"\n",
+					"result.filter(\"is_valid\").orderBy(\"CHE_Name\", \"dispatch_time\").show(10, truncate=False)\n",
+					""
+				],
+				"execution_count": 13
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# ===== CELL 9 : write to gold =====\n",
+					"GOLD_PATH = f\"abfss://{CONTAINER}@{STORAGE_ACCOUNT}.dfs.core.windows.net/gold/SC_EcEventsTransposed\"\n",
+					"(result.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(GOLD_PATH))\n",
+					"print(\"written:\", GOLD_PATH)\n",
+					""
+				],
+				"execution_count": 14
+			}
+		]
+	}
+}
