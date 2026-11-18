@@ -245,6 +245,18 @@
 		"tauranga_times_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
+		},
+		"WI_XPS_Dgt_properties_WI_01_XPS_parameters_client_id": {
+			"type": "string",
+			"defaultValue": "DGT"
+		},
+		"WI_XPS_Dgt_properties_WI_01_XPS_parameters_file_system": {
+			"type": "string",
+			"defaultValue": "dgt"
+		},
+		"WI_XPS_Dgt_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/095c0f82-6a29-4db3-9f53-6808ff55fa13/resourceGroups/NavisBIAnalyticsPowerBiData2/providers/Microsoft.Storage/storageAccounts/navispowerbidatastorage2"
 		}
 	},
 	"variables": {
@@ -132943,7 +132955,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "15c9091d-7f1d-4f0a-b8e7-d259ce111a79"
+						"spark.autotune.trackingId": "e2cc667b-d526-454a-8617-72a7a2db0e94"
 					}
 				},
 				"metadata": {
@@ -139845,7 +139857,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "ac963197-ae5b-42bf-9c98-710a998baead"
+						"spark.autotune.trackingId": "509d9b7f-91e9-4f2b-9c02-5233f8b7c74c"
 					}
 				},
 				"metadata": {
@@ -139870,7 +139882,8 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56
+						"memory": 56,
+						"automaticScaleJobs": true
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -139897,6 +139910,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# TERMINAL CONFIGURATION\n",
@@ -139983,6 +139997,28 @@
 							"        \"45R0\":\"4530\",\"45R1\":\"4530\",\"45R4\":\"4530\",\"45U0\":\"4550\",\"45U1\":\"4520\",\"4EG1\":\"4550\",\n",
 							"        \"L5G0\":\"9500\",\"L5G1\":\"9500\",\"LEG0\":\"9500\",\"LEG1\":\"9500\"},\n",
 							"    },\n",
+							"    \"DGT\": {\n",
+							"        \"client_key\": 106,\n",
+							"        \"weight_class_thresholds\": [\n",
+							"            (0,     \"WC1\"),\n",
+							"            (10000, \"WC2\"),\n",
+							"            (15000, \"WC3\"),\n",
+							"            (20000, \"WC4\"),\n",
+							"            (25000, \"WC5\"),\n",
+							"        ],\n",
+							"        \"equip_class_map\": {\n",
+							"            \"2200\":\"2200\",\"2210\":\"2200\",\"2270\":\"2270\",\"4260\":\"4260\",\n",
+							"            \"4400\":\"4500\",\"4500\":\"4500\",\"4510\":\"4500\",\"4530\":\"4530\",\n",
+							"            \"22G0\":\"2200\",\"22G1\":\"2200\",\"22G2\":\"2200\",\"22P3\":\"2260\",\n",
+							"            \"22R1\":\"2230\",\"22T0\":\"2270\",\"22T6\":\"2270\",\"22U0\":\"2250\",\n",
+							"            \"22U1\":\"2250\",\"22V0\":\"2200\",\"25G1\":\"2500\",\"42G0\":\"4200\",\n",
+							"            \"42G1\":\"4200\",\"42P0\":\"4260\",\"42P2\":\"4260\",\"42P3\":\"4260\",\n",
+							"            \"42U0\":\"4250\",\"42U1\":\"4250\",\"42U5\":\"4250\",\"45G0\":\"4500\",\n",
+							"            \"45G1\":\"4500\",\"45P3\":\"4560\",\"45R0\":\"4530\",\"45R1\":\"4530\",\n",
+							"            \"45R4\":\"4530\",\"45U0\":\"4550\",\"45U1\":\"4520\",\"4EG1\":\"4550\",\n",
+							"            \"L5G0\":\"9500\",\"L5G1\":\"9500\",\"LEG0\":\"9500\",\"LEG1\":\"9500\"\n",
+							"        },\n",
+							"    },\n",
 							"    #For VICT, the WC is different for 20,40 and 45 units and based on services. May be add the logic for that later if needed.\n",
 							"    \"VICT\": {\n",
 							"    \"client_key\": 105,   \n",
@@ -140039,6 +140075,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COLUMN MAP  — ground truth from ATTRS/NAMES in converter\n",
@@ -140137,6 +140174,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FIXED SILVER SCHEMA\n",
@@ -140268,6 +140306,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# LOOKUP TABLES\n",
@@ -140291,6 +140330,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FILENAME DATETIME EXTRACTION\n",
@@ -140327,6 +140367,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COVERAGE VALIDATOR\n",
@@ -140354,6 +140395,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PARSER  — CRITICAL FIX\n",
@@ -140485,6 +140527,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# DISCOVER TXT FILES\n",
@@ -140513,6 +140556,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PROCESS EACH FILE\n",
@@ -141130,7 +141174,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "34a1f971-b333-4c5d-9f9d-71c4173e6dfb"
+						"spark.autotune.trackingId": "08cb625d-7415-4dec-8278-66ddcdbd3894"
 					}
 				},
 				"metadata": {
@@ -141155,7 +141199,8 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56
+						"memory": 56,
+						"automaticScaleJobs": true
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -141172,16 +141217,17 @@
 							"# PARAMETERS  — set per pipeline run\n",
 							"# ============================================================\n",
 							"\n",
-							"client_id   = \"VICT\"\n",
-							"file_system = \"vict\"\n",
+							"client_id   = \"DGT\"\n",
+							"file_system = \"dgt\"\n",
 							"# file_name   = \"WI_Load_06082026_1029.txt\"   # injected by pipeline\n",
 							""
 						],
 						"outputs": [],
-						"execution_count": 2
+						"execution_count": 1
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# TERMINAL CONFIGURATION\n",
@@ -141268,6 +141314,28 @@
 							"        \"45R0\":\"4530\",\"45R1\":\"4530\",\"45R4\":\"4530\",\"45U0\":\"4550\",\"45U1\":\"4520\",\"4EG1\":\"4550\",\n",
 							"        \"L5G0\":\"9500\",\"L5G1\":\"9500\",\"LEG0\":\"9500\",\"LEG1\":\"9500\"},\n",
 							"    },\n",
+							"    \"DGT\": {\n",
+							"        \"client_key\": 106,\n",
+							"        \"weight_class_thresholds\": [\n",
+							"            (0,     \"WC1\"),\n",
+							"            (10000, \"WC2\"),\n",
+							"            (15000, \"WC3\"),\n",
+							"            (20000, \"WC4\"),\n",
+							"            (25000, \"WC5\"),\n",
+							"        ],\n",
+							"        \"equip_class_map\": {\n",
+							"            \"2200\":\"2200\",\"2210\":\"2200\",\"2270\":\"2270\",\"4260\":\"4260\",\n",
+							"            \"4400\":\"4500\",\"4500\":\"4500\",\"4510\":\"4500\",\"4530\":\"4530\",\n",
+							"            \"22G0\":\"2200\",\"22G1\":\"2200\",\"22G2\":\"2200\",\"22P3\":\"2260\",\n",
+							"            \"22R1\":\"2230\",\"22T0\":\"2270\",\"22T6\":\"2270\",\"22U0\":\"2250\",\n",
+							"            \"22U1\":\"2250\",\"22V0\":\"2200\",\"25G1\":\"2500\",\"42G0\":\"4200\",\n",
+							"            \"42G1\":\"4200\",\"42P0\":\"4260\",\"42P2\":\"4260\",\"42P3\":\"4260\",\n",
+							"            \"42U0\":\"4250\",\"42U1\":\"4250\",\"42U5\":\"4250\",\"45G0\":\"4500\",\n",
+							"            \"45G1\":\"4500\",\"45P3\":\"4560\",\"45R0\":\"4530\",\"45R1\":\"4530\",\n",
+							"            \"45R4\":\"4530\",\"45U0\":\"4550\",\"45U1\":\"4520\",\"4EG1\":\"4550\",\n",
+							"            \"L5G0\":\"9500\",\"L5G1\":\"9500\",\"LEG0\":\"9500\",\"LEG1\":\"9500\"\n",
+							"        },\n",
+							"    },\n",
 							"    #For SGTD, the WC is different for 20,40 and 45 units. May be add the logic for that later if needed.\n",
 							"    \"VICT\": {\n",
 							"    \"client_key\": 105,   \n",
@@ -141320,10 +141388,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 3
+						"execution_count": 2
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COLUMN MAP  — ground truth from ATTRS/NAMES in converter\n",
@@ -141418,10 +141487,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 4
+						"execution_count": 3
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FIXED SILVER SCHEMA\n",
@@ -141549,10 +141619,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 5
+						"execution_count": 4
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# LOOKUP TABLES\n",
@@ -141572,10 +141643,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 6
+						"execution_count": 5
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# FILENAME DATETIME EXTRACTION\n",
@@ -141608,10 +141680,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 7
+						"execution_count": 6
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# COVERAGE VALIDATOR\n",
@@ -141635,10 +141708,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 8
+						"execution_count": 7
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PARSER  — CRITICAL FIX\n",
@@ -141766,10 +141840,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 9
+						"execution_count": 8
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# DISCOVER TXT FILES\n",
@@ -141794,10 +141869,11 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 10
+						"execution_count": 9
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"# ============================================================\n",
 							"# PROCESS EACH FILE\n",
@@ -142315,7 +142391,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 11
+						"execution_count": 10
 					},
 					{
 						"cell_type": "code",
@@ -145245,7 +145321,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "f6df2c2b-e56a-4348-af69-dedd0558ddfb"
+						"spark.autotune.trackingId": "6e40e286-9bbe-49d8-b2d7-899a9494bbb9"
 					}
 				},
 				"metadata": {
@@ -145270,7 +145346,8 @@
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 8,
-						"memory": 56
+						"memory": 56,
+						"automaticScaleJobs": true
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -145299,13 +145376,14 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"from delta.tables import DeltaTable\n",
 							"\n",
 							"# Write directly to the Delta location in your storage\n",
 							"spark.sql(\"\"\"\n",
 							"    INSERT INTO delta.`abfss://workinstruction@navispowerbidatastorage2.dfs.core.windows.net/dimension/dim_client`\n",
-							"    VALUES (105, 'VICT', current_timestamp(), true)\n",
+							"    VALUES (106, 'DGT', current_timestamp(), true)\n",
 							"\"\"\")\n",
 							""
 						],
@@ -145314,18 +145392,28 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"spark.sql(\"\"\"\n",
 							"    INSERT INTO delta.`abfss://workinstruction@navispowerbidatastorage2.dfs.core.windows.net/dimension/dim_crane_terminal`\n",
-							"    VALUES -- Client 105 - Terminal 1\n",
-							"    ('QC01',  'Berth 4,5',     'Terminal 1',     105),\n",
-							"    ('QC02',  'Berth 4,5',     'Terminal 1',     105),\n",
-							"    ('QC03',  'Berth 4,5',     'Terminal 1',     105),\n",
-							"    ('QC04',  'Berth 4,5',     'Terminal 1',     105),\n",
-							"    ('QC05',  'Berth 4,5',     'Terminal 1',     105),\n",
-							"    ('QC06',  'Berth 4,5',     'Terminal 1',     105),\n",
-							"    ('QC07',  'Berth 4,5',     'Terminal 1',     105);\n",
-							"    \"\"\")"
+							"    VALUES -- Client 106 - Terminal 1\n",
+							"    ('CR536', 'Berth 108', 'Terminal 108', 106),\n",
+							"    ('CR537', 'Berth 108', 'Terminal 108', 106),\n",
+							"    ('CR538', 'Berth 108', 'Terminal 108', 106),\n",
+							"    ('CR539', 'Berth 108', 'Terminal 108', 106),\n",
+							"    ('CR524', 'Berth 202', 'Terminal 202', 106),\n",
+							"    ('CR525', 'Berth 202', 'Terminal 202', 106),\n",
+							"    ('CR533', 'Berth 202', 'Terminal 202', 106),\n",
+							"    ('CR534', 'Berth 202', 'Terminal 202', 106),\n",
+							"    ('CR526', 'Berth 203', 'Terminal 203', 106),\n",
+							"    ('CR527', 'Berth 203', 'Terminal 203', 106),\n",
+							"    ('CR528', 'Berth 203', 'Terminal 203', 106),\n",
+							"    ('CR529', 'Berth 204', 'Terminal 204', 106),\n",
+							"    ('CR530', 'Berth 204', 'Terminal 204', 106),\n",
+							"    ('CR531', 'Berth 204', 'Terminal 204', 106),\n",
+							"    ('CR532', 'Berth 204', 'Terminal 204', 106)\n",
+							"    \"\"\")\n",
+							""
 						],
 						"outputs": [],
 						"execution_count": 2
@@ -145630,7 +145718,7 @@
 						"spark.dynamicAllocation.enabled": "true",
 						"spark.dynamicAllocation.minExecutors": "1",
 						"spark.dynamicAllocation.maxExecutors": "3",
-						"spark.autotune.trackingId": "b2701841-916f-4f6a-a820-5b6cd7572305"
+						"spark.autotune.trackingId": "f0bfd39a-2bab-4b75-b554-d50d23a944bf"
 					}
 				},
 				"metadata": {
@@ -146024,6 +146112,40 @@
 				]
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WI_XPS_Dgt')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "WI_01_XPS",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"client_id": "[parameters('WI_XPS_Dgt_properties_WI_01_XPS_parameters_client_id')]",
+							"file_system": "[parameters('WI_XPS_Dgt_properties_WI_01_XPS_parameters_file_system')]"
+						}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/dgt/blobs/bronze/workinstruction_xps/load",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('WI_XPS_Dgt_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/WI_01_XPS')]"
+			]
 		}
 	]
 }
