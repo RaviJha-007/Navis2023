@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "f6df2c2b-e56a-4348-af69-dedd0558ddfb"
+				"spark.autotune.trackingId": "1dbf3138-154e-4f15-8868-fd9772572a0d"
 			}
 		},
 		"metadata": {
@@ -78,7 +78,7 @@
 					"# Write directly to the Delta location in your storage\n",
 					"spark.sql(\"\"\"\n",
 					"    INSERT INTO delta.`abfss://workinstruction@navispowerbidatastorage2.dfs.core.windows.net/dimension/dim_client`\n",
-					"    VALUES (105, 'VICT', current_timestamp(), true)\n",
+					"    VALUES (106, 'DGT', current_timestamp(), true)\n",
 					"\"\"\")\n",
 					""
 				],
@@ -89,15 +89,24 @@
 				"source": [
 					"spark.sql(\"\"\"\n",
 					"    INSERT INTO delta.`abfss://workinstruction@navispowerbidatastorage2.dfs.core.windows.net/dimension/dim_crane_terminal`\n",
-					"    VALUES -- Client 105 - Terminal 1\n",
-					"    ('QC01',  'Berth 4,5',     'Terminal 1',     105),\n",
-					"    ('QC02',  'Berth 4,5',     'Terminal 1',     105),\n",
-					"    ('QC03',  'Berth 4,5',     'Terminal 1',     105),\n",
-					"    ('QC04',  'Berth 4,5',     'Terminal 1',     105),\n",
-					"    ('QC05',  'Berth 4,5',     'Terminal 1',     105),\n",
-					"    ('QC06',  'Berth 4,5',     'Terminal 1',     105),\n",
-					"    ('QC07',  'Berth 4,5',     'Terminal 1',     105);\n",
-					"    \"\"\")"
+					"    VALUES -- Client 106 - Terminal 1\n",
+					"    ('CR536', 'Berth 108', 'Terminal 108', 106),\n",
+					"    ('CR537', 'Berth 108', 'Terminal 108', 106),\n",
+					"    ('CR538', 'Berth 108', 'Terminal 108', 106),\n",
+					"    ('CR539', 'Berth 108', 'Terminal 108', 106),\n",
+					"    ('CR524', 'Berth 202', 'Terminal 202', 106),\n",
+					"    ('CR525', 'Berth 202', 'Terminal 202', 106),\n",
+					"    ('CR533', 'Berth 202', 'Terminal 202', 106),\n",
+					"    ('CR534', 'Berth 202', 'Terminal 202', 106),\n",
+					"    ('CR526', 'Berth 203', 'Terminal 203', 106),\n",
+					"    ('CR527', 'Berth 203', 'Terminal 203', 106),\n",
+					"    ('CR528', 'Berth 203', 'Terminal 203', 106),\n",
+					"    ('CR529', 'Berth 204', 'Terminal 204', 106),\n",
+					"    ('CR530', 'Berth 204', 'Terminal 204', 106),\n",
+					"    ('CR531', 'Berth 204', 'Terminal 204', 106),\n",
+					"    ('CR532', 'Berth 204', 'Terminal 204', 106)\n",
+					"    \"\"\")\n",
+					""
 				],
 				"execution_count": 2
 			}
