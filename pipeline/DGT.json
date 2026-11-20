@@ -152,7 +152,14 @@
 			{
 				"name": "DGT_UnitStatus",
 				"type": "ExecuteDataFlow",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "DGT_Units",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -512,16 +519,9 @@
 				}
 			},
 			{
-				"name": "SC_EcEvents_Analysis",
-				"type": "SynapseNotebook",
-				"dependsOn": [
-					{
-						"activity": "EcEvents",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"name": "DGT_Units",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -531,11 +531,15 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebook": {
-						"referenceName": "DGT_SC_EcEventsTransposed",
-						"type": "NotebookReference"
+					"dataflow": {
+						"referenceName": "DGT_Units",
+						"type": "DataFlowReference"
 					},
-					"snapshot": true
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
 				}
 			}
 		],
