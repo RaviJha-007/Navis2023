@@ -1,0 +1,125 @@
+{
+	"name": "DGT_Units",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "unitstatus"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "linkedService1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {Container Nbr} as string,",
+				"          Event as string,",
+				"          {From Position} as string,",
+				"          {To Position} as string,",
+				"          {Current POD} as string,",
+				"          {Outbound Carrier} as string,",
+				"          {Carrier Service} as string,",
+				"          {Eq Class} as string,",
+				"          time_out as string,",
+				"          {Eq Length} as string,",
+				"          Time_Of_event as string,",
+				"          Status as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     moveFiles: ['bronze/unit_position_correction/load','bronze/unit_position_correction/archive'],",
+				"     format: 'delimited',",
+				"     fileSystem: 'dgt',",
+				"     folderPath: 'bronze/unit_position_correction/load',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> unitstatus",
+				"unitstatus select(mapColumn(",
+				"          each(match(true()),",
+				"               regexReplace($$,' ','_') = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive({Container Nbr} = trim(Container_Nbr),",
+				"          Time_Of_event = toTimestamp(Time_Of_event, 'yyyy-MM-dd HH:mm:ss'),",
+				"          Event = upper(Event),",
+				"          time_out = toTimestamp(time_out, 'yyyy-MM-dd HH:mm:ss'),",
+				"          Cycle_Status = iif((upper(Event)==\"UNIT_RECEIVE\" || upper(Event)==\"UNIT_DISCH\"), \"START\", iif((upper(Event)==\"UNIT_POSITION_CORRECTION\"), \"CORRECTION\", iif((upper(Event)==\"UNIT_LOAD\" || upper(Event)==\"UNIT_DELIVER\"), \"END\",\"\"))),",
+				"          Date_Of_Event = toDate(Time_Of_event, 'yyyy-MM-dd')) ~> derivedColumn1",
+				"select2 aggregate(groupBy(Container_Nbr,",
+				"          Time_Of_event),",
+				"     each(match(not(in([\"Container_Nbr\",\"Time_Of_event\"], name))), $$ = first($$))) ~> aggregate1",
+				"derivedColumn1 select(mapColumn(",
+				"          Container_Nbr,",
+				"          Event,",
+				"          From_Position,",
+				"          To_Position,",
+				"          Current_POD,",
+				"          Outbound_Carrier,",
+				"          Carrier_Service,",
+				"          Eq_Class,",
+				"          time_out,",
+				"          Eq_Length,",
+				"          Time_Of_event,",
+				"          Status,",
+				"          {Container Nbr},",
+				"          Cycle_Status,",
+				"          Date_Of_Event",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"aggregate1 alterRow(upsertIf(true())) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'dgt',",
+				"     folderPath: 'silver/unit_position_correction',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Container_Nbr','Time_Of_event'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
