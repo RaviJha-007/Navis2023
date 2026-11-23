@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "cc07f3bc-f456-4efc-bfa0-a583bf0a6b0c"
+				"spark.autotune.trackingId": "7de59ab3-48bd-4af0-84a0-4334cda7a3e8"
 			}
 		},
 		"metadata": {
@@ -68,7 +68,7 @@
 					"\n",
 					"SHIFT_STARTS = [\"07:00\", \"19:00\"]\n",
 					"SHIFT_NAMES  = [\"Day\", \"Night\"]    # PLACEHOLDER - replace with CT03's real shift pattern\n",
-					"WRITE_OUTPUT = False               # set True once results look right\n",
+					"WRITE_OUTPUT = True               # set True once results look right\n",
 					""
 				],
 				"execution_count": 52
@@ -447,6 +447,15 @@
 			{
 				"cell_type": "code",
 				"source": [
+					"WRITE_OUTPUT = True\n",
+					"print(START_DATE, END_DATE)\n",
+					""
+				],
+				"execution_count": 62
+			},
+			{
+				"cell_type": "code",
+				"source": [
 					"if WRITE_OUTPUT:\n",
 					"    rw = f\"shift_date >= '{START_DATE}' AND shift_date < '{END_DATE}'\"\n",
 					"    (violations.write.format(\"delta\").mode(\"overwrite\").option(\"replaceWhere\", rw)\n",
@@ -455,7 +464,7 @@
 					"            .partitionBy(\"shift_date\").save(f\"{OUTPUT_BASE}/summary\"))\n",
 					""
 				],
-				"execution_count": 61
+				"execution_count": 63
 			}
 		]
 	}
