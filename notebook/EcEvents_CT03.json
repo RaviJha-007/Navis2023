@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "24acb7cf-6e3b-4e52-8561-1972f23ac773"
+				"spark.autotune.trackingId": "0d2620a8-05ea-49aa-a5c5-fd4ff039f8b6"
 			}
 		},
 		"metadata": {
@@ -62,7 +62,7 @@
 					"\n",
 					"TERMINAL_CODE = \"CT03\"\n",
 					"FULL_REFRESH  = False        # True = rebuild Silver from Bronze (overwrite) instead of MERGE\n",
-					"\n",
+					"RUN_ID    = datetime.utcnow().strftime(\"%Y%m%d_%H%M%S\")\n",
 					"# ── Storage ────────────────────────────────────────────────────────────────────\n",
 					"STORAGE_ACCOUNT = \"navispowerbidatastorage2\"\n",
 					"CONTAINER       = \"adani-ct03\"   # <-- adjust to this terminal's container\n",
