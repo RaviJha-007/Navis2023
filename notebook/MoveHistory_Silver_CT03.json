@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "09c1724e-4b98-46f9-85e8-d791289cba70"
+				"spark.autotune.trackingId": "2d76cff6-92ce-488b-a182-87913b39d006"
 			}
 		},
 		"metadata": {
@@ -51,9 +51,12 @@
 			{
 				"cell_type": "code",
 				"source": [
+					"from datetime import datetime, timezone\n",
+					"\n",
 					"TERMINAL_CODE = \"CT03\"\n",
 					"WRITE_MODE    = \"overwrite\"\n",
 					"FULL_REFRESH = False\n",
+					"RUN_ID    = datetime.utcnow().strftime(\"%Y%m%d_%H%M%S\")\n",
 					"\n",
 					"# ── Storage ────────────────────────────────────────────────────────────────────\n",
 					"STORAGE_ACCOUNT = \"navispowerbidatastorage2\"\n",
@@ -61,7 +64,7 @@
 					"\n",
 					"BRONZE_PATH = (\n",
 					"    f\"abfss://{CONTAINER}@{STORAGE_ACCOUNT}.dfs.core.windows.net/\"\n",
-					"    f\"bronze/movehistory/load\"\n",
+					"    f\"bronze/moves/load\"\n",
 					")\n",
 					"ARCHIVE_ROOT = (\n",
 					"    f\"abfss://{CONTAINER}@{STORAGE_ACCOUNT}.dfs.core.windows.net/\"\n",
@@ -83,7 +86,8 @@
 					"    # \"dd/MM/yyyy HH:mm:ss\",       # enable ONE of these if the source changes\n",
 					"    # \"MM/dd/yyyy HH:mm:ss\",\n",
 					"]\n",
-					"\n",
+					"TS_NULL_TOKENS = [\"NULL\", \"NAN\", \"NAT\", \"NONE\", \"N/A\", \"-\"]\n",
+					"LOAD_PATH = BRONZE_PATH\n",
 					"print(f\"Terminal  : {TERMINAL_CODE}\")\n",
 					"print(f\"Bronze    : {BRONZE_PATH}\")\n",
 					"print(f\"Silver    : {SILVER_PATH}\")\n",
@@ -91,7 +95,7 @@
 					"print(f\"TS formats: {TS_FORMATS}\")\n",
 					""
 				],
-				"execution_count": 29
+				"execution_count": 42
 			},
 			{
 				"cell_type": "code",
@@ -103,7 +107,7 @@
 					"    StringType, ShortType, IntegerType,\n",
 					")"
 				],
-				"execution_count": 30
+				"execution_count": 43
 			},
 			{
 				"cell_type": "code",
@@ -138,7 +142,7 @@
 					"# First letter of a position name -> location type (V / T inferred from sample data)\n",
 					"POSITION_PREFIX_TYPE = {\"Y\": \"YARD\", \"V\": \"VESSEL\", \"T\": \"TRUCK\"}"
 				],
-				"execution_count": 31
+				"execution_count": 44
 			},
 			{
 				"cell_type": "code",
@@ -203,7 +207,7 @@
 					"def parse_position_udf(pos):\n",
 					"    return _parse(pos)"
 				],
-				"execution_count": 32
+				"execution_count": 45
 			},
 			{
 				"cell_type": "code",
@@ -317,7 +321,9 @@
 					"    if kind == \"dec\":\n",
 					"        return s.cast(\"decimal(18,3)\")\n",
 					"    if kind == \"ts\":\n",
-					"        return F.coalesce(*[F.to_timestamp(s, f) for f in TS_FORMATS])\n",
+					"        s_ts = F.when(F.upper(s).isin(TS_NULL_TOKENS), None).otherwise(s)\n",
+					"        return F.coalesce(*[F.to_timestamp(s_ts, f) for f in TS_FORMATS])\n",
+					"\n",
 					"    if kind in (\"flag\", \"bool\"):\n",
 					"        u = F.upper(s)\n",
 					"        f = (F.when(u.isin(_TRUE), F.lit(1))\n",
@@ -326,7 +332,7 @@
 					"        return f.cast(\"byte\") if kind == \"flag\" else f.cast(\"boolean\")\n",
 					"    raise ValueError(kind)"
 				],
-				"execution_count": 33
+				"execution_count": 46
 			},
 			{
 				"cell_type": "code",
@@ -346,7 +352,7 @@
 					"            out.append(it)\n",
 					"    return out\n",
 					"\n",
-					"load_files = list_csv(BRONZE_PATH)          # exactly these get archived\n",
+					"load_files = list_csv(LOAD_PATH)          # exactly these get archived\n",
 					"read_files = list(load_files)\n",
 					"if FULL_REFRESH:\n",
 					"    read_files += list_csv(ARCHIVE_ROOT)\n",
@@ -369,7 +375,7 @@
 					"    print(f\"\\n⚠️  Columns in COLUMN_SPEC not found in bronze (will be skipped): {missing}\")\n",
 					""
 				],
-				"execution_count": 34
+				"execution_count": 47
 			},
 			{
 				"cell_type": "code",
@@ -383,8 +389,12 @@
 					"# ── Fail loudly if any non-empty timestamp could not be parsed ────────────────\n",
 					"_ts_cols = [(s, t) for s, t, k in spec if k == \"ts\"]\n",
 					"if _ts_cols:\n",
-					"    _src = bronze.agg(*[F.sum(F.when(F.trim(F.col(f\"`{s}`\").cast(\"string\")) != \"\", 1).otherwise(0)).alias(t)\n",
-					"                        for s, t in _ts_cols]).collect()[0]\n",
+					"    _src = bronze.agg(*[\n",
+					"    F.sum(F.when(\n",
+					"        (F.trim(F.col(f\"`{s}`\").cast(\"string\")) != \"\")\n",
+					"            & (~F.upper(F.trim(F.col(f\"`{s}`\").cast(\"string\"))).isin(TS_NULL_TOKENS)),\n",
+					"            1).otherwise(0)).alias(t)\n",
+					"        for s, t in _ts_cols]).collect()[0]\n",
 					"    _dst = silver.agg(*[F.count(F.col(t)).alias(t) for _, t in _ts_cols]).collect()[0]\n",
 					"    _bad = {t: (_src[t] or 0) - (_dst[t] or 0) for _, t in _ts_cols if (_src[t] or 0) != (_dst[t] or 0)}\n",
 					"    assert not _bad, f\"Timestamp parse failures (column: rows). Add the new format to TS_FORMATS: {_bad}\"\n",
@@ -448,10 +458,13 @@
 					"print(f\"Duplicate {MERGE_KEY} rows removed: {before - silver.count():,}\")\n",
 					""
 				],
-				"execution_count": 35
+				"execution_count": 48
 			},
 			{
 				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
 				"source": [
 					"total     = silver.count()\n",
 					"fm_fail   = silver.filter(F.col(\"fm_yard_parse_fail\") == True).count()\n",
@@ -484,7 +497,7 @@
 					")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 49
 			},
 			{
 				"cell_type": "code",
@@ -519,7 +532,7 @@
 					"silver.unpersist()\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 50
 			},
 			{
 				"cell_type": "code",
@@ -530,7 +543,7 @@
 					"print(f\"Columns : {len(result.columns)}\")\n",
 					"result.printSchema()"
 				],
-				"execution_count": null
+				"execution_count": 51
 			}
 		]
 	}
