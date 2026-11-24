@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 34",
+	"properties": {
+		"content": {
+			"query": "SELECT\n    COUNT(DISTINCT CASE WHEN Move_Kind = 'SHFT' THEN Unit_Nbr END) AS SHFT_Moves_Count,\n    COUNT(DISTINCT CASE WHEN Move_Kind = 'YARD' THEN Unit_Nbr END) AS YARD_Moves_Count,\n    COUNT(DISTINCT CASE WHEN Move_Kind = 'LOAD' THEN Unit_Nbr END) AS LOAD_Moves_Count,\n    Week,\n    Month,\n    Year\nFROM\n    moves\nWHERE\n    Month >= 9\n    AND Category_Id = 'EXPRT'\n    AND Year = 2026\n    AND Move_Kind IN ('SHFT', 'YARD', 'LOAD')\nGROUP BY\n    Week,\n    Month,\n    Year\nORDER BY\n    Year,\n    Month,\n    Week;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "png",
+				"poolName": "Built-in"
+			},
+			"resultLimit": -1
+		},
+		"type": "SqlQuery"
+	}
+}
