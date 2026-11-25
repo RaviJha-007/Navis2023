@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "92593380-c187-471a-a39b-69d57ce01465"
+				"spark.autotune.trackingId": "e897f515-9e1a-4609-9b1f-84eab24048a0"
 			}
 		},
 		"metadata": {
@@ -54,7 +54,7 @@
 					"# ===== Parameters =====\n",
 					"STORAGE = \"abfss://adani-ct03@navispowerbidatastorage2.dfs.core.windows.net\"\n",
 					"EC_PATH = f\"{STORAGE}/silver/ecevents\"\n",
-					"MH_PATH = f\"{STORAGE}/silver/moves\"\n",
+					"MH_PATH = f\"abfss://mundra-ct03@navispowerbidatastorage2.dfs.core.windows.net/silver/moves\"\n",
 					"SOURCE_FORMAT = \"delta\"            # change to \"parquet\" if silver is plain parquet\n",
 					"OUTPUT_BASE = f\"{STORAGE}/gold/tto_dispatch_violations\"   # confirm gold location\n",
 					"\n",
@@ -71,7 +71,7 @@
 					"WRITE_OUTPUT = True               # set True once results look right\n",
 					""
 				],
-				"execution_count": 1
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -93,7 +93,7 @@
 					"    print(f\"Full run: EC {b.mn} to {b.mx}  ->  shift dates {START_DATE} to {END_DATE} (exclusive)\")\n",
 					""
 				],
-				"execution_count": 2
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -172,7 +172,7 @@
 					"print(\"EC ITV events:\", ec.count(), \"| LOAD/DSCH moves:\", mh.count())\n",
 					""
 				],
-				"execution_count": 3
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -195,7 +195,7 @@
 					"      ec.filter(F.col(\"wa\").isNull()).groupBy(\"event_type_desc\").count().orderBy(F.desc(\"count\")).collect())\n",
 					""
 				],
-				"execution_count": 4
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -282,7 +282,7 @@
 					"print(\"Jobs:\", jobs.count())\n",
 					""
 				],
-				"execution_count": 5
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -331,7 +331,7 @@
 					"                             (F.col(\"c_qc\") != F.col(\"pickup_pow\"))).cast(\"int\")))\n",
 					""
 				],
-				"execution_count": 6
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -406,7 +406,7 @@
 					"display(violations.orderBy(\"job_ts\"))\n",
 					""
 				],
-				"execution_count": 7
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -446,7 +446,7 @@
 					"display(missing_arrivals.groupBy().sum(\"missing_AYCO\", \"missing_AVCO\", \"missing_AYDR\"))\n",
 					""
 				],
-				"execution_count": 8
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -507,7 +507,7 @@
 					"    print(\"fact_jobs written\")\n",
 					""
 				],
-				"execution_count": 9
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -589,7 +589,7 @@
 					"    print(\"fact_truck_shift written\")\n",
 					""
 				],
-				"execution_count": 10
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -598,7 +598,7 @@
 					"print(START_DATE, END_DATE)\n",
 					""
 				],
-				"execution_count": 11
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -614,7 +614,7 @@
 					"    print(\"jobs and summary written\")\n",
 					""
 				],
-				"execution_count": 12
+				"execution_count": null
 			}
 		]
 	}
