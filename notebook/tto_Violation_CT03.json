@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "a9839404-a6c5-4c48-b988-c762f133aaf1"
+				"spark.autotune.trackingId": "92593380-c187-471a-a39b-69d57ce01465"
 			}
 		},
 		"metadata": {
@@ -71,7 +71,7 @@
 					"WRITE_OUTPUT = True               # set True once results look right\n",
 					""
 				],
-				"execution_count": 52
+				"execution_count": 1
 			},
 			{
 				"cell_type": "code",
@@ -93,7 +93,7 @@
 					"    print(f\"Full run: EC {b.mn} to {b.mx}  ->  shift dates {START_DATE} to {END_DATE} (exclusive)\")\n",
 					""
 				],
-				"execution_count": 53
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -172,7 +172,7 @@
 					"print(\"EC ITV events:\", ec.count(), \"| LOAD/DSCH moves:\", mh.count())\n",
 					""
 				],
-				"execution_count": 54
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -195,7 +195,7 @@
 					"      ec.filter(F.col(\"wa\").isNull()).groupBy(\"event_type_desc\").count().orderBy(F.desc(\"count\")).collect())\n",
 					""
 				],
-				"execution_count": 55
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -282,7 +282,7 @@
 					"print(\"Jobs:\", jobs.count())\n",
 					""
 				],
-				"execution_count": 57
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -313,7 +313,6 @@
 					"    F.collect_set(\"move_kind\").alias(\"mh_moves\"),\n",
 					"    F.max(\"dist_laden\").alias(\"dist_laden\"),\n",
 					"    F.max(\"dist_unladen\").alias(\"dist_unladen\"))\n",
-					")\n",
 					"  .withColumn(\"size_cat\", F.when((F.col(\"n_units\") >= 2) & (F.col(\"max_size\") == 20), \"2x20\")\n",
 					"                           .when(F.col(\"max_size\") == 40, \"40\")\n",
 					"                           .when(F.col(\"max_size\") == 20, \"20\")))\n",
@@ -332,7 +331,7 @@
 					"                             (F.col(\"c_qc\") != F.col(\"pickup_pow\"))).cast(\"int\")))\n",
 					""
 				],
-				"execution_count": 58
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
@@ -394,7 +393,7 @@
 					"\n",
 					"\n",
 					"violations = (res.filter(F.col(\"main_case\").isNotNull())\n",
-					"              .select(\"job_date\", \"shift_date\", \"shift_no\", \"job_ts\",\n",
+					"              .select(\"job_date\", \"shift_date\", \"shift_no\", \"shift_name\",\"job_ts\",\n",
 					"                      F.col(\"che_name\").alias(\"truck\"), \"wa\",\n",
 					"                      F.concat_ws(\";\", \"dispatched_units\").alias(\"unit_dispatched\"), \"dispatched_move\",\n",
 					"                      \"dispatched_qc\", F.concat_ws(\";\", \"d_blocks\").alias(\"dispatched_block\"), \"d_size_cat\",\n",
@@ -407,7 +406,7 @@
 					"display(violations.orderBy(\"job_ts\"))\n",
 					""
 				],
-				"execution_count": 59
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -447,7 +446,7 @@
 					"display(missing_arrivals.groupBy().sum(\"missing_AYCO\", \"missing_AVCO\", \"missing_AYDR\"))\n",
 					""
 				],
-				"execution_count": 60
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -508,10 +507,13 @@
 					"    print(\"fact_jobs written\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
 				"source": [
 					"# ===== Cell 10: fact_truck_shift (working hours per truck per shift) =====\n",
 					"from datetime import datetime, date, timedelta\n",
@@ -587,7 +589,7 @@
 					"    print(\"fact_truck_shift written\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 10
 			},
 			{
 				"cell_type": "code",
@@ -596,7 +598,7 @@
 					"print(START_DATE, END_DATE)\n",
 					""
 				],
-				"execution_count": 62
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
@@ -604,12 +606,15 @@
 					"if WRITE_OUTPUT:\n",
 					"    rw = f\"shift_date >= '{START_DATE}' AND shift_date < '{END_DATE}'\"\n",
 					"    (violations.write.format(\"delta\").mode(\"overwrite\").option(\"replaceWhere\", rw)\n",
+					"               .option(\"mergeSchema\", \"true\")\n",
 					"               .partitionBy(\"shift_date\").save(f\"{OUTPUT_BASE}/jobs\"))\n",
 					"    (summary.write.format(\"delta\").mode(\"overwrite\").option(\"replaceWhere\", rw)\n",
+					"            .option(\"mergeSchema\", \"true\")\n",
 					"            .partitionBy(\"shift_date\").save(f\"{OUTPUT_BASE}/summary\"))\n",
+					"    print(\"jobs and summary written\")\n",
 					""
 				],
-				"execution_count": 63
+				"execution_count": 12
 			}
 		]
 	}
