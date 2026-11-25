@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "0d2620a8-05ea-49aa-a5c5-fd4ff039f8b6"
+				"spark.autotune.trackingId": "21bf8c9f-c0e5-42d1-8574-90d840c8c0d3"
 			}
 		},
 		"metadata": {
@@ -73,7 +73,7 @@
 					")\n",
 					"ARCHIVE_ROOT = (\n",
 					"    f\"abfss://{CONTAINER}@{STORAGE_ACCOUNT}.dfs.core.windows.net/\"\n",
-					"    f\"bronze/ecevents/load\"\n",
+					"    f\"bronze/ecevents/archive\"\n",
 					")\n",
 					"SILVER_PATH = (\n",
 					"    f\"abfss://{CONTAINER}@{STORAGE_ACCOUNT}.dfs.core.windows.net/\"\n",
@@ -101,7 +101,7 @@
 					"print(f\"TS formats  : {TS_FORMATS}\")\n",
 					"print(f\"Full refresh: {FULL_REFRESH}\")"
 				],
-				"execution_count": 1
+				"execution_count": 47
 			},
 			{
 				"cell_type": "code",
@@ -109,7 +109,7 @@
 					"from pyspark.sql import functions as F\n",
 					"from pyspark.sql.window import Window"
 				],
-				"execution_count": 2
+				"execution_count": 48
 			},
 			{
 				"cell_type": "code",
@@ -204,7 +204,7 @@
 					"        .withColumn(f\"{prefix}_tier\",  part(4).cast(\"smallint\"))\n",
 					"    )"
 				],
-				"execution_count": 3
+				"execution_count": 49
 			},
 			{
 				"cell_type": "code",
@@ -255,7 +255,7 @@
 					"if missing:\n",
 					"    print(f\"\\n⚠️  Columns in COLUMN_SPEC not found in bronze (will be skipped): {missing}\")"
 				],
-				"execution_count": 5
+				"execution_count": 50
 			},
 			{
 				"cell_type": "code",
@@ -303,7 +303,7 @@
 					"business_cols = [c for c in typed.columns]\n",
 					"typed = typed.withColumn(\"row_hash\", F.xxhash64(*[F.col(c) for c in business_cols]))"
 				],
-				"execution_count": 6
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -353,7 +353,7 @@
 					"          .count().orderBy(F.desc(\"count\"))\n",
 					")"
 				],
-				"execution_count": 7
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -389,7 +389,7 @@
 					"\n",
 					""
 				],
-				"execution_count": 8
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -422,7 +422,7 @@
 					"print(f\"Event range  : \", result.agg(F.min('event_ts'), F.max('event_ts')).collect()[0])\n",
 					"result.printSchema()"
 				],
-				"execution_count": 9
+				"execution_count": null
 			}
 		]
 	}
