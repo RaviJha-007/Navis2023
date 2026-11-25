@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "21bf8c9f-c0e5-42d1-8574-90d840c8c0d3"
+				"spark.autotune.trackingId": "fb0be874-e1d6-4c5d-a7c4-c3688c5890f1"
 			}
 		},
 		"metadata": {
@@ -59,7 +59,7 @@
 					"\n",
 					"# In[1]:\n",
 					"\n",
-					"\n",
+					"from datetime import datetime\n",
 					"TERMINAL_CODE = \"CT03\"\n",
 					"FULL_REFRESH  = False        # True = rebuild Silver from Bronze (overwrite) instead of MERGE\n",
 					"RUN_ID    = datetime.utcnow().strftime(\"%Y%m%d_%H%M%S\")\n",
@@ -82,6 +82,7 @@
 					"\n",
 					"MERGE_KEY         = \"ec_event_gkey\"\n",
 					"SENTINEL_DISTANCE = 100_000_000\n",
+					"LOAD_PATH = BRONZE_PATH\n",
 					"\n",
 					"# ── Accepted timestamp formats (first successful parse wins) ───────────────────\n",
 					"# Current source format is FIRST. Separators differ, so these cannot clash.\n",
@@ -101,7 +102,7 @@
 					"print(f\"TS formats  : {TS_FORMATS}\")\n",
 					"print(f\"Full refresh: {FULL_REFRESH}\")"
 				],
-				"execution_count": 47
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -109,7 +110,7 @@
 					"from pyspark.sql import functions as F\n",
 					"from pyspark.sql.window import Window"
 				],
-				"execution_count": 48
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -204,7 +205,7 @@
 					"        .withColumn(f\"{prefix}_tier\",  part(4).cast(\"smallint\"))\n",
 					"    )"
 				],
-				"execution_count": 49
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -255,7 +256,7 @@
 					"if missing:\n",
 					"    print(f\"\\n⚠️  Columns in COLUMN_SPEC not found in bronze (will be skipped): {missing}\")"
 				],
-				"execution_count": 50
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -303,7 +304,7 @@
 					"business_cols = [c for c in typed.columns]\n",
 					"typed = typed.withColumn(\"row_hash\", F.xxhash64(*[F.col(c) for c in business_cols]))"
 				],
-				"execution_count": null
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
@@ -353,7 +354,7 @@
 					"          .count().orderBy(F.desc(\"count\"))\n",
 					")"
 				],
-				"execution_count": null
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -389,7 +390,7 @@
 					"\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -406,7 +407,7 @@
 					"silver.unpersist()\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
@@ -422,7 +423,7 @@
 					"print(f\"Event range  : \", result.agg(F.min('event_ts'), F.max('event_ts')).collect()[0])\n",
 					"result.printSchema()"
 				],
-				"execution_count": null
+				"execution_count": 10
 			}
 		]
 	}
