@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "b3680a9d-600e-40da-bb1a-b18d8022437d"
+				"spark.autotune.trackingId": "fb13d68d-d215-4b3e-9613-edca438f03a1"
 			}
 		},
 		"metadata": {
@@ -68,10 +68,10 @@
 					"\n",
 					"SHIFT_STARTS = [\"07:00\", \"19:00\"]\n",
 					"SHIFT_NAMES  = [\"Day\", \"Night\"]    # PLACEHOLDER - replace with CT03's real shift pattern\n",
-					"WRITE_OUTPUT = True               # set True once results look right\n",
+					"WRITE_OUTPUT = True              # set True once results look right\n",
 					""
 				],
-				"execution_count": 1
+				"execution_count": 61
 			},
 			{
 				"cell_type": "code",
@@ -93,7 +93,7 @@
 					"    print(f\"Full run: EC {b.mn} to {b.mx}  ->  shift dates {START_DATE} to {END_DATE} (exclusive)\")\n",
 					""
 				],
-				"execution_count": 2
+				"execution_count": 62
 			},
 			{
 				"cell_type": "code",
@@ -133,7 +133,7 @@
 					"      .withColumn(\"wa\", F.col(\"work_assignment_gkey\").cast(\"decimal(20,0)\").cast(\"string\"))\n",
 					"      .withColumn(\"units\", F.filter(F.transform(F.split(F.coalesce(F.col(\"unit_nbrs\"), F.lit(\"\")), \";\"),\n",
 					"                                                lambda x: F.trim(x)), lambda x: x != \"\"))\n",
-					"      .select(\"ec_event_gkey\", \"event_ts\", \"che_name\", \"event_type_desc\", \"units\", \"pow\", \"wa\")\n",
+					"      .select(\"ec_event_gkey\", \"event_ts\", \"che_name\", \"event_type_desc\", \"units\", \"pow\", \"wa\",\"move_kind\")\n",
 					"      .cache())\n",
 					"\n",
 					"# ---- Move history: LOAD / DSCH only ----\n",
@@ -172,7 +172,60 @@
 					"print(\"EC ITV events:\", ec.count(), \"| LOAD/DSCH moves:\", mh.count())\n",
 					""
 				],
-				"execution_count": 3
+				"execution_count": 63
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
+				"source": [
+					"# ===== Cell 2b: build jobs from each truck's event order (logic document, Step 1) =====\n",
+					"DISPATCH  = [\"TYCO\", \"TVCO\"]\n",
+					"PICKUP    = [\"TVDR\", \"TYDR\"]\n",
+					"BREAK_OUT = [\"UNAV\", \"LGOF\"]\n",
+					"KEY_EVENTS = DISPATCH + PICKUP + BREAK_OUT\n",
+					"\n",
+					"w_t   = W.partitionBy(\"che_name\").orderBy(\"ec_event_gkey\")\n",
+					"w_prv = w_t.rowsBetween(W.unboundedPreceding, -1)\n",
+					"w_cum = w_t.rowsBetween(W.unboundedPreceding, 0)\n",
+					"et = F.col(\"event_type_desc\")\n",
+					"\n",
+					"ec = (ec\n",
+					"  .withColumnRenamed(\"wa\", \"wa_orig\")\n",
+					"  # previous key event of this truck (dispatch / pickup / break) and its work assignment\n",
+					"  .withColumn(\"_prev_type\", F.last(F.when(et.isin(KEY_EVENTS), et), ignorenulls=True).over(w_prv))\n",
+					"  .withColumn(\"_prev_wa\",   F.last(F.when(et.isin(KEY_EVENTS), F.coalesce(F.col(\"wa_orig\"), F.lit(\"-\"))),\n",
+					"                                   ignorenulls=True).over(w_prv)))\n",
+					"\n",
+					"prev_is_d = F.coalesce(F.col(\"_prev_type\").isin(DISPATCH), F.lit(False))\n",
+					"prev_is_p = F.coalesce(F.col(\"_prev_type\").isin(PICKUP), F.lit(False))\n",
+					"same_wa   = F.coalesce(F.col(\"wa_orig\").isNotNull() & (F.col(\"_prev_wa\") == F.col(\"wa_orig\")), F.lit(False))\n",
+					"\n",
+					"ec = (ec\n",
+					"  .withColumn(\"_start\",\n",
+					"      F.when(et.isin(DISPATCH) & ~(prev_is_d & same_wa), 1)                      # new dispatch = new job\n",
+					"       .when(et.isin(PICKUP) & ~prev_is_d & ~(prev_is_p & same_wa), 1)           # pickup with no open dispatch\n",
+					"       .otherwise(0))\n",
+					"  .withColumn(\"_job_no\", F.sum(\"_start\").over(w_cum))\n",
+					"  .withColumn(\"wa\", F.when(F.col(\"_job_no\") > 0, F.concat(F.lit(\"J\"), F.col(\"_job_no\").cast(\"string\"))))\n",
+					"  .drop(\"_prev_type\", \"_prev_wa\", \"_start\", \"_job_no\")\n",
+					"  .cache())\n",
+					"\n",
+					"# check: share of picked-up jobs without a dispatch, before vs after 15 Oct\n",
+					"chk = (ec.filter(F.col(\"wa\").isNotNull()).groupBy(\"che_name\", \"wa\").agg(\n",
+					"          F.sum(et.isin(DISPATCH).cast(\"int\")).alias(\"d\"),\n",
+					"          F.sum(et.isin(PICKUP).cast(\"int\")).alias(\"p\"),\n",
+					"          F.min(\"event_ts\").alias(\"ts\"))\n",
+					"         .filter(\"p > 0\")\n",
+					"         .withColumn(\"period\", F.when(F.to_date(\"ts\") < \"2026-10-15\", \"before\").otherwise(\"after\")))\n",
+					"display(chk.groupBy(\"period\").agg(\n",
+					"          F.count(\"*\").alias(\"picked_jobs\"),\n",
+					"          F.round(F.avg((F.col(\"d\") == 0).cast(\"int\")) * 100, 1).alias(\"pct_no_dispatch\"),\n",
+					"          F.round(F.avg((F.col(\"p\") > 1).cast(\"int\")) * 100, 1).alias(\"pct_multi_pickup\")))\n",
+					""
+				],
+				"execution_count": 64
 			},
 			{
 				"cell_type": "code",
@@ -195,7 +248,7 @@
 					"      ec.filter(F.col(\"wa\").isNull()).groupBy(\"event_type_desc\").count().orderBy(F.desc(\"count\")).collect())\n",
 					""
 				],
-				"execution_count": 4
+				"execution_count": 65
 			},
 			{
 				"cell_type": "code",
@@ -226,6 +279,7 @@
 					"    F.max((etype == \"AVCO\").cast(\"int\")).alias(\"has_avco\"),\n",
 					"    F.max((etype == \"AYDR\").cast(\"int\")).alias(\"has_aydr\"),\n",
 					"    F.max((etype == \"AVDR\").cast(\"int\")).alias(\"has_avdr\"),\n",
+					"    F.concat_ws(\";\", F.array_sort(F.collect_set(\"wa_orig\"))).alias(\"work_assignments\"),\n",
 					"))\n",
 					"\n",
 					"# attach timestamp / type / POW of the dispatch, pickup and CMPL events\n",
@@ -282,7 +336,7 @@
 					"print(\"Jobs:\", jobs.count())\n",
 					""
 				],
-				"execution_count": 5
+				"execution_count": 66
 			},
 			{
 				"cell_type": "code",
@@ -331,7 +385,7 @@
 					"                             (F.col(\"c_qc\") != F.col(\"pickup_pow\"))).cast(\"int\")))\n",
 					""
 				],
-				"execution_count": 6
+				"execution_count": 67
 			},
 			{
 				"cell_type": "code",
@@ -353,10 +407,10 @@
 					"             (F.size(F.array_intersect(\"d_blocks\", \"c_blocks\")) == 0)\n",
 					"\n",
 					"res = (enriched.filter(F.col(\"pickup_gkey\").isNotNull())\n",
-					"       .withColumn(\"D1\", flag(disp_dsch & done_dsch & qc_diff & ~small_to_40))\n",
-					"       .withColumn(\"D3\", flag(disp_dsch & done_dsch & qc_diff & small_to_40))\n",
-					"       .withColumn(\"D2\", flag(disp_dsch & done_load))\n",
-					"       .withColumn(\"L3\", flag(disp_load & done_dsch))\n",
+					"       .withColumn(\"D1\", flag(disp_dsch & done_dsch & qc_diff & ~small_to_40 & no_unit_overlap))\n",
+					"       .withColumn(\"D3\", flag(disp_dsch & done_dsch & qc_diff & small_to_40 & no_unit_overlap))\n",
+					"       .withColumn(\"D2\", flag(disp_dsch & done_load & no_unit_overlap))\n",
+					"       .withColumn(\"L3\", flag(disp_load & done_dsch & no_unit_overlap))\n",
 					"       .withColumn(\"L1\", flag(disp_load & done_load & no_unit_overlap & block_diff))\n",
 					"       .withColumn(\"L2\", flag(disp_load & (F.col(\"d_size_cat\") == \"2x20\") & (F.col(\"c_size_cat\") == \"40\")))\n",
 					"       .withColumn(\"N1\", flag((F.col(\"break_before_pickup\") == 1) &\n",
@@ -383,8 +437,10 @@
 					"          .withColumn(\"job_ts\", F.coalesce(\"dispatch_ts\", \"pickup_ts\"))\n",
 					"          .withColumn(\"job_date\", F.to_date(\"job_ts\"))\n",
 					"          .withColumn(\"dq_more_than_2_units\", flag((F.col(\"d_n_units\") > 2) | (F.col(\"c_n_units\") > 2)))\n",
-					"          .withColumn(\"dq_unmatched_units\", flag((F.col(\"d_n_matched\") < F.col(\"d_n_units\")) |\n",
-					"                                                 (F.col(\"c_n_matched\") < F.col(\"c_n_units\"))))\n",
+					"          .withColumn(\"dq_unmatched_units\", flag(\n",
+					"              (F.col(\"dispatched_move\").isin(\"LOAD\", \"DSCH\") & (F.col(\"d_n_matched\") < F.col(\"d_n_units\"))) |\n",
+					"              (F.col(\"carried_move\").isin(\"LOAD\", \"DSCH\") & (F.col(\"c_n_matched\") < F.col(\"c_n_units\")))))\n",
+					"\n",
 					"          .withColumn(\"no_dispatch\", flag(F.col(\"dispatch_gkey\").isNull())))\n",
 					"res = (add_shift(res, \"job_ts\")\n",
 					"          .filter((F.col(\"shift_date\") >= F.lit(START_DATE).cast(\"date\")) &\n",
@@ -406,7 +462,7 @@
 					"display(violations.orderBy(\"job_ts\"))\n",
 					""
 				],
-				"execution_count": 7
+				"execution_count": 68
 			},
 			{
 				"cell_type": "code",
@@ -446,7 +502,7 @@
 					"display(missing_arrivals.groupBy().sum(\"missing_AYCO\", \"missing_AVCO\", \"missing_AYDR\"))\n",
 					""
 				],
-				"execution_count": 8
+				"execution_count": 69
 			},
 			{
 				"cell_type": "code",
@@ -464,9 +520,14 @@
 					"\n",
 					"fact_jobs = (res.join(arr, [\"che_name\", \"wa\"], \"left\")\n",
 					"    .withColumn(\"pickup_arrival_ts\", F.when(F.col(\"carried_move\") == \"LOAD\", F.col(\"ayco_ts\"))\n",
-					"                                      .when(F.col(\"carried_move\") == \"DSCH\", F.col(\"avco_ts\")))\n",
+					"                                      .when(F.col(\"carried_move\") == \"DSCH\", F.col(\"avco_ts\"))\n",
+					"                                      .when(F.col(\"carried_move\") == \"OTHER\", F.col(\"ayco_ts\")))\n",
 					"    .withColumn(\"drop_arrival_ts\",   F.when(F.col(\"carried_move\") == \"LOAD\", F.col(\"avdr_ts\"))\n",
-					"                                      .when(F.col(\"carried_move\") == \"DSCH\", F.col(\"aydr_ts\")))\n",
+					"                                      .when(F.col(\"carried_move\") == \"DSCH\", F.col(\"aydr_ts\"))\n",
+					"                                      .when(F.col(\"carried_move\") == \"OTHER\", F.col(\"aydr_ts\")))\n",
+					"    .withColumn(\"job_type\", F.when(F.col(\"carried_move\").isin(\"LOAD\", \"DSCH\"), \"Vessel\")\n",
+					"                             .when(F.col(\"carried_move\") == \"OTHER\", \"Yard\")\n",
+					"                             .otherwise(\"Unknown\"))\n",
 					"    .withColumn(\"min_to_pickup_point\", minutes(\"dispatch_ts\", \"pickup_arrival_ts\"))\n",
 					"    .withColumn(\"min_wait_at_pickup\",  minutes(\"pickup_arrival_ts\", \"pickup_ts\"))\n",
 					"    .withColumn(\"min_pickup_to_cmpl\",  minutes(\"pickup_ts\", \"cmpl_ts\"))\n",
@@ -484,9 +545,9 @@
 					"    .withColumn(\"hour_of_day\", F.hour(\"job_ts\"))\n",
 					"    .withColumn(\"shift_key\", F.concat_ws(\"_\", F.col(\"shift_date\").cast(\"string\"), F.col(\"shift_no\").cast(\"string\")))\n",
 					"    .select(\"shift_date\", \"shift_no\", \"shift_name\", \"shift_key\", \"job_ts\", \"hour_of_day\",\n",
-					"            F.col(\"che_name\").alias(\"truck\"), \"wa\",\n",
+					"            F.col(\"che_name\").alias(\"truck\"), \"wa\",\"work_assignments\",\n",
 					"            \"dispatch_ts\", \"pickup_arrival_ts\", \"pickup_ts\", \"drop_arrival_ts\", \"cmpl_ts\",\n",
-					"            \"dispatched_move\", \"carried_move\", \"dispatched_qc\", \"carried_qc\",\n",
+					"            \"dispatched_move\", \"carried_move\",\"job_type\", \"dispatched_qc\", \"carried_qc\",\n",
 					"            F.concat_ws(\";\", \"d_blocks\").alias(\"dispatched_block\"), F.concat_ws(\";\", \"c_blocks\").alias(\"carried_block\"),\n",
 					"            F.concat_ws(\";\", \"dispatched_units\").alias(\"unit_dispatched\"),\n",
 					"            F.concat_ws(\";\", \"carried_units\").alias(\"unit_received\"),\n",
@@ -507,7 +568,7 @@
 					"    print(\"fact_jobs written\")\n",
 					""
 				],
-				"execution_count": 9
+				"execution_count": 70
 			},
 			{
 				"cell_type": "code",
@@ -589,7 +650,7 @@
 					"    print(\"fact_truck_shift written\")\n",
 					""
 				],
-				"execution_count": 10
+				"execution_count": 71
 			},
 			{
 				"cell_type": "code",
@@ -598,7 +659,7 @@
 					"print(START_DATE, END_DATE)\n",
 					""
 				],
-				"execution_count": 11
+				"execution_count": 72
 			},
 			{
 				"cell_type": "code",
@@ -614,7 +675,106 @@
 					"    print(\"jobs and summary written\")\n",
 					""
 				],
-				"execution_count": 12
+				"execution_count": 73
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
+				"source": [
+					"from pyspark.sql import functions as F\n",
+					"\n",
+					"fj = (spark.read.format(\"delta\").load(f\"{OUTPUT_BASE}/fact_jobs\")\n",
+					"          .filter(F.col(\"shift_date\") >= \"2026-10-15\"))\n",
+					"\n",
+					"# 1. Did the new columns arrive?\n",
+					"print(\"job_type present:\", \"job_type\" in fj.columns,\n",
+					"      \"| work_assignments present:\", \"work_assignments\" in fj.columns)\n",
+					"\n",
+					"# 2. Move types: housekeeping should now show as OTHER\n",
+					"display(fj.groupBy(\"dispatched_move\", \"carried_move\").count().orderBy(F.desc(\"count\")))\n",
+					"\n",
+					"# 3. L1 check on load-to-load jobs\n",
+					"d_u = F.split(\"unit_dispatched\", \";\")\n",
+					"c_u = F.split(\"unit_received\", \";\")\n",
+					"d_b = F.split(\"dispatched_block\", \";\")\n",
+					"c_b = F.split(\"carried_block\", \";\")\n",
+					"ll = fj.filter((F.col(\"dispatched_move\") == \"LOAD\") & (F.col(\"carried_move\") == \"LOAD\") & (F.col(\"is_base_job\") == 1))\n",
+					"display(ll.agg(\n",
+					"    F.count(\"*\").alias(\"load_load_jobs\"),\n",
+					"    F.sum((F.size(F.array_intersect(d_u, c_u)) == 0).cast(\"int\")).alias(\"different_box\"),\n",
+					"    F.sum((F.coalesce(F.col(\"dispatched_block\"), F.lit(\"\")) == \"\").cast(\"int\")).alias(\"d_block_missing\"),\n",
+					"    F.sum((F.coalesce(F.col(\"carried_block\"), F.lit(\"\")) == \"\").cast(\"int\")).alias(\"c_block_missing\"),\n",
+					"    F.sum(\"L1\").alias(\"L1_flagged\")))\n",
+					"display(ll.filter(F.col(\"L1\") == 1)\n",
+					"          .select(\"truck\", \"unit_dispatched\", \"dispatched_block\", \"unit_received\", \"carried_block\", \"carried_qc\")\n",
+					"          .limit(15))\n",
+					"\n",
+					"# 4. Case counts and rates against the right denominators\n",
+					"base = fj.filter((F.col(\"is_base_job\") == 1) & F.col(\"dispatched_move\").isin(\"LOAD\", \"DSCH\"))\n",
+					"den = base.groupBy(\"dispatched_move\").count().collect()\n",
+					"print(\"Discharge / load jobs:\", {r[\"dispatched_move\"]: r[\"count\"] for r in den})\n",
+					"display(base.filter(F.col(\"main_case\").isNotNull())\n",
+					"            .groupBy(\"main_case\", \"dispatched_move\").count().orderBy(\"main_case\"))\n",
+					"\n",
+					"# 5. Data quality and yard share\n",
+					"display(fj.agg(\n",
+					"    F.count(\"*\").alias(\"all_jobs\"),\n",
+					"    F.round(F.avg((F.col(\"carried_move\") == \"OTHER\").cast(\"int\")) * 100, 1).alias(\"yard_move_pct\"),\n",
+					"    F.round(F.avg(\"no_dispatch\") * 100, 1).alias(\"no_dispatch_pct\"),\n",
+					"    F.round(F.avg(\"dq_unmatched_units\") * 100, 1).alias(\"unmatched_pct\"),\n",
+					"    F.round(F.avg(\"dq_more_than_2_units\") * 100, 1).alias(\"gt2_units_pct\")))\n",
+					""
+				],
+				"execution_count": 74
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"editable": false,
+					"run_control": {
+						"frozen": true
+					},
+					"collapsed": false
+				},
+				"source": [
+					"from delta.tables import DeltaTable\n",
+					"\n",
+					"print(\"OUTPUT_BASE:\", OUTPUT_BASE)\n",
+					"print(\"WRITE_OUTPUT:\", WRITE_OUTPUT)\n",
+					"\n",
+					"h = DeltaTable.forPath(spark, f\"{OUTPUT_BASE}/fact_jobs\").history(5)\n",
+					"display(h.select(\"version\", \"timestamp\", \"operation\", \"operationParameters\"))\n",
+					""
+				],
+				"execution_count": 60
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"editable": false,
+					"run_control": {
+						"frozen": true
+					},
+					"collapsed": false
+				},
+				"source": [
+					"print(\"move_kind in ec:\", \"move_kind\" in ec.columns)\n",
+					"print(\"dispatch_mk in jobs:\", \"dispatch_mk\" in jobs.columns)\n",
+					"if \"move_kind\" in ec.columns:\n",
+					"    display(ec.filter(F.col(\"event_type_desc\").isin(\"TYCO\", \"TVCO\", \"TVDR\", \"TYDR\"))\n",
+					"              .groupBy(\"event_type_desc\", \"move_kind\").count().orderBy(\"event_type_desc\"))\n",
+					"\n",
+					"print(\"yard_block in mh:\", \"yard_block\" in mh.columns)\n",
+					"display(mh.groupBy(\"move_kind\").agg(\n",
+					"    F.count(\"*\").alias(\"moves\"),\n",
+					"    F.sum(F.col(\"yard_block\").isNull().cast(\"int\")).alias(\"block_null\")))\n",
+					"display(side_agg.groupBy(\"side\").agg(F.sum((F.size(\"blocks\") == 0).cast(\"int\")).alias(\"no_block\"),\n",
+					"                                     F.count(\"*\").alias(\"jobs\")))\n",
+					""
+				],
+				"execution_count": 75
 			}
 		]
 	}
