@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "3",
-				"spark.autotune.trackingId": "fb13d68d-d215-4b3e-9613-edca438f03a1"
+				"spark.autotune.trackingId": "68af2afd-0384-41d3-98bd-9fb3783660c7"
 			}
 		},
 		"metadata": {
@@ -71,7 +71,7 @@
 					"WRITE_OUTPUT = True              # set True once results look right\n",
 					""
 				],
-				"execution_count": 61
+				"execution_count": 76
 			},
 			{
 				"cell_type": "code",
@@ -93,10 +93,13 @@
 					"    print(f\"Full run: EC {b.mn} to {b.mx}  ->  shift dates {START_DATE} to {END_DATE} (exclusive)\")\n",
 					""
 				],
-				"execution_count": 62
+				"execution_count": 77
 			},
 			{
 				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
 				"source": [
 					"from pyspark.sql import functions as F\n",
 					"from pyspark.sql.window import Window as W\n",
@@ -137,12 +140,16 @@
 					"      .cache())\n",
 					"\n",
 					"# ---- Move history: LOAD / DSCH only ----\n",
+					"# ---- Move history: LOAD / DSCH only ----\n",
 					"mh_start = F.expr(f\"timestamp'{START_DATE} 00:00:00' - interval {LOOKBACK_DAYS + MH_MARGIN_DAYS} days\")\n",
 					"mh_end   = F.expr(f\"timestamp'{END_DATE} 00:00:00' + interval {MH_MARGIN_DAYS} days\")\n",
 					"\n",
 					"mh = latest_version(read_silver(MH_PATH), \"mve_gkey\").filter(F.col(\"move_kind\").isin(\"LOAD\", \"DSCH\"))\n",
 					"for c in [\"t_put\", \"t_carry_complete\", \"t_fetch\"]:\n",
 					"    mh = as_ts(mh, c)\n",
+					"\n",
+					"def blank_to_null(c):\n",
+					"    return F.when(F.trim(c) != \"\", F.trim(c))\n",
 					"\n",
 					"mh = (mh\n",
 					"      .withColumn(\"move_ts\", F.coalesce(\"t_put\", \"t_carry_complete\", \"t_fetch\"))\n",
@@ -156,23 +163,34 @@
 					"      .withColumn(\"vessel_slot\", F.when(F.col(\"move_kind\") == \"DSCH\", F.col(\"from_position_name\"))\n",
 					"                                  .otherwise(F.col(\"to_position_name\")))\n",
 					"      .withColumn(\"vessel_bay\", F.regexp_extract(\"vessel_slot\", r\"^V-[^-]+-(\\d{2})\\d{4}$\", 1))\n",
-					"      .withColumn(\"yard_block\", F.when(F.col(\"move_kind\") == \"LOAD\", F.col(\"fm_yard_block\"))\n",
-					"                                 .otherwise(F.col(\"to_yard_block\")))\n",
+					"      # yard block: parsed column first, else from the yard position Y-<facility>-<block><bay><row><tier>\n",
+					"      .withColumn(\"yard_pos\", F.when(F.col(\"move_kind\") == \"LOAD\", F.col(\"from_position_name\"))\n",
+					"                               .otherwise(F.col(\"to_position_name\")))\n",
+					"      .withColumn(\"yard_block\", F.coalesce(\n",
+					"          blank_to_null(F.when(F.col(\"move_kind\") == \"LOAD\", F.col(\"fm_yard_block\"))\n",
+					"                         .otherwise(F.col(\"to_yard_block\"))),\n",
+					"          blank_to_null(F.regexp_extract(\"yard_pos\", r\"^Y-[^-]+-(\\d+[A-Z]+)\\d\", 1))))\n",
 					"      # size: ISO type first char (2=20ft, 4/L=40/45ft), fallback odd/even vessel bay\n",
 					"      .withColumn(\"size_ft\",\n",
 					"                  F.when(F.substring(\"equipment_type\", 1, 1) == \"2\", 20)\n",
 					"                   .when(F.substring(\"equipment_type\", 1, 1).isin(\"4\", \"L\"), 40)\n",
 					"                   .when((F.col(\"vessel_bay\") != \"\") & (F.col(\"vessel_bay\").cast(\"int\") % 2 == 1), 20)\n",
 					"                   .when((F.col(\"vessel_bay\") != \"\") & (F.col(\"vessel_bay\").cast(\"int\") % 2 == 0), 40))\n",
-					"      .select(\"mve_gkey\", \"unit_nbr\", \"move_kind\", \"move_ts\", \"qc_name\", \"vessel_slot\", \"yard_block\", \"size_ft\",\n",
-					"            F.col(\"dist_laden\").cast(\"double\").alias(\"dist_laden\"),\n",
-					"            F.col(\"dist_unladen\").cast(\"double\").alias(\"dist_unladen\"))\n",
+					"      .select(\"mve_gkey\", \"unit_nbr\", \"move_kind\", \"move_ts\", \"qc_name\", \"vessel_slot\", \"yard_pos\", \"yard_block\",\n",
+					"              \"size_ft\",\n",
+					"              F.col(\"dist_laden\").cast(\"double\").alias(\"dist_laden\"),\n",
+					"              F.col(\"dist_unladen\").cast(\"double\").alias(\"dist_unladen\"))\n",
 					"      .cache())\n",
 					"\n",
 					"print(\"EC ITV events:\", ec.count(), \"| LOAD/DSCH moves:\", mh.count())\n",
+					"# block check: block_null should be close to 0\n",
+					"display(mh.groupBy(\"move_kind\").agg(F.count(\"*\").alias(\"moves\"),\n",
+					"                                    F.sum(F.col(\"yard_block\").isNull().cast(\"int\")).alias(\"block_null\")))\n",
+					"display(mh.filter(F.col(\"yard_block\").isNull()).select(\"move_kind\", \"yard_pos\").limit(10))\n",
+					"\n",
 					""
 				],
-				"execution_count": 63
+				"execution_count": 78
 			},
 			{
 				"cell_type": "code",
@@ -225,7 +243,7 @@
 					"          F.round(F.avg((F.col(\"p\") > 1).cast(\"int\")) * 100, 1).alias(\"pct_multi_pickup\")))\n",
 					""
 				],
-				"execution_count": 64
+				"execution_count": 79
 			},
 			{
 				"cell_type": "code",
@@ -248,7 +266,7 @@
 					"      ec.filter(F.col(\"wa\").isNull()).groupBy(\"event_type_desc\").count().orderBy(F.desc(\"count\")).collect())\n",
 					""
 				],
-				"execution_count": 65
+				"execution_count": 80
 			},
 			{
 				"cell_type": "code",
@@ -283,19 +301,26 @@
 					"))\n",
 					"\n",
 					"# attach timestamp / type / POW of the dispatch, pickup and CMPL events\n",
-					"attr = ec.select(\"ec_event_gkey\", \"event_ts\", \"event_type_desc\", \"pow\")\n",
+					"# attach timestamp / type / POW / move kind of the dispatch, pickup and CMPL events\n",
+					"attr = ec.select(\"ec_event_gkey\", \"event_ts\", \"event_type_desc\", \"pow\", \"move_kind\")\n",
 					"for prefix in [\"dispatch\", \"pickup\", \"cmpl\"]:\n",
 					"    a = attr.select(F.col(\"ec_event_gkey\").alias(f\"{prefix}_gkey\"),\n",
 					"                    F.col(\"event_ts\").alias(f\"{prefix}_ts\"),\n",
 					"                    F.col(\"event_type_desc\").alias(f\"{prefix}_type\"),\n",
-					"                    F.col(\"pow\").alias(f\"{prefix}_pow\"))\n",
+					"                    F.col(\"pow\").alias(f\"{prefix}_pow\"),\n",
+					"                    F.col(\"move_kind\").alias(f\"{prefix}_mk\"))\n",
 					"    jobs = jobs.join(a, f\"{prefix}_gkey\", \"left\")\n",
 					"\n",
+					"# move type from EC move_kind; event code only as fallback. Non-vessel moves (YARD, RECV, SHFT...) -> OTHER\n",
+					"def move_of(mk, etype, load_code, dsch_code):\n",
+					"    return (F.when(F.col(mk).isin(\"LOAD\", \"DSCH\"), F.col(mk))\n",
+					"             .when(F.col(mk).isNotNull() & (F.col(mk) != \"\"), F.lit(\"OTHER\"))\n",
+					"             .when(F.col(etype) == load_code, F.lit(\"LOAD\"))\n",
+					"             .when(F.col(etype) == dsch_code, F.lit(\"DSCH\")))\n",
+					"\n",
 					"jobs = (jobs\n",
-					"        .withColumn(\"dispatched_move\", F.when(F.col(\"dispatch_type\") == \"TYCO\", \"LOAD\")\n",
-					"                                        .when(F.col(\"dispatch_type\") == \"TVCO\", \"DSCH\"))\n",
-					"        .withColumn(\"carried_move\", F.when(F.col(\"pickup_type\") == \"TVDR\", \"LOAD\")\n",
-					"                                     .when(F.col(\"pickup_type\") == \"TYDR\", \"DSCH\")))\n",
+					"        .withColumn(\"dispatched_move\", move_of(\"dispatch_mk\", \"dispatch_type\", \"TYCO\", \"TVCO\"))\n",
+					"        .withColumn(\"carried_move\",    move_of(\"pickup_mk\",   \"pickup_type\",   \"TVDR\", \"TYDR\")))\n",
 					"\n",
 					"# ---- breaks (UNAV/LGOF) between the reference dispatch and the pickup ----\n",
 					"dispatch_ev = ec.filter(F.col(\"event_type_desc\").isin(DISPATCH)).select(\n",
@@ -336,7 +361,7 @@
 					"print(\"Jobs:\", jobs.count())\n",
 					""
 				],
-				"execution_count": 66
+				"execution_count": 81
 			},
 			{
 				"cell_type": "code",
@@ -385,7 +410,7 @@
 					"                             (F.col(\"c_qc\") != F.col(\"pickup_pow\"))).cast(\"int\")))\n",
 					""
 				],
-				"execution_count": 67
+				"execution_count": 82
 			},
 			{
 				"cell_type": "code",
@@ -462,7 +487,7 @@
 					"display(violations.orderBy(\"job_ts\"))\n",
 					""
 				],
-				"execution_count": 68
+				"execution_count": 83
 			},
 			{
 				"cell_type": "code",
@@ -502,7 +527,7 @@
 					"display(missing_arrivals.groupBy().sum(\"missing_AYCO\", \"missing_AVCO\", \"missing_AYDR\"))\n",
 					""
 				],
-				"execution_count": 69
+				"execution_count": 84
 			},
 			{
 				"cell_type": "code",
@@ -568,7 +593,7 @@
 					"    print(\"fact_jobs written\")\n",
 					""
 				],
-				"execution_count": 70
+				"execution_count": 85
 			},
 			{
 				"cell_type": "code",
@@ -650,7 +675,7 @@
 					"    print(\"fact_truck_shift written\")\n",
 					""
 				],
-				"execution_count": 71
+				"execution_count": 86
 			},
 			{
 				"cell_type": "code",
@@ -659,7 +684,7 @@
 					"print(START_DATE, END_DATE)\n",
 					""
 				],
-				"execution_count": 72
+				"execution_count": 87
 			},
 			{
 				"cell_type": "code",
@@ -675,11 +700,15 @@
 					"    print(\"jobs and summary written\")\n",
 					""
 				],
-				"execution_count": 73
+				"execution_count": 88
 			},
 			{
 				"cell_type": "code",
 				"metadata": {
+					"editable": false,
+					"run_control": {
+						"frozen": true
+					},
 					"collapsed": false
 				},
 				"source": [
@@ -727,7 +756,7 @@
 					"    F.round(F.avg(\"dq_more_than_2_units\") * 100, 1).alias(\"gt2_units_pct\")))\n",
 					""
 				],
-				"execution_count": 74
+				"execution_count": 89
 			},
 			{
 				"cell_type": "code",
@@ -774,7 +803,7 @@
 					"                                     F.count(\"*\").alias(\"jobs\")))\n",
 					""
 				],
-				"execution_count": 75
+				"execution_count": 90
 			}
 		]
 	}
